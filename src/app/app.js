@@ -10,7 +10,8 @@ const model = new OpenAIModel({
   azureApiKey: config.azureOpenAIKey,
   azureDefaultDeployment: config.azureOpenAIDeploymentName,
   azureEndpoint: config.azureOpenAIEndpoint,
-
+  azureApiVersion: '2024-02-15-preview',
+  
   useSystemMessages: true,
   logRequests: true,
 });
@@ -30,12 +31,12 @@ const app = new Application({
   ai: {
     planner,
     enable_feedback_loop: true,
+    mute: true,
   },
 });
 
 app.feedbackLoop(async (context, state, feedbackLoopData) => {
-  //add custom feedback process logic here
-  console.log("Your feedback is " + JSON.stringify(context.activity.value));
+  console.log("Votre feedback est " + JSON.stringify(context.activity.value));
 });
 
 module.exports = app;
