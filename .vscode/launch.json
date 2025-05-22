@@ -24,6 +24,20 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
+            "name": "Launch Remote in Teams (Firefox)",
+            "type": "firefox",
+            "request": "launch",
+            "url": "https://teams.microsoft.com/l/app/${{TEAMS_APP_ID}}?installAppPackage=true&webjoin=true&${account-hint}",
+            "presentation": {
+                "group": "2-Teams",
+                "order": 6
+            },
+            "internalConsoleOptions": "neverOpen",
+            "runtimeExecutable": "/usr/bin/firefox",
+            "webRoot": "${workspaceFolder}",
+            "reloadOnAttach": true
+        },
+        {
             "name": "Launch Agent (Edge)",
             "type": "msedge",
             "request": "launch",
@@ -72,9 +86,9 @@
             "preLaunchTask": "Start Agent in Desktop Client (Remote)",
             "presentation": {
                 "group": "2-Teams",
-                "order": 6
+                "order": 7
             },
-            "internalConsoleOptions": "neverOpen",
+            "internalConsoleOptions": "neverOpen"
         }
     ],
     "compounds": [
