@@ -1,11 +1,11 @@
 {
 	"$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
 	"manifestVersion": "1.19",
-	"version": "1.0.0",
+	"version": "1.0.5",
 	"id": "${{TEAMS_APP_ID}}",
 	"developer": {
-		"name": "My App, Inc.",
-		"websiteUrl": "https://www.example.com",
+		"name": "Cotechnoe Inc.",
+		"websiteUrl": "https://cotechnoe.com",
 		"privacyUrl": "https://www.example.com/privacy",
 		"termsOfUseUrl": "https://www.example.com/termofuse"
 	},
@@ -14,12 +14,12 @@
 		"outline": "outline.png"
 	},
 	"name": {
-		"short": "chatbottez-legis-qc${{APP_NAME_SUFFIX}}",
+		"short": "Légis QC",
 		"full": "Chatbottez-Légis-QC – Conseiller Juridique Virtuel"
 	},
 	"description": {
 		"short": "Votre conseiller juridique virtuel pour le droit québécois.",
-		"full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois, règlements et décisions judiciaires officiels du Québec."
+		"full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec."
 	},
 	"accentColor": "#FFFFFF",
 	"bots": [
@@ -30,12 +30,14 @@
 				"team",
 				"groupChat"
 			],
-			"supportsFiles": false,
+			"supportsFiles": true,
 			"isNotificationOnly": false,
 			"commandLists": [
 				{
 					"scopes": [
-						"personal"
+						"personal",
+						"team",
+						"groupChat"
 					],
 					"commands": [
 						{
