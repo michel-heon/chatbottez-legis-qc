@@ -33,7 +33,6 @@
                 "order": 6
             },
             "internalConsoleOptions": "neverOpen",
-            "runtimeExecutable": "/usr/bin/firefox",
             "webRoot": "${workspaceFolder}",
             "reloadOnAttach": true
         },
