@@ -23,6 +23,10 @@ convert_image: check_imagemagick
 # Génère l'icône outline.png avec détection de contours
 generate_outline: check_imagemagick
 	@echo "Génération de $(OUTLINE) à partir de $(COLOR) avec détection de contours..."
+	@convert $(COLOR) -gravity center -crop 120x120+0+0 +repage -colorspace Gray -resize 32x32 -alpha set -fuzz 40% -transparent black  $(OUTLINE)
+	@echo "Fichier $(OUTLINE) généré avec succès."
+
+ancien:
 	@convert $(COLOR) \
 	    -gravity center -crop 130x130+0+0 +repage \
 	    -reverse -opaque "#d4af37" \
@@ -31,7 +35,6 @@ generate_outline: check_imagemagick
 	    -alpha set -fuzz 20% -transparent black \
 	    -background white -flatten \
 	    $(OUTLINE)
-	@echo "Fichier $(OUTLINE) généré avec succès."
 
 #	convert $(COLOR) -gravity center -crop 140x140+0+0  -fuzz 7% -fill white -opaque "#d4af37" -fill none -draw "color 0,0 floodfill" -transparent white -colorspace Gray -resize 32x32 -alpha set $(OUTLINE)
 

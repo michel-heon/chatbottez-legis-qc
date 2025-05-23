@@ -1,40 +1,50 @@
 {
-  "schema": 1.1,
-  "description": "Le Chatbottez qui peut discuter justice avec les utilisateurs",
-  "type": "completion",
-  "completion": {
-    "model": "gpt-4.1-mini",
-    "completion_type": "chat",
-    "include_history": true,
-    "include_input": true,
-    "max_input_tokens": 2800,
-    "max_tokens": 3000,
-    "temperature": 0.9,
-    "top_p": 0.0,
-    "presence_penalty": 0.6,
-    "frequency_penalty": 0.0,
-    "data_sources": [
-      {
-        "type": "azure_search",
-        "parameters": {
-            "semantic_configuration": "default",
-            "query_type": "vector_semantic_hybrid",
-            "fields_mapping": {},
-            "in_scope": true,
-            "filter": null,
-            "strictness": 1,
-            "top_n_documents": 20,
-            "endpoint": "https://search-cotechnoe-ai.search.windows.net",
-            "index_name": "fileupload-justice-index-02",
-            "authentication": {
-                "type": "api_key",
-                "key": "YDcIo6Do1dEXTwLXEcuXLCdEQMELiXn3Q7HDhwrxEAAzSeD3CIr6"
-            },
-            "embedding_dependency": {
-                "type": "deployment_name",
-                "deployment_name": "text-embedding-ada-002"
-             }
+    "schema": 1.1,
+    "description": "Le Chatbottez qui peut discuter justice avec les utilisateurs",
+    "type": "completion",
+    "completion": {
+        "model": "gpt-4.1-mini",
+        "completion_type": "chat",
+        "include_history": true,
+        "include_input": true,
+        "max_input_tokens": 2800,
+        "max_tokens": 3000,
+        "temperature": 0.9,
+        "top_p": 0.0,
+        "presence_penalty": 0.6,
+        "frequency_penalty": 0.0,
+        "data_sources": [
+            {
+                "type": "azure_search",
+                "parameters": {
+                    "semantic_configuration": "default",
+                    "query_type": "vector_semantic_hybrid",
+                    "fields_mapping": {
+                    },
+                    "in_scope": true,
+                    "filter": null,
+                    "strictness": 1,
+                    "top_n_documents": 20,
+                    "queryLanguage": "fr-FR",
+                    "endpoint": "https://search-cotechnoe-ai.search.windows.net",
+                    "index_name": "fileupload-justice-index-02",
+                    "authentication": {
+                        "type": "api_key",
+                        "key": "YDcIo6Do1dEXTwLXEcuXLCdEQMELiXn3Q7HDhwrxEAAzSeD3CIr6"
+                    },
+                    "embedding_dependency": {
+                        "type": "deployment_name",
+                        "deployment_name": "text-embedding-ada-002"
+                    }
+                }
+            }
+        ],
+        "retrieval": {
+            "semanticConfiguration": "default",
+            "topK": 5,
+            "queryType": "semantic",
+            "includeSourceAttributions": true,
+            "queryLanguage": "fr-FR"
         }
-      }]
-  }
+    }
 }
