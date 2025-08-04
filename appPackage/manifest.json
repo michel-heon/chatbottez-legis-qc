@@ -1,11 +1,11 @@
 {
-    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.19",
-    "version": "1.0.7",
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.21/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.21",
+    "version": "1.0.0",
     "id": "${{TEAMS_APP_ID}}",
     "developer": {
-        "name": "Cotechnoe Inc.",
-        "websiteUrl": "https://cotechnoe.com",
+        "name": "My App, Inc.",
+        "websiteUrl": "https://www.example.com",
         "privacyUrl": "https://www.example.com/privacy",
         "termsOfUseUrl": "https://www.example.com/termofuse"
     },
@@ -14,83 +14,53 @@
         "outline": "outline.png"
     },
     "name": {
-        "short": "Légis QC",
-        "full": "Chatbottez-Légis-QC – Conseiller Juridique Virtuel"
+        "short": "chatbottez-legis-qc-rag${{APP_NAME_SUFFIX}}",
+        "full": "full name for chatbottez-legis-qc-rag"
     },
     "description": {
-        "short": "Votre conseiller juridique virtuel pour le droit québécois.",
-        "full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec."
+        "short": "short description for chatbottez-legis-qc-rag",
+        "full": "full description for chatbottez-legis-qc-rag"
     },
     "accentColor": "#FFFFFF",
     "bots": [
         {
             "botId": "${{BOT_ID}}",
             "scopes": [
-                "personal",
                 "team",
-                "groupChat"
+                "groupChat",
+                "personal"
             ],
-            "supportsFiles": true,
+            "supportsFiles": false,
             "isNotificationOnly": false,
             "commandLists": [
                 {
                     "scopes": [
-                        "personal",
-                        "team",
-                        "groupChat"
+                        "personal"
                     ],
                     "commands": [
                         {
-                            "title": "Quelles lois sont disponibles?",
-                            "description": "Voir les lois et règlements disponibles pour consultation."
+                            "title": "List Contoso history in table",
+                            "description": "Tell me the history of Contoso Electronics, format in a table."
                         },
                         {
-                            "title": "Puis-je contester une décision?",
-                            "description": "Obtenez les étapes à suivre pour contester une décision administrative ou judiciaire."
+                            "title": "Compare Contoso Electronics plan",
+                            "description": "Compare different Contoso Electronics benefit package plans"
                         },
                         {
-                            "title": "Quels sont mes droits au travail",
-                            "description": "Renseignez-vous sur vos droits en tant que travailleur selon les normes du travail."
-                        },
-                        {
-                            "title": "Protéger mes données persos",
-                            "description": "Informations sur la protection des renseignements personnels au Québec."
-                        },
-                        {
-                            "title": "Rédiger une mise en demeure",
-                            "description": "Aide à la rédaction d'une mise en demeure conforme à la législation québécoise."
-                        },
-                        {
-                            "title": "Créer une société par actions",
-                            "description": "Instructions juridiques pour constituer une société par actions au Québec."
-                        },
-                        {
-                            "title": "Mes droits comme consommateur?",
-                            "description": "Connaître vos droits protégés par la Loi sur la protection du consommateur."
-                        },
-                        {
-                            "title": "Préparer une demande au tribunal",
-                            "description": "Obtenez les informations nécessaires pour préparer une demande devant les tribunaux québécois."
-                        },
-                        {
-                            "title": "/reset",
-                            "description": "Recommencer une nouvelle conversation"
+                            "title": "Summarize PerksPlus Program",
+                            "description": "Summarize Contoso Electronics PerksPlus Program"
                         }
                     ]
                 }
             ]
         }
     ],
-    "composeExtensions": [
-    ],
-    "configurableTabs": [
-    ],
-    "staticTabs": [
-    ],
+    "composeExtensions": [],
+    "configurableTabs": [],
+    "staticTabs": [],
     "permissions": [
         "identity",
         "messageTeamMembers"
     ],
-    "validDomains": [
-    ]
+    "validDomains": []
 }

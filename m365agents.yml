@@ -11,7 +11,7 @@ provision:
   - uses: teamsApp/create
     with:
       # app name
-      name: chatbottez-legis-qc${{APP_NAME_SUFFIX}}
+      name: chatbottez-legis-qc-rag${{APP_NAME_SUFFIX}}
     # Write the information of created resources into environment file for
     # the specified environment variable(s).
     writeToEnvironmentFile:
@@ -128,4 +128,4 @@ publish:
     # the specified environment variable(s).
     writeToEnvironmentFile:
       publishedAppId: TEAMS_APP_PUBLISHED_APP_ID
-projectId: 274ed842-393e-43b5-8f77-dec1ed0d1fb2
+projectId: ec30d305-0bf2-4b93-9eab-1b095a29bc49

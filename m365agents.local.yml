@@ -8,7 +8,7 @@ provision:
   - uses: teamsApp/create
     with:
       # app name
-      name: chatbottez-legis-qc${{APP_NAME_SUFFIX}}
+      name: chatbottez-legis-qc-rag${{APP_NAME_SUFFIX}}
     # Write the information of created resources into environment file for
     # the specified environment variable(s).
     writeToEnvironmentFile:
@@ -18,7 +18,7 @@ provision:
   - uses: aadApp/create
     with:
       # The Microsoft Entra application's display name
-      name: chatbottez-legis-qc${{APP_NAME_SUFFIX}}
+      name: chatbottez-legis-qc-rag${{APP_NAME_SUFFIX}}
       generateClientSecret: true
       signInAudience: AzureADMultipleOrgs
     writeToEnvironmentFile:
@@ -33,7 +33,7 @@ provision:
   - uses: botFramework/create
     with:
       botId: ${{BOT_ID}}
-      name: chatbottez-legis-qc
+      name: chatbottez-legis-qc-rag
       messagingEndpoint: ${{BOT_ENDPOINT}}/api/messages
       description: ""
       channels:
@@ -85,3 +85,6 @@ deploy:
         AZURE_OPENAI_API_KEY: ${{SECRET_AZURE_OPENAI_API_KEY}}
         AZURE_OPENAI_ENDPOINT: ${{AZURE_OPENAI_ENDPOINT}}
         AZURE_OPENAI_DEPLOYMENT_NAME: ${{AZURE_OPENAI_DEPLOYMENT_NAME}}
+        AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: ${{AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}}
+        AZURE_SEARCH_KEY: ${{SECRET_AZURE_SEARCH_KEY}}
+        AZURE_SEARCH_ENDPOINT: ${{AZURE_SEARCH_ENDPOINT}}

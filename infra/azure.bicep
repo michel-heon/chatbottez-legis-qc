@@ -12,6 +12,15 @@ param azureOpenAIEndpoint string
 @secure()
 param azureOpenAIDeploymentName string
 
+@secure()
+param azureOpenAIEmbeddingDeploymentName string
+
+@secure()
+param azureSearchKey string
+
+@secure()
+param azureSearchEndpoint string
+
 param webAppSKU string
 
 @maxLength(42)
@@ -68,7 +77,7 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
           name: 'BOT_TENANT_ID'
           value: identity.properties.tenantId
         }
-        { 
+        {
           name: 'BOT_TYPE' 
           value: 'UserAssignedMsi'
         }
@@ -83,6 +92,18 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: 'AZURE_OPENAI_DEPLOYMENT_NAME'
           value: azureOpenAIDeploymentName
+        }
+        {
+          name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME'
+          value: azureOpenAIEmbeddingDeploymentName
+        }
+        {
+          name: 'AZURE_SEARCH_KEY'
+          value: azureSearchKey
+        }
+        {
+          name: 'AZURE_SEARCH_ENDPOINT'
+          value: azureSearchEndpoint
         }
       ]
       ftpsState: 'FtpsOnly'

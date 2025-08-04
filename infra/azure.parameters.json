@@ -14,11 +14,20 @@
     "azureOpenAIDeploymentName": {
       "value": "${{AZURE_OPENAI_DEPLOYMENT_NAME}}"
     },
+    "azureOpenAIEmbeddingDeploymentName": {
+      "value": "${{AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}}"
+    },
+    "azureSearchKey": {
+      "value": "${{SECRET_AZURE_SEARCH_KEY}}"
+    },
+    "azureSearchEndpoint": {
+      "value": "${{AZURE_SEARCH_ENDPOINT}}"
+    },
     "webAppSKU": {
       "value": "B1"
     },
     "botDisplayName": {
-      "value": "chatbottez-legis-qc"
+      "value": "chatbottez-legis-qc-rag"
     }
   }
 }
