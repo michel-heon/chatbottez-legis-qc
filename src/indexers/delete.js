@@ -1,7 +1,7 @@
 const { AzureKeyCredential, SearchIndexClient } = require("@azure/search-documents");
 const { deleteIndex } = require("./utils");
 
-const index = "my-documents";
+const index = "fileupload-justice-index-02";
 const searchApiKey = process.argv[2];
 if (!searchApiKey) {
   throw new Error("Missing input Azure AI Search Key");

@@ -9,12 +9,12 @@ const { AzureAISearchDataSource } = require("./azureAISearchDataSource");
 
 // Create AI components
 const model = new OpenAIModel({
-  azureApiKey: config.azureOpenAIKey,
-  azureDefaultDeployment: config.azureOpenAIDeploymentName,
-  azureEndpoint: config.azureOpenAIEndpoint,
-
-  useSystemMessages: true,
-  logRequests: true,
+    azureApiKey: config.azureOpenAIKey,
+    azureDefaultDeployment: config.azureOpenAIDeploymentName,
+    azureEndpoint: config.azureOpenAIEndpoint,
+    azureApiVersion: '2024-02-15-preview',
+    useSystemMessages: true,
+    logRequests: true,
 });
 const prompts = new PromptManager({
   promptsFolder: path.join(__dirname, "../prompts"),
@@ -29,7 +29,7 @@ const planner = new ActionPlanner({
 planner.prompts.addDataSource(
   new AzureAISearchDataSource({
     name: "azure-ai-search",
-    indexName: "my-documents",
+    indexName: "fileupload-justice-index-02",
     azureAISearchApiKey: config.azureSearchKey,
     azureAISearchEndpoint: config.azureSearchEndpoint,
     azureOpenAIApiKey: config.azureOpenAIKey,

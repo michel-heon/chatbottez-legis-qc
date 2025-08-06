@@ -17,7 +17,7 @@ process.env.SECRET_AZURE_OPENAI_API_KEY = azureOpenAIKey;
  *  Main function that creates the index and upserts the documents.
  */
 async function main() {
-    const index = "my-documents";
+    const index = "fileupload-justice-index-02";
 
     if (
         !process.env.AZURE_SEARCH_ENDPOINT ||

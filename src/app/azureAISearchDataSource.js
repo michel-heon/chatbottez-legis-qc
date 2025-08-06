@@ -29,27 +29,14 @@ class AzureAISearchDataSource {
         }
         
         const selectedFields = [
-            "docId",
-            "docTitle",
-            "description",
+            "title"
         ];
 
         // hybrid search
         const queryVector= await this.getEmbeddingVector(query);
         const searchResults = await this.searchClient.search(query, {
-            searchFields: ["docTitle", "description"],
+            searchFields: ["title"],
             select: selectedFields,
-            vectorSearchOptions: {
-                queries: [
-                    {
-                        kind: "vector",
-                        fields: ["descriptionVector"],
-                        kNearestNeighborsCount: 2,
-                        // The query vector is the embedding of the user's input
-                        vector: queryVector
-                    }
-                ]
-            },
         });
 
         if (!searchResults.results) {
