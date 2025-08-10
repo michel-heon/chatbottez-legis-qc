@@ -23,6 +23,8 @@ const planner = new ActionPlanner({
   model,
   prompts,
   defaultPrompt: "chat",
+  maxHistoryMessages: 10,
+  maxPromptTokens: 2500 ,
 });
 
 // Register your data source with planner

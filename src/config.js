@@ -10,5 +10,5 @@ const config = {
   azureSearchKey: process.env.AZURE_SEARCH_KEY,
   azureSearchEndpoint: process.env.AZURE_SEARCH_ENDPOINT,
 };
-
+console.log(config);
 module.exports = config;
