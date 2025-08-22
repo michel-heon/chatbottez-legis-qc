@@ -6,16 +6,16 @@ Documentation technique détaillée des scripts de gestion de l'index Azure AI S
 
 | Script | Fonction | Complexité |
 |--------|----------|------------|
-| `check-env.sh` | Validation environnement | 🟢 Simple |
-| `validate-config.sh` | Test connectivité Azure | 🟡 Moyen |
-| `setup-index.sh` | Création et indexation | 🔴 Complexe |
-| `delete-index.sh` | Suppression d'index | 🟡 Moyen |
-| `add-documents.sh` | Ajout documents | 🔴 Complexe |
-| `check-index-status.sh` | Monitoring index | 🟡 Moyen |
+| `env-check.sh` | Validation environnement | 🟢 Simple |
+| `config-validate.sh` | Test connectivité Azure | 🟡 Moyen |
+| `index-setup.sh` | Création et indexation | 🔴 Complexe |
+| `index-delete.sh` | Suppression d'index | 🟡 Moyen |
+| `documents-add.sh` | Ajout documents | 🔴 Complexe |
+| `index-status-check.sh` | Monitoring index | 🟡 Moyen |
 
 ## 🔍 Analyse détaillée des scripts
 
-### 1. check-env.sh
+### 1. env-check.sh
 
 **Objectif** : Valider la présence et la validité des variables d'environnement.
 
@@ -43,13 +43,13 @@ AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME
 #### Utilisation
 ```bash
 # Validation automatique
-make check-env
+make env-check
 
 # Validation manuelle
-./scripts/check-env.sh
+./scripts/env-check.sh
 ```
 
-### 2. validate-config.sh
+### 2. config-validate.sh
 
 **Objectif** : Tester la connectivité et la configuration des services Azure.
 
@@ -82,7 +82,7 @@ make check-env
 - `curl` : Requis
 - `jq` : Optionnel (formatage JSON)
 
-### 3. setup-index.sh
+### 3. index-setup.sh
 
 **Objectif** : Processus complet de création d'index et d'indexation des documents.
 
@@ -121,7 +121,7 @@ fi
 - 🔄 Exécution de l'indexation
 - ✅ Confirmation de succès
 
-### 4. delete-index.sh
+### 4. index-delete.sh
 
 **Objectif** : Suppression sécurisée de l'index Azure Search.
 
@@ -147,7 +147,7 @@ fi
 5. Exécution de `delete.js`
 6. Rapport de succès/échec
 
-### 5. add-documents.sh
+### 5. documents-add.sh
 
 **Objectif** : Ajout incrémental de nouveaux documents à l'index existant.
 
@@ -182,7 +182,7 @@ else
 fi
 ```
 
-### 6. check-index-status.sh
+### 6. index-status-check.sh
 
 **Objectif** : Monitoring et diagnostic de l'état de l'index.
 

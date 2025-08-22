@@ -68,10 +68,10 @@ AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=text-embedding-ada-002
 ### 5. Validation de la configuration
 ```bash
 # Vérifier les variables d'environnement
-make check-env
+make env-check
 
 # Tester la connectivité Azure
-make validate-config
+make config-validate
 ```
 
 ### 6. Build et setup initial
@@ -80,7 +80,7 @@ make validate-config
 make build
 
 # Créer l'index et indexer les documents
-make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
 ```
 
 ## 🎯 Configuration avancée
@@ -92,19 +92,19 @@ Le projet supporte plusieurs environnements :
 #### Playground (développement)
 ```bash
 # Variables dans env/.env.playground.user
-make setup-playground
+make playground-setup
 ```
 
 #### Local (test)
 ```bash
 # Variables dans env/.env.local.user  
-make setup-local
+make local-setup
 ```
 
 #### Production
 ```bash
 # Variables dans env/.env.user (non inclus dans git)
-make setup-index AZURE_SEARCH_KEY=prod_key AZURE_OPENAI_KEY=prod_key
+make index-setup AZURE_SEARCH_KEY=prod_key AZURE_OPENAI_KEY=prod_key
 ```
 
 ### Configuration des modèles
@@ -183,7 +183,7 @@ curl -H "api-key: $AZURE_OPENAI_KEY" \
 ### Tests fonctionnels
 ```bash
 # Créer un index de test
-make setup-index AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+make index-setup AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
 
 # Vérifier le contenu
 make index-status AZURE_SEARCH_KEY=key
@@ -200,7 +200,7 @@ make dev
 ```bash
 Error: Missing required environment variables
 ```
-**Solution** : Exécuter `make check-env` et configurer les variables manquantes.
+**Solution** : Exécuter `make env-check` et configurer les variables manquantes.
 
 #### Connectivité Azure
 ```bash
@@ -235,7 +235,7 @@ The API deployment for this resource does not exist
 ```bash
 # Activer le debug
 export DEBUG=azure-search:*
-make setup-index AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+make index-setup AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
 ```
 
 #### Monitoring des ressources

@@ -1,6 +1,20 @@
 # 📚 Documentation - Chatbot Legis QC
 
-Bienvenue dans la documentation complète du projet **Chatbot Legis QC** - Un agent conversationnel Microsoft 365 Teams avec capacités RAG (Retrieval Augmented Generation) alimenté par Azure AI Search.
+Bienvenue dans la documentation complète du projet **Chatbot Legis Q### Ajout de nouveaux documents
+```bash
+# 1. Placer les fichiers .md dans src/indexers/new-data/
+# 2. Indexer
+make documents-add AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+```
+
+### 2. Test et validation
+```bash
+# Vérifier l'index
+make index-status AZURE_SEARCH_KEY=key
+
+# Démarrer l'application
+make dev
+```conversationnel Microsoft 365 Teams avec capacités RAG (Retrieval Augmented Generation) alimenté par Azure AI Search.
 
 ## 🗂️ Organisation de la documentation
 
@@ -63,16 +77,16 @@ make dev
 ### Configuration initiale
 ```bash
 make install              # Installation des dépendances
-make check-env           # Validation de l'environnement
-make validate-config     # Test de connectivité Azure
+make env-check           # Validation de l'environnement
+make config-validate     # Test de connectivité Azure
 ```
 
 ### Gestion de l'index
 ```bash
-make setup-index         # Création et indexation
+make index-setup         # Création et indexation
 make index-status        # Vérification du statut
-make add-documents       # Ajout de nouveaux documents
-make reindex            # Reconstruction complète
+make documents-add       # Ajout de nouveaux documents
+make index-reindex       # Reconstruction complète
 ```
 
 ### Développement
@@ -135,9 +149,9 @@ make build
 ### Erreurs communes
 | Problème | Commande de diagnostic | Solution |
 |----------|----------------------|----------|
-| Variables manquantes | `make check-env` | Configurer les variables d'environnement |
-| Connectivité Azure | `make validate-config` | Vérifier les endpoints et clés |
-| Index inexistant | `make index-status` | Exécuter `make setup-index` |
+| Variables manquantes | `make env-check` | Configurer les variables d'environnement |
+| Connectivité Azure | `make config-validate` | Vérifier les endpoints et clés |
+| Index inexistant | `make index-status` | Exécuter `make index-setup` |
 | Build échoué | `make clean && make build` | Nettoyer et recompiler |
 
 ### Support et ressources
