@@ -19,6 +19,7 @@ make dev
 ## 🗂️ Organisation de la documentation
 
 ### 📖 Guides utilisateur
+- **[playground-guide.md](./playground-guide.md)** - Guide complet Microsoft 365 Agents Playground
 - **[azure-search-management.md](./azure-search-management.md)** - Guide complet de gestion de l'index Azure AI Search
 - **[setup-guide.md](./setup-guide.md)** - Guide d'installation et configuration pas à pas
 
@@ -28,20 +29,23 @@ make dev
 ## 🚀 Démarrage rapide
 
 ### Nouveaux utilisateurs
-1. 📋 Lire le [Guide d'installation](./setup-guide.md)
+1. 📋 Lire le [Guide Microsoft 365 Playground](./playground-guide.md)
 2. 🛠️ Suivre la [Configuration Azure Search](./azure-search-management.md#configuration-requise)
 3. ⚡ Exécuter `make help` pour voir toutes les commandes disponibles
 
 ### Utilisateurs expérimentés
 ```bash
-# Configuration rapide
-make check-env && make validate-config
+# Configuration Playground
+make playground-env-setup
+# Éditer env/.env.playground.user avec vos clés
+make playground-env-validate
 
 # Setup complet
-make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make playground-setup
 
 # Démarrage de l'application
-make dev
+npm run dev:teamsfx:testtool
+npm run dev:teamsfx:launch-testtool
 ```
 
 ## 🎯 Architecture du projet

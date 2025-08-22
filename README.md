@@ -17,22 +17,29 @@ Ce projet démontre la construction d'un chatbot sophistiqué capable de répond
 # 1. Installation des dépendances
 make install
 
-# 2. Validation de l'environnement
-make env-check
+# 2. Configuration de l'environnement Playground
+make playground-env-setup
 
-# 3. Configuration de l'index Azure Search
-make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+# 3. Éditer env/.env.playground.user avec vos clés Azure
 
-# 4. Démarrage de l'application
-make dev
+# 4. Validation de la configuration
+make playground-env-validate
+
+# 5. Configuration de l'index Azure Search
+make playground-setup
+
+# 6. Démarrage de l'application Playground
+npm run dev:teamsfx:testtool
+npm run dev:teamsfx:launch-testtool
 ```
 
 ### 📋 Commandes disponibles
 ```bash
-make help                # Affiche toutes les commandes disponibles
-make config-validate     # Teste la connectivité Azure
-make index-status       # Vérifie l'état de l'index
-make index-reindex      # Reconstruit l'index complet
+make help                    # Affiche toutes les commandes disponibles
+make playground-env-setup    # Configuration environnement Playground
+make playground-env-validate # Validation configuration Playground
+make index-status           # Vérifie l'état de l'index
+make index-reindex          # Reconstruit l'index complet
 ```
 
 ## 📚 Documentation complète
@@ -40,11 +47,13 @@ make index-reindex      # Reconstruit l'index complet
 👉 **[Consulter la documentation détaillée](./docs/README.md)** dans le dossier `./docs/`
 
 ### Guides principaux
+- 🎮 **[Guide Microsoft 365 Playground](./docs/playground-guide.md)** - Configuration et utilisation du Playground
 - 🛠️ **[Guide d'installation](./docs/setup-guide.md)** - Configuration pas à pas
 - 🔍 **[Gestion Azure Search](./docs/azure-search-management.md)** - Guide complet d'indexation
 - 🔧 **[Référence des scripts](./docs/scripts-reference.md)** - Documentation technique
+- 📝 **[Changelog](./CHANGELOG.md)** - Historique des versions et migrations
 
-## Get started with the template
+## Get started with Microsoft 365 Agents Playground
 
 > **Prerequisites**
 >
@@ -54,17 +63,38 @@ make index-reindex      # Reconstruit l'index complet
 > - [Microsoft 365 Agents Toolkit Visual Studio Code Extension](https://aka.ms/teams-toolkit) version 5.0.0 and higher or [Microsoft 365 Agents Toolkit CLI](https://aka.ms/teamsfx-toolkit-cli)
 > - Prepare your own [Azure OpenAI](https://aka.ms/oai/access) resource and [Azure AI Search](https://azure.microsoft.com/en-us/products/ai-services/ai-search).
 
-> For local debugging using Microsoft 365 Agents Toolkit CLI, you need to do some extra steps described in [Set up your Microsoft 365 Agents Toolkit CLI for local debugging](https://aka.ms/teamsfx-cli-debugging).
+### 🔧 Configuration automatisée
+1. **Setup de l'environnement Playground**
+   ```bash
+   make playground-env-setup
+   ```
 
-1. First, select the Microsoft 365 Agents Toolkit icon on the left in the VS Code toolbar.
-1. In file *env/.env.playground.user*, fill in your Azure OpenAI key `SECRET_AZURE_OPENAI_API_KEY=<your-key>`, endpoint `AZURE_OPENAI_ENDPOINT=<your-endpoint>`, deployment name `AZURE_OPENAI_DEPLOYMENT_NAME=<your-deployment>`, and embedding deployment name `AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=<your-embedding-deployment>`. And fill in your Azure AI search key `SECRET_AZURE_SEARCH_KEY=<your-ai-search-key>` and endpoint `AZURE_SEARCH_ENDPOINT=<your-ai-search-endpoint>`.
-1. Do `npm install` and `npm run indexer:create -- <your-ai-search-key> <your-azure-openai-api-key>` to create the my documents index. Once you're done using the sample it's good practice to delete the index. You can do so with the `npm run indexer:delete -- <your-ai-search-key>` command.
-1. Press F5 to start debugging which launches your app in Microsoft 365 Agents Playground using a web browser. Select `Debug in Microsoft 365 Agents Playground`.
-1. You can send any message to get a response from the agent.
+2. **Configuration des clés Azure** dans `env/.env.playground.user`:
+   ```bash
+   SECRET_AZURE_OPENAI_API_KEY=<your-openai-api-key>
+   AZURE_OPENAI_ENDPOINT=<your-openai-endpoint>
+   AZURE_OPENAI_DEPLOYMENT_NAME=<your-deployment-name>
+   AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=<your-embedding-deployment>
+   SECRET_AZURE_SEARCH_KEY=<your-search-key>
+   AZURE_SEARCH_ENDPOINT=<your-search-endpoint>
+   AZURE_SEARCH_INDEX_NAME=index-data-sample
+   ```
 
-**Congratulations**! You are running an application that can now interact with users in Microsoft 365 Agents Playground:
+3. **Validation de la configuration**
+   ```bash
+   make playground-env-validate
+   ```
 
-![AI Search Bot](https://github.com/user-attachments/assets/464fe1b0-d8c6-4ecf-a410-8dde7d9ca9b3)
+4. **Création et indexation**
+   ```bash
+   make playground-setup
+   ```
+
+5. **Démarrage du Playground**
+   - Via commandes : `npm run dev:teamsfx:testtool` puis `npm run dev:teamsfx:launch-testtool`
+   - Via VS Code : Utilisez les tâches "Start application (Microsoft 365 Agents Playground)"
+
+**Congratulations**! You are running an application that can now interact with users in Microsoft 365 Agents Playground.
 
 ## What's included in the template
 
