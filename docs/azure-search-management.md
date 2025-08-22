@@ -46,16 +46,16 @@ make build
 ### Gestion de l'index
 ```bash
 # Créer l'index et indexer les documents
-make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
 
 # Supprimer l'index
-make delete-index AZURE_SEARCH_KEY=your_key
+make index-delete AZURE_SEARCH_KEY=your_key
 
 # Recréer l'index (suppression + création)
-make reindex AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-reindex AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
 
 # Ajouter de nouveaux documents
-make add-documents AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make documents-add AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
 
 # Vérifier le statut de l'index
 make index-status AZURE_SEARCH_KEY=your_key
@@ -64,19 +64,19 @@ make index-status AZURE_SEARCH_KEY=your_key
 ### Environnements spécifiques
 ```bash
 # Setup pour l'environnement playground
-make setup-playground
+make playground-setup
 
 # Setup pour l'environnement local
-make setup-local
+make local-setup
 ```
 
 ### Validation et diagnostic
 ```bash
 # Vérifier les variables d'environnement
-make check-env
+make env-check
 
 # Valider la configuration Azure
-make validate-config
+make config-validate
 
 # Aide
 make help
@@ -109,12 +109,12 @@ interface MyDocument {
 
 | Script | Description |
 |--------|-------------|
-| `check-env.sh` | Vérifie les variables d'environnement |
-| `validate-config.sh` | Valide la configuration Azure |
-| `setup-index.sh` | Crée l'index et indexe les documents |
-| `delete-index.sh` | Supprime l'index |
-| `add-documents.sh` | Ajoute de nouveaux documents |
-| `check-index-status.sh` | Vérifie le statut de l'index |
+| `env-check.sh` | Vérifie les variables d'environnement |
+| `config-validate.sh` | Valide la configuration Azure |
+| `index-setup.sh` | Crée l'index et indexe les documents |
+| `index-delete.sh` | Supprime l'index |
+| `documents-add.sh` | Ajoute de nouveaux documents |
+| `index-status-check.sh` | Vérifie le statut de l'index |
 
 ## 🔍 Processus d'indexation
 
@@ -213,18 +213,18 @@ make clean  # Supprime les artefacts de build
 make install
 
 # 2. Vérifier la configuration
-make check-env
-make validate-config
+make env-check
+make config-validate
 
 # 3. Créer l'index
-make setup-index AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
+make index-setup AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
 ```
 
 ### Ajout de nouveaux documents
 ```bash
 # 1. Copier les documents .md dans src/indexers/new-data/
 # 2. Indexer
-make add-documents AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
+make documents-add AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
 ```
 
 ### Développement quotidien

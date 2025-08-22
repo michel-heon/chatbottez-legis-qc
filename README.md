@@ -18,10 +18,10 @@ Ce projet démontre la construction d'un chatbot sophistiqué capable de répond
 make install
 
 # 2. Validation de l'environnement
-make check-env
+make env-check
 
 # 3. Configuration de l'index Azure Search
-make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
 
 # 4. Démarrage de l'application
 make dev
@@ -30,9 +30,9 @@ make dev
 ### 📋 Commandes disponibles
 ```bash
 make help                # Affiche toutes les commandes disponibles
-make validate-config     # Teste la connectivité Azure
+make config-validate     # Teste la connectivité Azure
 make index-status       # Vérifie l'état de l'index
-make reindex           # Reconstruit l'index complet
+make index-reindex      # Reconstruit l'index complet
 ```
 
 ## 📚 Documentation complète
