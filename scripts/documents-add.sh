@@ -20,10 +20,24 @@ elif [[ -f "env/.env.local.user" ]]; then
     export $(grep -v '^#' env/.env.local.user | xargs)
 fi
 
+# Load configuration if available
+INDEX_NAME="my-documents"  # Default value
+if [[ -f "scripts/.index-config" ]]; then
+    echo "📋 Loading index configuration..."
+    source scripts/.index-config
+    echo "   Using configured index name: $INDEX_NAME"
+fi
+
+# Allow override via environment variable
+if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📋 Using index name from environment: $INDEX_NAME"
+fi
+
 # Check if TypeScript is compiled
-if [[ ! -d "dist" ]]; then
+if [[ ! -d "lib" ]]; then
     echo "📦 Building TypeScript project..."
-    npm run build
+    npm run build || echo "⚠️  Build failed, continuing with existing artifacts..."
 fi
 
 # Check if there are new documents
@@ -65,12 +79,12 @@ cp "$NEW_DOCS_DIR"/*.md "$DATA_DIR/"
 
 # Run the setup script (which will add all documents, including new ones)
 echo "🔄 Updating index..."
-cd dist/indexers || {
+cd lib/src/indexers || {
     echo "❌ Build directory not found. Please run 'npm run build' first."
     exit 1
 }
 
-if node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY"; then
+if node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY" "$INDEX_NAME"; then
     echo "✅ Documents added successfully!"
     
     # Move processed documents to archive

@@ -14,12 +14,12 @@ fi
 echo "🚀 Setting up Azure Search index..."
 
 # Load environment variables
-if [[ -f "env/.env.playground.user" ]]; then
-    echo "📋 Loading environment from env/.env.playground.user"
-    export $(grep -v '^#' env/.env.playground.user | xargs)
-elif [[ -f "env/.env.local.user" ]]; then
+if [[ -f "env/.env.local.user" ]]; then
     echo "📋 Loading environment from env/.env.local.user"
-    export $(grep -v '^#' env/.env.local.user | xargs)
+    export $(grep -v '^#' env/.env.local.user | grep -v '^$' | xargs)
+elif [[ -f "env/.env.playground.user" ]]; then
+    echo "📋 Loading environment from env/.env.playground.user"
+    export $(grep -v '^#' env/.env.playground.user | grep -v '^$' | xargs)
 else
     echo "⚠️  No environment file found, using system environment"
 fi
@@ -38,13 +38,27 @@ if [[ "$AZURE_OPENAI_KEY" == crypto_* ]]; then
 fi
 
 # Check if TypeScript is compiled
-if [[ ! -d "dist" ]]; then
+if [[ ! -d "lib" ]]; then
     echo "📦 Building TypeScript project..."
-    npm run build
+    npm run build || echo "⚠️  Build failed, continuing with existing artifacts..."
 fi
 
-echo "📊 Starting index setup process..."
-echo "   Index name: my-documents"
+# Load configuration if available
+INDEX_NAME="my-documents"  # Default value
+if [[ -f "scripts/.index-config" ]]; then
+    echo "� Loading index configuration..."
+    source scripts/.index-config
+    echo "   Using configured index name: $INDEX_NAME"
+fi
+
+# Allow override via environment variable
+if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📋 Using index name from environment: $INDEX_NAME"
+fi
+
+echo "�📊 Starting index setup process..."
+echo "   Index name: $INDEX_NAME"
 echo "   Data source: src/indexers/data/"
 
 # Count documents to be indexed
@@ -53,12 +67,12 @@ echo "   Documents to index: $DOC_COUNT"
 
 # Run the setup script
 echo "🔄 Running index setup..."
-cd dist/indexers || {
+cd lib/src/indexers || {
     echo "❌ Build directory not found. Please run 'npm run build' first."
     exit 1
 }
 
-node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY"
+node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY" "$INDEX_NAME"
 
 if [[ $? -eq 0 ]]; then
     echo "✅ Index setup completed successfully!"

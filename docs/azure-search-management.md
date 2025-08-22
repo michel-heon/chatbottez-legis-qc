@@ -24,6 +24,7 @@ Créer les fichiers d'environnement suivants :
 # Azure AI Search
 AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net/
 SECRET_AZURE_SEARCH_KEY=your_search_api_key
+AZURE_SEARCH_INDEX_NAME=my-custom-index
 
 # Azure OpenAI
 AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com/
@@ -47,6 +48,9 @@ make build
 ```bash
 # Créer l'index et indexer les documents
 make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+
+# Assigner un nom personnalisé à l'index
+make index-name-set INDEX_NAME=legis-qc-documents ENVIRONMENT=local
 
 # Supprimer l'index
 make index-delete AZURE_SEARCH_KEY=your_key
@@ -82,6 +86,50 @@ make config-validate
 make help
 ```
 
+## 🏷️ Gestion des noms d'index
+
+### Configuration du nom d'index
+
+Le système permet d'utiliser des noms d'index personnalisés pour différents environnements :
+
+```bash
+# Assigner un nom d'index pour l'environnement local
+make index-name-set INDEX_NAME=legis-qc-dev ENVIRONMENT=local
+
+# Assigner un nom d'index pour l'environnement playground
+make index-name-set INDEX_NAME=legis-qc-prod ENVIRONMENT=playground
+
+# Utiliser un nom d'index personnalisé
+make index-name-set INDEX_NAME=my-custom-index
+
+# Lister toutes les configurations
+make index-config-list
+```
+
+### Règles de nommage
+
+Les noms d'index doivent respecter les contraintes Azure :
+- **Longueur** : 2 à 128 caractères
+- **Format** : Lettres minuscules, chiffres et traits d'union uniquement
+- **Début/Fin** : Doit commencer et finir par un caractère alphanumérique
+- **Exemples valides** : `legis-qc-documents`, `my-index-v2`, `docs-2024`
+- **Exemples invalides** : `My-Index`, `-invalid-`, `Index_With_Underscores`
+
+### Priorité de configuration
+
+Le nom d'index est déterminé selon cet ordre de priorité :
+
+1. **Variable d'environnement** : `AZURE_SEARCH_INDEX_NAME`
+2. **Fichier de configuration** : `scripts/.index-config`
+3. **Valeur par défaut** : `my-documents`
+
+### Fichiers de configuration
+
+Les noms d'index sont stockés dans :
+- **Configuration globale** : `scripts/.index-config`
+- **Configuration d'environnement** : `env/.env.{environment}.user`
+- **Configuration npm** : `package.json` (section config)
+
 ## 📁 Structure des données
 
 ### Emplacement des documents
@@ -113,6 +161,8 @@ interface MyDocument {
 | `config-validate.sh` | Valide la configuration Azure |
 | `index-setup.sh` | Crée l'index et indexe les documents |
 | `index-delete.sh` | Supprime l'index |
+| `index-name-set.sh` | Assigne un nom personnalisé à l'index |
+| `index-config-list.sh` | Liste toutes les configurations d'index |
 | `documents-add.sh` | Ajoute de nouveaux documents |
 | `index-status-check.sh` | Vérifie le statut de l'index |
 
@@ -212,11 +262,14 @@ make clean  # Supprime les artefacts de build
 # 1. Installer les dépendances
 make install
 
-# 2. Vérifier la configuration
+# 2. Configurer le nom d'index
+make index-name-set INDEX_NAME=legis-qc-documents ENVIRONMENT=local
+
+# 3. Vérifier la configuration
 make env-check
 make config-validate
 
-# 3. Créer l'index
+# 4. Créer l'index
 make index-setup AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
 ```
 

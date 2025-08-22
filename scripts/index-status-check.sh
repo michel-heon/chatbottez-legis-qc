@@ -19,12 +19,25 @@ elif [[ -f "env/.env.local.user" ]]; then
     export $(grep -v '^#' env/.env.local.user | xargs)
 fi
 
+# Load configuration if available
+INDEX_NAME="my-documents"  # Default value
+if [[ -f "scripts/.index-config" ]]; then
+    echo "📋 Loading index configuration..."
+    source scripts/.index-config
+    echo "   Using configured index name: $INDEX_NAME"
+fi
+
+# Allow override via environment variable
+if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📋 Using index name from environment: $INDEX_NAME"
+fi
+
 if [[ -z "$AZURE_SEARCH_ENDPOINT" ]]; then
     echo "❌ AZURE_SEARCH_ENDPOINT is not set"
     exit 1
 fi
 
-INDEX_NAME="my-documents"
 API_VERSION="2023-11-01"
 
 # Check if index exists

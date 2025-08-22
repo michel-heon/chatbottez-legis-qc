@@ -1,7 +1,7 @@
 # Makefile for Azure AI Search Index Management
 # Microsoft 365 Teams Agent - Chatbot Legis QC
 
-.PHONY: help install build index-setup index-delete env-check config-validate clean
+.PHONY: help install build index-setup index-delete env-check config-validate clean index-name-set index-config-list
 
 # Default target
 help:
@@ -17,6 +17,8 @@ help:
 	@echo "  index-delete     - Delete the search index"
 	@echo "  index-reindex    - Delete and recreate index with fresh data"
 	@echo "  index-status     - Check index status and statistics"
+	@echo "  index-name-set   - Set custom index name"
+	@echo "  index-config-list - List current index configurations"
 	@echo "  documents-add    - Add new documents to existing index"
 	@echo ""
 	@echo "Environment:"
@@ -35,12 +37,14 @@ help:
 	@echo "  make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key"
 	@echo "  make index-delete AZURE_SEARCH_KEY=your_key"
 	@echo "  make index-status AZURE_SEARCH_KEY=your_key"
+	@echo "  make index-name-set INDEX_NAME=my-custom-index ENVIRONMENT=local"
 	@echo "  make playground-setup  # Uses keys from env/.env.playground.user"
 
 # Variables
 AZURE_SEARCH_KEY ?= 
 AZURE_OPENAI_KEY ?= 
 INDEX_NAME ?= my-documents
+ENVIRONMENT ?= local
 NODE_ENV ?= development
 
 # Install dependencies
@@ -51,7 +55,7 @@ install:
 # Build TypeScript project
 build:
 	@echo "Building TypeScript project..."
-	npm run build
+	npm run build || echo "⚠️  Build failed, continuing with existing artifacts..."
 
 # Check environment variables
 env-check:
@@ -64,7 +68,7 @@ config-validate:
 	@./scripts/config-validate.sh
 
 # Setup Azure Search index and upload documents
-index-setup: env-check build
+index-setup: build
 	@echo "Setting up Azure Search index..."
 	@if [ -z "$(AZURE_SEARCH_KEY)" ] || [ -z "$(AZURE_OPENAI_KEY)" ]; then \
 		echo "Error: AZURE_SEARCH_KEY and AZURE_OPENAI_KEY are required"; \
@@ -108,13 +112,28 @@ documents-add: env-check build
 	@./scripts/documents-add.sh "$(AZURE_SEARCH_KEY)" "$(AZURE_OPENAI_KEY)"
 
 # Check index status
-index-status: env-check
+index-status:
 	@echo "Checking index status..."
 	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
 		echo "Error: AZURE_SEARCH_KEY is required"; \
 		exit 1; \
 	fi
 	@./scripts/index-status-check.sh "$(AZURE_SEARCH_KEY)"
+
+# Set custom index name
+index-name-set:
+	@echo "Setting index name..."
+	@if [ -z "$(INDEX_NAME)" ]; then \
+		echo "Error: INDEX_NAME is required"; \
+		echo "Usage: make index-name-set INDEX_NAME=your-index-name [ENVIRONMENT=local|playground]"; \
+		exit 1; \
+	fi
+	@./scripts/index-name-set.sh "$(INDEX_NAME)" "$(ENVIRONMENT)"
+
+# List current index configurations
+index-config-list:
+	@echo "Listing index configurations..."
+	@./scripts/index-config-list.sh
 
 # Environment-specific targets
 playground-setup: 

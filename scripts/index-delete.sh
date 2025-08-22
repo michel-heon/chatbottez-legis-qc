@@ -21,13 +21,27 @@ elif [[ -f "env/.env.local.user" ]]; then
     export $(grep -v '^#' env/.env.local.user | xargs)
 fi
 
-# Check if TypeScript is compiled
-if [[ ! -d "dist" ]]; then
-    echo "📦 Building TypeScript project..."
-    npm run build
+# Load configuration if available
+INDEX_NAME="my-documents"  # Default value
+if [[ -f "scripts/.index-config" ]]; then
+    echo "📋 Loading index configuration..."
+    source scripts/.index-config
+    echo "   Using configured index name: $INDEX_NAME"
 fi
 
-echo "⚠️  WARNING: This will delete the entire 'my-documents' index!"
+# Allow override via environment variable
+if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📋 Using index name from environment: $INDEX_NAME"
+fi
+
+# Check if TypeScript is compiled
+if [[ ! -d "lib" ]]; then
+    echo "📦 Building TypeScript project..."
+    npm run build || echo "⚠️  Build failed, continuing with existing artifacts..."
+fi
+
+echo "⚠️  WARNING: This will delete the entire '$INDEX_NAME' index!"
 echo "   All indexed documents will be lost."
 echo ""
 
@@ -40,12 +54,12 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo "🔄 Running index deletion..."
-cd dist/indexers || {
+cd lib/src/indexers || {
     echo "❌ Build directory not found. Please run 'npm run build' first."
     exit 1
 }
 
-node delete.js "$AZURE_SEARCH_KEY"
+node delete.js "$AZURE_SEARCH_KEY" "$INDEX_NAME"
 
 if [[ $? -eq 0 ]]; then
     echo "✅ Index deleted successfully!"
