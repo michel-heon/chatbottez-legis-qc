@@ -1,7 +1,18 @@
 # Makefile for Azure AI Search Index Management
 # Microsoft 365 Teams Agent - Chatbot Legis QC
 
-.PHONY: help install build index-setup index-delete env-check config-validate clean index-name-set index-config-list playground-env-setup playground-env-validate
+.PHONY: help install build index-setup index-delete env-c# Environment-specific targets
+playground-setup: 
+	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2)"
+
+playground-test:
+	$(MAKE) index-test AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)"
+
+local-setup:
+	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2)"
+
+local-test:
+	$(MAKE) index-test AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)"onfig-validate clean index-name-set index-config-list playground-env-setup playground-env-validate
 
 # Default target
 help:
@@ -17,6 +28,7 @@ help:
 	@echo "  index-delete     - Delete the search index"
 	@echo "  index-reindex    - Delete and recreate index with fresh data"
 	@echo "  index-status     - Check index status and statistics"
+	@echo "  index-test       - Test index content and search functionality"
 	@echo "  index-name-set   - Set custom index name"
 	@echo "  index-config-list - List current index configurations"
 	@echo "  documents-add    - Add new documents to existing index"
@@ -33,7 +45,9 @@ help:
 	@echo ""
 	@echo "Environment-specific:"
 	@echo "  playground-setup - Setup index using playground environment"
+	@echo "  playground-test  - Test index using playground environment"
 	@echo "  local-setup      - Setup index using local environment"
+	@echo "  local-test       - Test index using local environment"
 	@echo ""
 	@echo "Microsoft 365 Playground:"
 	@echo "  playground-env-setup    - Create playground environment files"
@@ -125,6 +139,15 @@ index-status: env-check
 		exit 1; \
 	fi
 	@./scripts/index-status-check.sh "$(AZURE_SEARCH_KEY)"
+
+# Test index content and search functionality
+index-test: env-check
+	@echo "Testing index content and search functionality..."
+	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
+		echo "Error: AZURE_SEARCH_KEY is required"; \
+		exit 1; \
+	fi
+	@./scripts/index-test.sh "$(AZURE_SEARCH_KEY)"
 
 # Set custom index name
 index-name-set:

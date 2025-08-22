@@ -20,3 +20,9 @@ lib/
 
 # devTools
 devTools/
+
+# Data files (PDF documents, backups)
+src/indexers/data/*.pdf
+src/indexers/data-original/
+*.backup
+Makefile.backup
