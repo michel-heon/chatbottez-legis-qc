@@ -29,7 +29,7 @@ const planner = new ActionPlanner<TurnState>({
 planner.prompts.addDataSource(
   new AzureAISearchDataSource({
     name: "azure-ai-search",
-    indexName: "my-documents",
+    indexName: config.azureSearchIndexName!,
     azureAISearchApiKey: config.azureSearchKey!,
     azureAISearchEndpoint: config.azureSearchEndpoint!,
     azureOpenAIApiKey: config.azureOpenAIKey!,

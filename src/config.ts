@@ -3,12 +3,13 @@ const config = {
   MicrosoftAppType: process.env.BOT_TYPE,
   MicrosoftAppTenantId: process.env.BOT_TENANT_ID,
   MicrosoftAppPassword: process.env.BOT_PASSWORD,
-  azureOpenAIKey: process.env.AZURE_OPENAI_API_KEY,
+  azureOpenAIKey: process.env.SECRET_AZURE_OPENAI_API_KEY,
   azureOpenAIEndpoint: process.env.AZURE_OPENAI_ENDPOINT,
   azureOpenAIDeploymentName: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
   azureOpenAIEmbeddingDeploymentName: process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME,
-  azureSearchKey: process.env.AZURE_SEARCH_KEY,
+  azureSearchKey: process.env.SECRET_AZURE_SEARCH_KEY,
   azureSearchEndpoint: process.env.AZURE_SEARCH_ENDPOINT,
+  azureSearchIndexName: process.env.AZURE_SEARCH_INDEX_NAME || "my-documents",
 };
 
 export default config;
