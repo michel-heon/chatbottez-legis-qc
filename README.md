@@ -1,10 +1,48 @@
-# Overview of the Chat With Your Data (Using Azure AI Search) template
+# 🤖 Chatbot Legis QC
 
-This app template showcases how to build one of the most powerful applications enabled by LLM - sophisticated question-answering (Q&A) chat bots that can answer questions about specific source information right in the Microsoft Teams.
-This app template also demonstrates usage of techniques like: 
-- [Retrieval Augmented Generation](https://python.langchain.com/docs/use_cases/question_answering/#what-is-rag), or RAG.
-- [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
-- [Teams AI Library](https://learn.microsoft.com/microsoftteams/platform/bots/how-to/teams%20conversational%20ai/teams-conversation-ai-overview)
+Agent conversationnel intelligent pour Microsoft 365 Teams avec capacités RAG (Retrieval Augmented Generation) alimenté par Azure AI Search.
+
+## 🎯 Vue d'ensemble
+
+Ce projet démontre la construction d'un chatbot sophistiqué capable de répondre à des questions spécifiques basées sur des documents indexés, directement dans Microsoft Teams. Il utilise des techniques avancées comme :
+
+- **[Retrieval Augmented Generation (RAG)](https://python.langchain.com/docs/use_cases/question_answering/#what-is-rag)** - Génération augmentée par récupération
+- **[Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)** - Recherche hybride (textuelle + vectorielle)  
+- **[Teams AI Library](https://learn.microsoft.com/microsoftteams/platform/bots/how-to/teams%20conversational%20ai/teams-conversation-ai-overview)** - Framework Microsoft pour agents Teams
+
+## ⚡ Démarrage rapide
+
+### 🚀 Installation automatisée avec Makefile
+```bash
+# 1. Installation des dépendances
+make install
+
+# 2. Validation de l'environnement
+make check-env
+
+# 3. Configuration de l'index Azure Search
+make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+
+# 4. Démarrage de l'application
+make dev
+```
+
+### 📋 Commandes disponibles
+```bash
+make help                # Affiche toutes les commandes disponibles
+make validate-config     # Teste la connectivité Azure
+make index-status       # Vérifie l'état de l'index
+make reindex           # Reconstruit l'index complet
+```
+
+## 📚 Documentation complète
+
+👉 **[Consulter la documentation détaillée](./docs/README.md)** dans le dossier `./docs/`
+
+### Guides principaux
+- 🛠️ **[Guide d'installation](./docs/setup-guide.md)** - Configuration pas à pas
+- 🔍 **[Gestion Azure Search](./docs/azure-search-management.md)** - Guide complet d'indexation
+- 🔧 **[Référence des scripts](./docs/scripts-reference.md)** - Documentation technique
 
 ## Get started with the template
 
