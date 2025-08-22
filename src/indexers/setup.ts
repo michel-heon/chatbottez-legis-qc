@@ -12,7 +12,7 @@ const azureOpenAIKey = process.argv[3];
 if (!azureOpenAIKey) {
   throw new Error("Missing input Azure OpenAI Key");
 }
-const indexName = process.argv[4] || "my-documents";
+const indexName = process.argv[4] || process.env.AZURE_SEARCH_INDEX_NAME || "my-documents";
 process.env.SECRET_AZURE_OPENAI_API_KEY = azureOpenAIKey;
 
 /**

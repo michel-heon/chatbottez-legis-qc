@@ -1,7 +1,7 @@
 # Makefile for Azure AI Search Index Management
 # Microsoft 365 Teams Agent - Chatbot Legis QC
 
-.PHONY: help install build index-setup index-delete env-check config-validate clean index-name-set index-config-list
+.PHONY: help install build index-setup index-delete env-check config-validate clean index-name-set index-config-list playground-env-setup playground-env-validate
 
 # Default target
 help:
@@ -24,6 +24,8 @@ help:
 	@echo "Environment:"
 	@echo "  env-check        - Validate environment variables"
 	@echo "  config-validate  - Validate Azure Search configuration"
+	@echo "  playground-env-setup - Setup Preview Playground environment files"
+	@echo "  playground-env-validate - Validate Preview Playground configuration"
 	@echo ""
 	@echo "Development:"
 	@echo "  clean            - Clean build artifacts"
@@ -32,6 +34,10 @@ help:
 	@echo "Environment-specific:"
 	@echo "  playground-setup - Setup index using playground environment"
 	@echo "  local-setup      - Setup index using local environment"
+	@echo ""
+	@echo "Microsoft 365 Playground:"
+	@echo "  playground-env-setup    - Create playground environment files"
+	@echo "  playground-env-validate - Validate playground configuration"
 	@echo ""
 	@echo "Usage Examples:"
 	@echo "  make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key"
@@ -141,3 +147,13 @@ playground-setup:
 
 local-setup:
 	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2)"
+
+# Setup Preview Playground environment files
+playground-env-setup:
+	@echo "Setting up Preview Playground environment..."
+	@./scripts/playground-env-setup.sh
+
+# Validate Preview Playground environment configuration
+playground-env-validate:
+	@echo "Validating Preview Playground environment..."
+	@./scripts/playground-env-validate.sh
