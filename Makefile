@@ -55,7 +55,7 @@ install:
 # Build TypeScript project
 build:
 	@echo "Building TypeScript project..."
-	npm run build || echo "⚠️  Build failed, continuing with existing artifacts..."
+	npm run build
 
 # Check environment variables
 env-check:
@@ -68,7 +68,7 @@ config-validate:
 	@./scripts/config-validate.sh
 
 # Setup Azure Search index and upload documents
-index-setup: build
+index-setup: env-check build
 	@echo "Setting up Azure Search index..."
 	@if [ -z "$(AZURE_SEARCH_KEY)" ] || [ -z "$(AZURE_OPENAI_KEY)" ]; then \
 		echo "Error: AZURE_SEARCH_KEY and AZURE_OPENAI_KEY are required"; \
@@ -112,7 +112,7 @@ documents-add: env-check build
 	@./scripts/documents-add.sh "$(AZURE_SEARCH_KEY)" "$(AZURE_OPENAI_KEY)"
 
 # Check index status
-index-status:
+index-status: env-check
 	@echo "Checking index status..."
 	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
 		echo "Error: AZURE_SEARCH_KEY is required"; \

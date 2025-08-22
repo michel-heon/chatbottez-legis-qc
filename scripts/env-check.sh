@@ -5,6 +5,31 @@ set -e
 
 echo "🔍 Checking environment variables..."
 
+# Function to safely load environment variables from file
+load_env_file() {
+    local env_file="$1"
+    if [[ -f "$env_file" ]]; then
+        echo "📋 Loading environment from $env_file"
+        # Export variables from file (ignore comments and empty lines)
+        set -a  # Automatically export all variables
+        source <(grep -v '^#' "$env_file" | grep -v '^$' | sed 's/^/export /')
+        set +a  # Stop auto-export
+        return 0
+    fi
+    return 1
+}
+
+# Load environment variables from available files (prioritize local)
+if load_env_file "env/.env.local.user"; then
+    echo "   ✅ Loaded local environment"
+elif load_env_file "env/.env.playground.user"; then
+    echo "   ✅ Loaded playground environment"
+elif load_env_file "env/.env.dev.user"; then
+    echo "   ✅ Loaded dev environment"
+else
+    echo "⚠️  No environment files found, using system environment"
+fi
+
 # Required environment variables
 REQUIRED_VARS=(
     "AZURE_SEARCH_ENDPOINT"
@@ -22,28 +47,21 @@ empty_vars=()
 
 # Check required variables
 for var in "${REQUIRED_VARS[@]}"; do
-    if [[ -z "${!var:-}" ]]; then
-        if ! grep -q "^${var}=" env/.env.* 2>/dev/null; then
-            missing_vars+=("$var")
-        else
-            # Variable exists but is empty
-            if grep "^${var}=$" env/.env.* >/dev/null 2>&1; then
-                empty_vars+=("$var")
-            fi
-        fi
+    value="${!var:-}"
+    if [[ -z "$value" ]]; then
+        missing_vars+=("$var")
+    elif [[ "$value" == "" ]]; then
+        empty_vars+=("$var")
     fi
 done
 
 # Check optional variables
 for var in "${OPTIONAL_VARS[@]}"; do
-    if [[ -z "${!var:-}" ]]; then
-        if ! grep -q "^${var}=" env/.env.* 2>/dev/null; then
-            echo "⚠️  Warning: Optional variable $var is not set"
-        else
-            if grep "^${var}=$" env/.env.* >/dev/null 2>&1; then
-                echo "⚠️  Warning: Optional variable $var is empty"
-            fi
-        fi
+    value="${!var:-}"
+    if [[ -z "$value" ]]; then
+        echo "⚠️  Warning: Optional variable $var is not set"
+    elif [[ "$value" == "" ]]; then
+        echo "⚠️  Warning: Optional variable $var is empty"
     fi
 done
 
