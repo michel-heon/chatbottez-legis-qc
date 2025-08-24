@@ -94,5 +94,5 @@ echo ""
 # Show next steps
 echo "🚀 Quick Actions:"
 echo "   Set index name: make index-name-set INDEX_NAME=new-name ENVIRONMENT=local"
-echo "   Check index status: make index-status AZURE_SEARCH_KEY=your_key"
-echo "   Create index: make index-setup AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key"
+echo "   Check index status: make index-status SECRET_AZURE_SEARCH_KEY=your_key"
+echo "   Create index: make index-setup SECRET_AZURE_SEARCH_KEY=key SECRET_AZURE_OPENAI_API_KEY=key"

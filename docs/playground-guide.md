@@ -30,7 +30,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=text-embedding-ada-002
 
 # Azure AI Search Configuration
-SECRET_AZURE_SEARCH_KEY=your_actual_search_key_here
+SECRET_SECRET_AZURE_SEARCH_KEY=your_actual_search_key_here
 AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net
 AZURE_SEARCH_INDEX_NAME=index-data-sample
 
@@ -83,7 +83,7 @@ npm run dev:teamsfx:launch-testtool
 ### Vérifier le statut de l'index
 ```bash
 # Utilise automatiquement les clés du playground
-AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" make index-status
+SECRET_AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" make index-status
 ```
 
 ### Ajouter de nouveaux documents
@@ -93,7 +93,7 @@ AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut 
 ### Reconstruire l'index complet
 ```bash
 # Supprime et recrée l'index avec toutes les données
-AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" make index-reindex
+SECRET_AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" make index-reindex
 ```
 
 ## 🛡️ Sécurité
@@ -154,7 +154,7 @@ kill -9 <PID>
 make playground-env-validate
 
 # Vérifier l'état de l'index
-AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" make index-status
+SECRET_AZURE_SEARCH_KEY="$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" make index-status
 
 # Tester la connectivité Azure
 curl -H "api-key: $(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" \

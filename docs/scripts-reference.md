@@ -101,7 +101,7 @@ graph TD
 
 #### Gestion des clés chiffrées
 ```bash
-if [[ "$AZURE_SEARCH_KEY" == crypto_* ]]; then
+if [[ "$SECRET_AZURE_SEARCH_KEY" == crypto_* ]]; then
     echo "🔓 Decrypting Azure Search key..."
     # Implémentation de déchiffrement requise
 fi
@@ -172,7 +172,7 @@ src/indexers/
 
 #### Gestion des erreurs
 ```bash
-if node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY"; then
+if node setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY"; then
     # Succès : archivage
     mv "$NEW_DOCS_DIR"/*.md "$ARCHIVE_DIR/"
 else
@@ -227,19 +227,19 @@ fi
 echo "API Key: ${API_KEY:0:8}..."
 
 # Variables sensibles non exposées
-export AZURE_SEARCH_KEY="$1"  # Paramètre, pas variable d'env
+export SECRET_AZURE_SEARCH_KEY="$1"  # Paramètre, pas variable d'env
 ```
 
 ### Validation des entrées
 ```bash
 # Vérification de la présence des arguments
-if [[ -z "$AZURE_SEARCH_KEY" ]]; then
+if [[ -z "$SECRET_AZURE_SEARCH_KEY" ]]; then
     echo "❌ Usage: $0 <azure_search_key>"
     exit 1
 fi
 
 # Validation du format des clés
-if [[ ! "$AZURE_SEARCH_KEY" =~ ^[A-Za-z0-9+/=]{40,}$ ]]; then
+if [[ ! "$SECRET_AZURE_SEARCH_KEY" =~ ^[A-Za-z0-9+/=]{40,}$ ]]; then
     echo "⚠️  Warning: Key format may be invalid"
 fi
 ```
@@ -305,8 +305,8 @@ echo "$(date -Iseconds) [ERROR] Failed to connect to Azure"
 ### Intégration CI/CD
 ```bash
 # Variables d'environnement CI
-CI_AZURE_SEARCH_KEY=${CI_AZURE_SEARCH_KEY}
-CI_AZURE_OPENAI_KEY=${CI_AZURE_OPENAI_KEY}
+CI_SECRET_AZURE_SEARCH_KEY=${CI_AZURE_SEARCH_KEY}
+CI_SECRET_AZURE_OPENAI_API_KEY=${CI_AZURE_OPENAI_KEY}
 
 # Exécution non-interactive
 export DEBIAN_FRONTEND=noninteractive

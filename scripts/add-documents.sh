@@ -3,11 +3,11 @@
 
 set -e
 
-AZURE_SEARCH_KEY="$1"
-AZURE_OPENAI_KEY="$2"
+SECRET_AZURE_SEARCH_KEY="$1"
+SECRET_AZURE_OPENAI_API_KEY="$2"
 
-if [[ -z "$AZURE_SEARCH_KEY" ]] || [[ -z "$AZURE_OPENAI_KEY" ]]; then
-    echo "❌ Usage: $0 <azure_search_key> <azure_openai_key>"
+if [[ -z "$SECRET_AZURE_SEARCH_KEY" ]] || [[ -z "$SECRET_AZURE_OPENAI_API_KEY" ]]; then
+    echo "❌ Usage: $0 <secret_azure_search_key> <secret_azure_openai_api_key>"
     exit 1
 fi
 
@@ -70,7 +70,7 @@ cd dist/indexers || {
     exit 1
 }
 
-if node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY"; then
+if node setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY"; then
     echo "✅ Documents added successfully!"
     
     # Move processed documents to archive

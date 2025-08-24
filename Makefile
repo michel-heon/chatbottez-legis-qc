@@ -1,18 +1,34 @@
 # Makefile for Azure AI Search Index Management
 # Microsoft 365 Teams Agent - Chatbot Legis QC
 
-.PHONY: help install build index-setup index-delete env-c# Environment-specific targets
+.PHONY: help install build index-setup index-delete index-reindex index-status index-test env-check config-validate clean index-name-set index-config-list playground-env-setup playground-env-validate playground-setup playground-test local-setup local-test
+
+# Environment-specific targets
 playground-setup: 
-	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2)"
+	$(MAKE) index-setup SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" SECRET_AZURE_OPENAI_API_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2)"
 
 playground-test:
-	$(MAKE) index-test AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)"
+	$(MAKE) index-test SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)"
 
 local-setup:
-	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2)"
+	$(MAKE) index-setup SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)" SECRET_AZURE_OPENAI_API_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2)"
 
 local-test:
-	$(MAKE) index-test AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)"onfig-validate clean index-name-set index-config-list playground-env-setup playground-env-validate
+	$(MAKE) index-test SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)"Azure AI Search Index Management
+# Microsoft 365 Teams Agent - Chatbot Legis QC
+
+.PHONY: help install build index-setup index-delete env-c# Environment# Environment-specific targets
+playground-setup: 
+	$(MAKE) index-setup SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" SECRET_AZURE_OPENAI_API_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2)"
+
+playground-test:
+	$(MAKE) index-test SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)"
+
+local-setup:
+	$(MAKE) index-setup SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)" SECRET_AZURE_OPENAI_API_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2)"
+
+local-test:
+	$(MAKE) index-test SECRET_AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)"
 
 # Default target
 help:
@@ -54,15 +70,15 @@ help:
 	@echo "  playground-env-validate - Validate playground configuration"
 	@echo ""
 	@echo "Usage Examples:"
-	@echo "  make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key"
-	@echo "  make index-delete AZURE_SEARCH_KEY=your_key"
-	@echo "  make index-status AZURE_SEARCH_KEY=your_key"
+	@echo "  make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"
+	@echo "  make index-delete SECRET_AZURE_SEARCH_KEY=your_key"
+	@echo "  make index-status SECRET_AZURE_SEARCH_KEY=your_key"
 	@echo "  make index-name-set INDEX_NAME=my-custom-index ENVIRONMENT=local"
 	@echo "  make playground-setup  # Uses keys from env/.env.playground.user"
 
 # Variables
-AZURE_SEARCH_KEY ?= 
-AZURE_OPENAI_KEY ?= 
+SECRET_AZURE_SEARCH_KEY ?= 
+SECRET_AZURE_OPENAI_API_KEY ?= 
 INDEX_NAME ?= my-documents
 ENVIRONMENT ?= local
 NODE_ENV ?= development
@@ -90,22 +106,22 @@ config-validate:
 # Setup Azure Search index and upload documents
 index-setup: env-check build
 	@echo "Setting up Azure Search index..."
-	@if [ -z "$(AZURE_SEARCH_KEY)" ] || [ -z "$(AZURE_OPENAI_KEY)" ]; then \
-		echo "Error: AZURE_SEARCH_KEY and AZURE_OPENAI_KEY are required"; \
-		echo "Usage: make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key"; \
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] || [ -z "$(SECRET_AZURE_OPENAI_API_KEY)" ]; then \
+		echo "Error: SECRET_AZURE_SEARCH_KEY and SECRET_AZURE_OPENAI_API_KEY are required"; \
+		echo "Usage: make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"; \
 		exit 1; \
 	fi
-	@./scripts/index-setup.sh "$(AZURE_SEARCH_KEY)" "$(AZURE_OPENAI_KEY)"
+	@./scripts/index-setup.sh "$(SECRET_AZURE_SEARCH_KEY)" "$(SECRET_AZURE_OPENAI_API_KEY)"
 
 # Delete Azure Search index
 index-delete: env-check build
 	@echo "Deleting Azure Search index..."
-	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
-		echo "Error: AZURE_SEARCH_KEY is required"; \
-		echo "Usage: make index-delete AZURE_SEARCH_KEY=your_key"; \
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ]; then \
+		echo "Error: SECRET_AZURE_SEARCH_KEY is required"; \
+		echo "Usage: make index-delete SECRET_AZURE_SEARCH_KEY=your_key"; \
 		exit 1; \
 	fi
-	@./scripts/index-delete.sh "$(AZURE_SEARCH_KEY)"
+	@./scripts/index-delete.sh "$(SECRET_AZURE_SEARCH_KEY)"
 
 # Reindex (delete and recreate)
 index-reindex: index-delete index-setup
@@ -125,29 +141,29 @@ dev: build
 # Advanced index management
 documents-add: env-check build
 	@echo "Adding new documents to index..."
-	@if [ -z "$(AZURE_SEARCH_KEY)" ] || [ -z "$(AZURE_OPENAI_KEY)" ]; then \
-		echo "Error: AZURE_SEARCH_KEY and AZURE_OPENAI_KEY are required"; \
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] || [ -z "$(SECRET_AZURE_OPENAI_API_KEY)" ]; then \
+		echo "Error: SECRET_AZURE_SEARCH_KEY and SECRET_AZURE_OPENAI_API_KEY are required"; \
 		exit 1; \
 	fi
-	@./scripts/documents-add.sh "$(AZURE_SEARCH_KEY)" "$(AZURE_OPENAI_KEY)"
+	@./scripts/documents-add.sh "$(SECRET_AZURE_SEARCH_KEY)" "$(SECRET_AZURE_OPENAI_API_KEY)"
 
 # Check index status
 index-status: env-check
 	@echo "Checking index status..."
-	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
-		echo "Error: AZURE_SEARCH_KEY is required"; \
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ]; then \
+		echo "Error: SECRET_AZURE_SEARCH_KEY is required"; \
 		exit 1; \
 	fi
-	@./scripts/index-status-check.sh "$(AZURE_SEARCH_KEY)"
+	@./scripts/index-status-check.sh "$(SECRET_AZURE_SEARCH_KEY)"
 
 # Test index content and search functionality
 index-test: env-check
 	@echo "Testing index content and search functionality..."
-	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
-		echo "Error: AZURE_SEARCH_KEY is required"; \
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ]; then \
+		echo "Error: SECRET_AZURE_SEARCH_KEY is required"; \
 		exit 1; \
 	fi
-	@./scripts/index-test.sh "$(AZURE_SEARCH_KEY)"
+	@./scripts/index-test.sh "$(SECRET_AZURE_SEARCH_KEY)"
 
 # Set custom index name
 index-name-set:
@@ -163,13 +179,6 @@ index-name-set:
 index-config-list:
 	@echo "Listing index configurations..."
 	@./scripts/index-config-list.sh
-
-# Environment-specific targets
-playground-setup: 
-	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2)"
-
-local-setup:
-	$(MAKE) index-setup AZURE_SEARCH_KEY="$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2)" AZURE_OPENAI_KEY="$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2)"
 
 # Setup Preview Playground environment files
 playground-env-setup:
