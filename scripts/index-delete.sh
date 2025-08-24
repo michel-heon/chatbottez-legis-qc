@@ -19,15 +19,12 @@ if [[ -f "env/.env.playground.user" ]]; then
 elif [[ -f "env/.env.local.user" ]]; then
     echo "📋 Loading environment from env/.env.local.user"
     export $(grep -v '^#' env/.env.local.user | xargs)
+else
+    echo "⚠️  No environment file found, using system environment"
 fi
 
 # Load configuration if available
 INDEX_NAME="my-documents"  # Default value
-if [[ -f "scripts/.index-config" ]]; then
-    echo "📋 Loading index configuration..."
-    source scripts/.index-config
-    echo "   Using configured index name: $INDEX_NAME"
-fi
 
 # Allow override via environment variable
 if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
@@ -38,7 +35,7 @@ fi
 # Check if TypeScript is compiled
 if [[ ! -d "lib" ]]; then
     echo "📦 Building TypeScript project..."
-    npm run build || echo "⚠️  Build failed, continuing with existing artifacts..."
+    npm run build
 fi
 
 echo "⚠️  WARNING: This will delete the entire '$INDEX_NAME' index!"

@@ -120,14 +120,12 @@ Les noms d'index doivent respecter les contraintes Azure :
 Le nom d'index est déterminé selon cet ordre de priorité :
 
 1. **Variable d'environnement** : `AZURE_SEARCH_INDEX_NAME`
-2. **Fichier de configuration** : `scripts/.index-config`
-3. **Valeur par défaut** : `my-documents`
+2. **Valeur par défaut** : `my-documents`
 
 ### Fichiers de configuration
 
 Les noms d'index sont stockés dans :
-- **Configuration globale** : `scripts/.index-config`
-- **Configuration d'environnement** : `env/.env.{environment}.user`
+- **Configuration par environnement** : `env/.env.*.user`
 - **Configuration npm** : `package.json` (section config)
 
 ## 📁 Structure des données

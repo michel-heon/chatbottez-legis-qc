@@ -29,8 +29,7 @@ make index-config-list
 ## Configuration Priority
 
 1. **Environment Variable**: `AZURE_SEARCH_INDEX_NAME`
-2. **Script Config**: `scripts/.index-config`
-3. **Default**: `my-documents`
+2. **Default**: `my-documents`
 
 ## Index Name Validation
 
@@ -54,8 +53,9 @@ make index-name-set INDEX_NAME=Index_With_Under # underscores
 
 ## Configuration Files
 
-- `scripts/.index-config` - Script-level configuration
-- `env/.env.{environment}.user` - Environment-specific settings
+### Configuration Sources
+
+- `env/.env.*.user` - Environment-specific configuration files
 - `package.json` - npm configuration (if jq available)
 
 ## Integration

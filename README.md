@@ -48,6 +48,7 @@ make index-reindex          # Reconstruit l'index complet
 
 ### Guides principaux
 - 🎮 **[Guide Microsoft 365 Playground](./docs/playground-guide.md)** - Configuration et utilisation du Playground
+- 📝 **[Conventions de Nomenclature](./NAMING_CONVENTIONS.md)** - Règles simples et obligatoires
 - 🛠️ **[Guide d'installation](./docs/setup-guide.md)** - Configuration pas à pas
 - 🔍 **[Gestion Azure Search](./docs/azure-search-management.md)** - Guide complet d'indexation
 - 🔧 **[Référence des scripts](./docs/scripts-reference.md)** - Documentation technique

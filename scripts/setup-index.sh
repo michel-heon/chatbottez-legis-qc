@@ -43,8 +43,17 @@ if [[ ! -d "dist" ]]; then
     npm run build
 fi
 
+# Determine index name
+INDEX_NAME="my-documents"  # Default value
+
+# Allow override via environment variable
+if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📋 Using index name from environment: $INDEX_NAME"
+fi
+
 echo "📊 Starting index setup process..."
-echo "   Index name: my-documents"
+echo "   Index name: $INDEX_NAME"
 echo "   Data source: src/indexers/data/"
 
 # Count documents to be indexed
@@ -58,7 +67,7 @@ cd dist/indexers || {
     exit 1
 }
 
-node setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY"
+node setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY" "$INDEX_NAME"
 
 if [[ $? -eq 0 ]]; then
     echo "✅ Index setup completed successfully!"

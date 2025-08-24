@@ -1,5 +1,12 @@
 #!/bin/bash
-# Add new documents to existing Azure Search index
+# Add new # Load configuration if available
+INDEX_NAME="my-documents"  # Default value
+
+# Allow override via environment variable
+if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📋 Using index name from environment: $INDEX_NAME"
+fiexisting Azure Search index
 
 set -e
 
