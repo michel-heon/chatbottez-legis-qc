@@ -7,16 +7,6 @@ echo "📋 Current Index Configurations"
 echo "================================"
 echo ""
 
-# Check script configuration
-if [[ -f "scripts/.index-config" ]]; then
-    echo "🔧 Script Configuration (scripts/.index-config):"
-    cat scripts/.index-config | sed 's/^/   /'
-    echo ""
-else
-    echo "⚠️  No script configuration found"
-    echo ""
-fi
-
 # Check environment files
 echo "🌍 Environment Configurations:"
 for env_file in env/.env.*.user; do
@@ -66,21 +56,12 @@ fi
 # Show current effective configuration
 echo "⚡ Effective Configuration (priority order):"
 echo "   1. Environment variable AZURE_SEARCH_INDEX_NAME"
-echo "   2. Script configuration file (scripts/.index-config)"
-echo "   3. Default value (my-documents)"
+echo "   2. Default value (my-documents)"
 echo ""
 
 # Determine current effective index name
 effective_index="my-documents"
 source_description="default value"
-
-if [[ -f "scripts/.index-config" ]]; then
-    source scripts/.index-config
-    if [[ -n "$INDEX_NAME" ]]; then
-        effective_index="$INDEX_NAME"
-        source_description="script configuration"
-    fi
-fi
 
 if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
     effective_index="$AZURE_SEARCH_INDEX_NAME"

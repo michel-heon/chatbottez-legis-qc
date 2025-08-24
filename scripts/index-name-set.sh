@@ -83,20 +83,12 @@ if [[ -f "package.json" ]]; then
     fi
 fi
 
-# Create a local configuration file for scripts
-CONFIG_FILE="scripts/.index-config"
-echo "INDEX_NAME=$INDEX_NAME" > "$CONFIG_FILE"
-echo "ENVIRONMENT=$ENVIRONMENT" >> "$CONFIG_FILE"
-echo "UPDATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$CONFIG_FILE"
-echo "✅ Created script configuration: $CONFIG_FILE"
-
 # Display current configuration
 echo ""
 echo "📊 Current Index Configuration:"
 echo "  Index Name: $INDEX_NAME"
 echo "  Environment: $ENVIRONMENT"
 echo "  Config File: $ENV_FILE"
-echo "  Script Config: $CONFIG_FILE"
 echo ""
 
 # Show next steps

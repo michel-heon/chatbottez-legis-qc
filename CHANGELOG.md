@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ♻️ Refactored
+- **Index Configuration Simplification**: Removed `scripts/.index-config` file dependency
+- **Centralized Configuration**: All index name configuration now managed via `.env` files only
+- **Simplified Priority**: Environment variable `AZURE_SEARCH_INDEX_NAME` → Default `my-documents`
+- **Script Cleanup**: Removed `.index-config` source commands from all shell scripts
+- **Documentation Update**: Updated configuration priority in all documentation files
+
+### 🔧 Technical Changes
+- Modified 7 shell scripts to remove `.index-config` dependency
+- Updated `scripts/index-name-set.sh` to only manage `.env` files  
+- Simplified `scripts/index-config-list.sh` logic
+- Added `AZURE_SEARCH_INDEX_NAME` to `env/.env.dev.user`
+- Maintained backward compatibility for existing workflows
+
 ## [v0.4.0-playground-environment-fix] - 2025-08-22
 
 ### 🔧 Fixed

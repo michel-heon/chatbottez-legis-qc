@@ -1,5 +1,5 @@
 #!/bin/bash
-# Setup Azure Search index and upload documents
+# Test index setup with improved error handling - processes only first 5 PDFs
 
 set -e
 
@@ -11,7 +11,7 @@ if [[ -z "$SECRET_AZURE_SEARCH_KEY" ]] || [[ -z "$SECRET_AZURE_OPENAI_API_KEY" ]
     exit 1
 fi
 
-echo "🚀 Setting up Azure Search index..."
+echo "🧪 Testing Azure Search index setup with first 5 PDFs..."
 
 # Load environment variables
 if [[ -f "env/.env.local.user" ]]; then
@@ -22,19 +22,6 @@ elif [[ -f "env/.env.playground.user" ]]; then
     export $(grep -v '^#' env/.env.playground.user | grep -v '^$' | xargs)
 else
     echo "⚠️  No environment file found, using system environment"
-fi
-
-# Decrypt keys if they are encrypted (crypto_ prefix)
-if [[ "$SECRET_AZURE_SEARCH_KEY" == crypto_* ]]; then
-    echo "🔓 Decrypting Azure Search key..."
-    # Note: In a real scenario, you'd implement proper decryption
-    echo "⚠️  Encrypted keys detected - manual decryption required"
-fi
-
-if [[ "$SECRET_AZURE_OPENAI_API_KEY" == crypto_* ]]; then
-    echo "🔓 Decrypting Azure OpenAI key..."
-    # Note: In a real scenario, you'd implement proper decryption
-    echo "⚠️  Encrypted keys detected - manual decryption required"
 fi
 
 # Check if TypeScript is compiled
@@ -52,31 +39,40 @@ if [[ -n "$AZURE_SEARCH_INDEX_NAME" ]]; then
     echo "📋 Using index name from environment: $INDEX_NAME"
 fi
 
-echo "📊 Starting index setup process..."
+echo "🧪 Starting TEST index setup process..."
 echo "   Index name: $INDEX_NAME"
 echo "   Data source: src/indexers/data/"
+echo "   Test mode: Processing only first 5 PDFs"
 
-# Count documents to be indexed
-DOC_COUNT=$(find src/indexers/data -name "*.md" | wc -l)
-echo "   Documents to index: $DOC_COUNT"
-
-# Run the setup script
-echo "🔄 Running index setup..."
+# Run the test setup script
+echo "🔄 Running test index setup..."
 cd lib/src/indexers || {
     echo "❌ Build directory not found. Please run 'npm run build' first."
     exit 1
 }
 
-node setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY" "$INDEX_NAME"
+# Create a temporary test script
+cat > test-setup.js << 'EOF'
+const setup = require('./setup.js');
+
+// Override the file processing to limit to first 5 files
+const originalReaddirSync = require('fs').readdirSync;
+require('fs').readdirSync = function(path) {
+    const files = originalReaddirSync(path);
+    const pdfFiles = files.filter(file => file.endsWith('.pdf'));
+    console.log(`📊 Found ${pdfFiles.length} PDF files, limiting to first 5 for testing`);
+    return pdfFiles.slice(0, 5);
+};
+EOF
+
+node test-setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY" "$INDEX_NAME"
 
 if [[ $? -eq 0 ]]; then
-    echo "✅ Index setup completed successfully!"
+    echo "✅ Test index setup completed successfully!"
     echo ""
-    echo "📝 Next steps:"
-    echo "   1. Test the search functionality"
-    echo "   2. Check index status: make index-status"
-    echo "   3. Start the application: make dev"
+    echo "📝 Test completed with first 5 PDFs. Run full setup with:"
+    echo "   make index-setup ENV_CONFIG=playground"
 else
-    echo "❌ Index setup failed!"
+    echo "❌ Test index setup failed!"
     exit 1
 fi

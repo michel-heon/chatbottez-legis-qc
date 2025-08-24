@@ -7,7 +7,9 @@ set -e
 
 # Source configuration
 source "$(dirname "$0")/load-env.sh"
-source "$(dirname "$0")/.index-config"
+
+# Set index name from environment or default
+INDEX_NAME="${AZURE_SEARCH_INDEX_NAME:-my-documents}"
 
 # Debug: Check if key variables are loaded
 if [ -z "$SECRET_AZURE_SEARCH_KEY" ]; then
