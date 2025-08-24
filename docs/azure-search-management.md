@@ -23,7 +23,7 @@ Créer les fichiers d'environnement suivants :
 ```bash
 # Azure AI Search
 AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net/
-SECRET_AZURE_SEARCH_KEY=your_search_api_key
+SECRET_SECRET_AZURE_SEARCH_KEY=your_search_api_key
 AZURE_SEARCH_INDEX_NAME=my-custom-index
 
 # Azure OpenAI
@@ -47,22 +47,22 @@ make build
 ### Gestion de l'index
 ```bash
 # Créer l'index et indexer les documents
-make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-setup SECRET_SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key
 
 # Assigner un nom personnalisé à l'index
 make index-name-set INDEX_NAME=legis-qc-documents ENVIRONMENT=local
 
 # Supprimer l'index
-make index-delete AZURE_SEARCH_KEY=your_key
+make index-delete SECRET_SECRET_AZURE_SEARCH_KEY=your_key
 
 # Recréer l'index (suppression + création)
-make index-reindex AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-reindex SECRET_SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key
 
 # Ajouter de nouveaux documents
-make documents-add AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make documents-add SECRET_SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key
 
 # Vérifier le statut de l'index
-make index-status AZURE_SEARCH_KEY=your_key
+make index-status SECRET_SECRET_AZURE_SEARCH_KEY=your_key
 ```
 
 ### Environnements spécifiques
@@ -207,7 +207,7 @@ L'application utilise une recherche hybride combinant :
 
 3. **Index inexistant**
    ```bash
-   make index-status AZURE_SEARCH_KEY=your_key
+   make index-status SECRET_SECRET_AZURE_SEARCH_KEY=your_key
    ```
 
 4. **Problèmes de build**
@@ -232,7 +232,7 @@ L'application utilise une recherche hybride combinant :
 ### Commandes de monitoring
 ```bash
 # Statut de l'index
-make index-status AZURE_SEARCH_KEY=your_key
+make index-status SECRET_AZURE_SEARCH_KEY=your_key
 
 # Validation de la configuration
 make validate-config
@@ -247,7 +247,7 @@ make validate-config
 
 ### Reconstruction complète
 ```bash
-make reindex AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make reindex SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key
 ```
 
 ### Nettoyage
@@ -270,14 +270,14 @@ make env-check
 make config-validate
 
 # 4. Créer l'index
-make index-setup AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
+make index-setup SECRET_AZURE_SEARCH_KEY=sk-... SECRET_AZURE_OPENAI_API_KEY=sk-...
 ```
 
 ### Ajout de nouveaux documents
 ```bash
 # 1. Copier les documents .md dans src/indexers/new-data/
 # 2. Indexer
-make documents-add AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
+make documents-add SECRET_AZURE_SEARCH_KEY=sk-... SECRET_AZURE_OPENAI_API_KEY=sk-...
 ```
 
 ### Développement quotidien
@@ -286,5 +286,5 @@ make documents-add AZURE_SEARCH_KEY=sk-... AZURE_OPENAI_KEY=sk-...
 make dev
 
 # Vérifier l'index
-make index-status AZURE_SEARCH_KEY=sk-...
+make index-status SECRET_AZURE_SEARCH_KEY=sk-...
 ```

@@ -25,4 +25,4 @@ devTools/
 src/indexers/data/*.pdf
 src/indexers/data-original/
 *.backup
-Makefile.backup
+Makefile.backupsrc/indexers/data_pdf/

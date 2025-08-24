@@ -54,7 +54,7 @@ Créer le fichier `env/.env.playground.user` :
 ```bash
 # Azure AI Search
 AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net/
-SECRET_AZURE_SEARCH_KEY=your_search_admin_key
+SECRET_SECRET_AZURE_SEARCH_KEY=your_search_admin_key
 
 # Azure OpenAI  
 AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com/
@@ -80,7 +80,7 @@ make config-validate
 make build
 
 # Créer l'index et indexer les documents
-make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key
 ```
 
 ## 🎯 Configuration avancée
@@ -104,7 +104,7 @@ make local-setup
 #### Production
 ```bash
 # Variables dans env/.env.user (non inclus dans git)
-make index-setup AZURE_SEARCH_KEY=prod_key AZURE_OPENAI_KEY=prod_key
+make index-setup SECRET_AZURE_SEARCH_KEY=prod_key SECRET_AZURE_OPENAI_API_KEY=prod_key
 ```
 
 ### Configuration des modèles
@@ -140,11 +140,11 @@ AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=text-embedding-3-small
 ### Gestion des secrets
 ```bash
 # Clés préfixées SECRET_ sont masquées dans les logs
-SECRET_AZURE_SEARCH_KEY=your_key
+SECRET_SECRET_AZURE_SEARCH_KEY=your_key
 SECRET_AZURE_OPENAI_API_KEY=your_key
 
 # Support des clés chiffrées
-SECRET_AZURE_SEARCH_KEY=crypto_encrypted_value
+SECRET_SECRET_AZURE_SEARCH_KEY=crypto_encrypted_value
 ```
 
 ### Fichiers d'environnement
@@ -172,21 +172,21 @@ env/.env.template
 make validate-config
 
 # Test spécifique Azure Search
-curl -H "api-key: $AZURE_SEARCH_KEY" \
+curl -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
      "$AZURE_SEARCH_ENDPOINT/indexes?api-version=2023-11-01"
 
 # Test spécifique Azure OpenAI
-curl -H "api-key: $AZURE_OPENAI_KEY" \
+curl -H "api-key: $SECRET_AZURE_OPENAI_API_KEY" \
      "$AZURE_OPENAI_ENDPOINT/openai/deployments?api-version=2023-05-15"
 ```
 
 ### Tests fonctionnels
 ```bash
 # Créer un index de test
-make index-setup AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+make index-setup SECRET_AZURE_SEARCH_KEY=key SECRET_AZURE_OPENAI_API_KEY=key
 
 # Vérifier le contenu
-make index-status AZURE_SEARCH_KEY=key
+make index-status SECRET_AZURE_SEARCH_KEY=key
 
 # Démarrer l'application
 make dev
@@ -235,7 +235,7 @@ The API deployment for this resource does not exist
 ```bash
 # Activer le debug
 export DEBUG=azure-search:*
-make index-setup AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+make index-setup SECRET_AZURE_SEARCH_KEY=key SECRET_AZURE_OPENAI_API_KEY=key
 ```
 
 #### Monitoring des ressources

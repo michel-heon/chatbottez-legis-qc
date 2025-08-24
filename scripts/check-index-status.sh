@@ -3,10 +3,10 @@
 
 set -e
 
-AZURE_SEARCH_KEY="$1"
+SECRET_AZURE_SEARCH_KEY="$1"
 
-if [[ -z "$AZURE_SEARCH_KEY" ]]; then
-    echo "❌ Usage: $0 <azure_search_key>"
+if [[ -z "$SECRET_AZURE_SEARCH_KEY" ]]; then
+    echo "❌ Usage: $0 <secret_azure_search_key>"
     exit 1
 fi
 
@@ -32,7 +32,7 @@ echo "🔍 Checking if index '$INDEX_NAME' exists..."
 INDEX_URL="${AZURE_SEARCH_ENDPOINT}/indexes/${INDEX_NAME}?api-version=${API_VERSION}"
 
 response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
-    -H "api-key: $AZURE_SEARCH_KEY" \
+    -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
     -H "Content-Type: application/json" \
     "$INDEX_URL")
 
@@ -48,7 +48,7 @@ case $http_code in
         COUNT_URL="${AZURE_SEARCH_ENDPOINT}/indexes/${INDEX_NAME}/docs/\$count?api-version=${API_VERSION}"
         
         doc_count=$(curl -s \
-            -H "api-key: $AZURE_SEARCH_KEY" \
+            -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
             "$COUNT_URL")
         
         if [[ "$doc_count" =~ ^[0-9]+$ ]]; then
@@ -62,7 +62,7 @@ case $http_code in
         STATS_URL="${AZURE_SEARCH_ENDPOINT}/indexes/${INDEX_NAME}/stats?api-version=${API_VERSION}"
         
         stats=$(curl -s \
-            -H "api-key: $AZURE_SEARCH_KEY" \
+            -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
             "$STATS_URL")
         
         if command -v jq >/dev/null 2>&1; then
@@ -76,7 +76,7 @@ case $http_code in
         echo "❌ Index '$INDEX_NAME' does not exist"
         echo ""
         echo "💡 To create the index, run:"
-        echo "   make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key"
+        echo "   make setup-index SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"
         exit 1
         ;;
     401)

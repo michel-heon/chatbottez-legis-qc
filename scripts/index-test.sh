@@ -9,13 +9,9 @@ set -e
 source "$(dirname "$0")/load-env.sh"
 source "$(dirname "$0")/.index-config"
 
-# Map SECRET_ prefixed variables to standard names
-export AZURE_SEARCH_KEY="${AZURE_SEARCH_KEY:-$SECRET_AZURE_SEARCH_KEY}"
-export AZURE_OPENAI_KEY="${AZURE_OPENAI_KEY:-$SECRET_AZURE_OPENAI_API_KEY}"
-
 # Debug: Check if key variables are loaded
-if [ -z "$AZURE_SEARCH_KEY" ]; then
-    echo "❌ AZURE_SEARCH_KEY is not set!"
+if [ -z "$SECRET_AZURE_SEARCH_KEY" ]; then
+    echo "❌ SECRET_AZURE_SEARCH_KEY is not set!"
     echo "Available environment variables starting with AZURE_ or SECRET_:"
     env | grep -E '^(AZURE_|SECRET_)' || echo "   No AZURE_ or SECRET_ variables found"
     exit 1
@@ -23,7 +19,7 @@ fi
 
 echo "🧪 Testing Azure Search Index: $INDEX_NAME"
 echo "🔗 Endpoint: $AZURE_SEARCH_ENDPOINT"
-echo "🔑 Search Key: ${AZURE_SEARCH_KEY:0:10}..."
+echo "🔑 Search Key: ${SECRET_AZURE_SEARCH_KEY:0:10}..."
 echo ""
 
 # Function to test search functionality
@@ -38,7 +34,7 @@ test_search() {
     
     local response=$(curl -s \
         -H "Content-Type: application/json" \
-        -H "api-key: $AZURE_SEARCH_KEY" \
+        -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
         "$AZURE_SEARCH_ENDPOINT/indexes/$INDEX_NAME/docs/search?api-version=2023-11-01" \
         -d "{\"search\": \"$escaped_query\", \"top\": 10, \"select\": \"docId,docTitle,description\"}")
     
@@ -65,7 +61,7 @@ get_index_stats() {
     echo "📊 Index Statistics:"
     
     local stats=$(curl -s \
-        -H "api-key: $AZURE_SEARCH_KEY" \
+        -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
         "$AZURE_SEARCH_ENDPOINT/indexes/$INDEX_NAME/stats?api-version=2023-11-01")
     
     local doc_count=$(echo "$stats" | jq -r '.documentCount // "unknown"' 2>/dev/null)
@@ -81,7 +77,7 @@ test_index_health() {
     echo "🏥 Testing Index Health:"
     
     local response=$(curl -s -w "%{http_code}" \
-        -H "api-key: $AZURE_SEARCH_KEY" \
+        -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
         "$AZURE_SEARCH_ENDPOINT/indexes/$INDEX_NAME?api-version=2023-11-01")
     
     local http_code="${response: -3}"
@@ -101,7 +97,7 @@ sample_documents() {
     
     local response=$(curl -s \
         -H "Content-Type: application/json" \
-        -H "api-key: $AZURE_SEARCH_KEY" \
+        -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
         "$AZURE_SEARCH_ENDPOINT/indexes/$INDEX_NAME/docs/search?api-version=2023-11-01" \
         -d '{"search": "*", "top": 3, "select": "docId,docTitle"}')
     

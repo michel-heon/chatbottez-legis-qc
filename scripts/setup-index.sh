@@ -3,11 +3,11 @@
 
 set -e
 
-AZURE_SEARCH_KEY="$1"
-AZURE_OPENAI_KEY="$2"
+SECRET_AZURE_SEARCH_KEY="$1"
+SECRET_AZURE_OPENAI_API_KEY="$2"
 
-if [[ -z "$AZURE_SEARCH_KEY" ]] || [[ -z "$AZURE_OPENAI_KEY" ]]; then
-    echo "❌ Usage: $0 <azure_search_key> <azure_openai_key>"
+if [[ -z "$SECRET_AZURE_SEARCH_KEY" ]] || [[ -z "$SECRET_AZURE_OPENAI_API_KEY" ]]; then
+    echo "❌ Usage: $0 <secret_azure_search_key> <secret_azure_openai_api_key>"
     exit 1
 fi
 
@@ -25,13 +25,13 @@ else
 fi
 
 # Decrypt keys if they are encrypted (crypto_ prefix)
-if [[ "$AZURE_SEARCH_KEY" == crypto_* ]]; then
+if [[ "$SECRET_AZURE_SEARCH_KEY" == crypto_* ]]; then
     echo "🔓 Decrypting Azure Search key..."
     # Note: In a real scenario, you'd implement proper decryption
     echo "⚠️  Encrypted keys detected - manual decryption required"
 fi
 
-if [[ "$AZURE_OPENAI_KEY" == crypto_* ]]; then
+if [[ "$SECRET_AZURE_OPENAI_API_KEY" == crypto_* ]]; then
     echo "🔓 Decrypting Azure OpenAI key..."
     # Note: In a real scenario, you'd implement proper decryption
     echo "⚠️  Encrypted keys detected - manual decryption required"
@@ -58,7 +58,7 @@ cd dist/indexers || {
     exit 1
 }
 
-node setup.js "$AZURE_SEARCH_KEY" "$AZURE_OPENAI_KEY"
+node setup.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY"
 
 if [[ $? -eq 0 ]]; then
     echo "✅ Index setup completed successfully!"

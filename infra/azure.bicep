@@ -82,7 +82,7 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
           value: 'UserAssignedMsi'
         }
         {
-          name: 'AZURE_OPENAI_API_KEY'
+          name: 'SECRET_AZURE_OPENAI_API_KEY'
           value: azureOpenAIKey
         }
         {
@@ -98,7 +98,7 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
           value: azureOpenAIEmbeddingDeploymentName
         }
         {
-          name: 'AZURE_SEARCH_KEY'
+          name: 'SECRET_AZURE_SEARCH_KEY'
           value: azureSearchKey
         }
         {

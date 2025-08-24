@@ -3,10 +3,10 @@
 
 set -e
 
-AZURE_SEARCH_KEY="$1"
+SECRET_AZURE_SEARCH_KEY="$1"
 
-if [[ -z "$AZURE_SEARCH_KEY" ]]; then
-    echo "❌ Usage: $0 <azure_search_key>"
+if [[ -z "$SECRET_AZURE_SEARCH_KEY" ]]; then
+    echo "❌ Usage: $0 <secret_azure_search_key>"
     exit 1
 fi
 
@@ -59,7 +59,7 @@ cd lib/src/indexers || {
     exit 1
 }
 
-node delete.js "$AZURE_SEARCH_KEY" "$INDEX_NAME"
+node delete.js "$SECRET_AZURE_SEARCH_KEY" "$INDEX_NAME"
 
 if [[ $? -eq 0 ]]; then
     echo "✅ Index deleted successfully!"

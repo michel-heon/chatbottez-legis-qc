@@ -102,7 +102,7 @@ echo ""
 # Show next steps
 echo "🚀 Next Steps:"
 echo "  1. Verify your environment file: cat $ENV_FILE"
-echo "  2. Setup index with new name: make index-setup AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key"
+echo "  2. Setup index with new name: make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"
 echo "  3. Or use environment setup: make ${ENVIRONMENT}-setup"
 echo ""
 

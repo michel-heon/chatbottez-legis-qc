@@ -4,13 +4,13 @@ Bienvenue dans la documentation complète du projet **Chatbot Legis Q### Ajout d
 ```bash
 # 1. Placer les fichiers .md dans src/indexers/new-data/
 # 2. Indexer
-make documents-add AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+make documents-add SECRET_SECRET_AZURE_SEARCH_KEY=key SECRET_AZURE_OPENAI_API_KEY=key
 ```
 
 ### 2. Test et validation
 ```bash
 # Vérifier l'index
-make index-status AZURE_SEARCH_KEY=key
+make index-status SECRET_SECRET_AZURE_SEARCH_KEY=key
 
 # Démarrer l'application
 make dev
@@ -112,7 +112,7 @@ make clean             # Nettoyage des artefacts
 ```bash
 # Azure AI Search
 AZURE_SEARCH_ENDPOINT=https://your-service.search.windows.net/
-SECRET_AZURE_SEARCH_KEY=your_admin_key
+SECRET_SECRET_AZURE_SEARCH_KEY=your_admin_key
 
 # Azure OpenAI
 AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
@@ -127,13 +127,13 @@ AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=text-embedding-ada-002
 ```bash
 # 1. Placer les fichiers .md dans src/indexers/new-data/
 # 2. Indexer
-make add-documents AZURE_SEARCH_KEY=key AZURE_OPENAI_KEY=key
+make add-documents SECRET_SECRET_AZURE_SEARCH_KEY=key SECRET_AZURE_OPENAI_API_KEY=key
 ```
 
 ### 2. Test et validation
 ```bash
 # Vérifier l'index
-make index-status AZURE_SEARCH_KEY=key
+make index-status SECRET_SECRET_AZURE_SEARCH_KEY=key
 
 # Démarrer l'application
 make dev
