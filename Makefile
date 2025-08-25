@@ -4,7 +4,10 @@
 # CONVENTION OBLIGATOIRE : Toutes les règles doivent suivre <objet>-<action>
 # Voir NAMING_CONVENTIONS.md pour les détails complets
 
-.PHONY: help install build index-setup index-delete index-reindex index-status index-test env-check config-validate clean index-name-set index-config-list playground-env-setup playground-env-validate data-populate conventions-validate
+# Export ENV_CONFIG to sub-shells
+export ENV_CONFIG
+
+.PHONY: help install build index-setup index-delete index-reindex index-status index-test env-check config-validate clean index-name-set index-config-list playground-env-setup playground-env-validate data-populate data-sparql-populate conventions-validate
 
 # Default target
 help:
@@ -25,6 +28,7 @@ help:
 	@echo "  index-config-list - List current index configurations"
 	@echo "  documents-add    - Add new documents to existing index"
 	@echo "  data-populate    - Populate data directory with random PDF files"
+	@echo "  data-sparql-populate - Populate Azure Search index using SPARQL queries"
 	@echo "  conventions-validate - Validate naming conventions for scripts and rules"
 	@echo ""
 	@echo "Environment:"
@@ -54,10 +58,16 @@ help:
 	@echo "  ttl-capabilities - Show TTL parser capabilities"
 	@echo ""
 	@echo "Enhanced Setup:"
-	@echo "  enhanced-setup   - Setup enhanced index with TTL metadata integration"
+	@echo "  enhanced-setup-v2 - Complete TTL-driven workflow (recommended)"
+	@echo "  enhanced-setup   - Legacy enhanced setup with TTL metadata integration"
 	@echo "  enhanced-demo    - Demo enhanced setup with sample credentials"
-	@echo "  create-enhanced-index - Create new enhanced index with TTL schema"
-	@echo "  enhanced-demo-env - Run enhanced demo with environment detection"
+	@echo ""
+	@echo "TTL-Driven Workflow (Segmented):"
+	@echo "  ttl-analyze      - Analyze TTL metadata and extract index schema"
+	@echo "  index-create-ttl - Create Azure Search index from TTL schema"
+	@echo "  files-discover   - Discover files to process from TTL metadata"
+	@echo "  content-process  - Process PDF content and generate embeddings"
+	@echo "  index-populate   - Populate index with processed content"
 	@echo ""
 	@echo "Usage Examples:"
 	@echo "  make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"
@@ -272,6 +282,12 @@ data-populate:
 	@echo "Populating data directory with random PDF files..."
 	@./scripts/data-populate.sh
 
+# Data SPARQL Population
+data-sparql-populate:
+	@echo "🚀 Populating Azure Search index using SPARQL queries..."
+	@chmod +x scripts/data-sparql-populate.sh
+	@./scripts/data-sparql-populate.sh
+
 # TTL/RDF Metadata Commands
 ttl-test:
 	@echo "Testing TTL parser and SPARQL functionality..."
@@ -289,21 +305,95 @@ ttl-capabilities:
 	@echo "Showing TTL parser capabilities..."
 	@./scripts/ttl-parser-utils.sh capabilities
 
-# Enhanced Index Setup with TTL Metadata Integration
-enhanced-setup:
+# Enhanced Setup V2 - Complete TTL-driven workflow
+enhanced-setup-v2: env-check build
+	@echo "🚀 Enhanced Setup V2 - TTL-driven Architecture"
+	@chmod +x scripts/enhanced-setup-v2.sh
+	@./scripts/enhanced-setup-v2.sh "$(ENV_CONFIG)" "full"
+
+# TTL Schema Analysis
+ttl-analyze: env-check build
+	@echo "🔍 Analyzing TTL Schema..."
+	@chmod +x scripts/ttl-schema-analyze.sh
+	@./scripts/ttl-schema-analyze.sh "$(ENV_CONFIG)"
+
+# Create Index from TTL Schema
+index-create-ttl: env-check build
+	@echo "🏗️  Creating Index from TTL Schema..."
+	@chmod +x scripts/index-create-from-ttl.sh
+	@./scripts/index-create-from-ttl.sh "$(ENV_CONFIG)"
+
+# Discover Files from TTL
+files-discover: env-check build
+	@echo "🔍 Discovering Files from TTL..."
+	@chmod +x scripts/ttl-files-discover.sh
+	@./scripts/ttl-files-discover.sh "$(ENV_CONFIG)"
+
+# Process Content in Batches
+content-process: env-check build
+	@echo "⚙️  Processing Content..."
+	@chmod +x scripts/content-process-batch.sh
+	@./scripts/content-process-batch.sh "$(ENV_CONFIG)" "$(or $(BATCH_SIZE),10)"
+
+# Populate Index from TTL
+index-populate: env-check build
+	@echo "📤 Populating Index..."
+	@chmod +x scripts/index-populate-from-ttl.sh
+	@./scripts/index-populate-from-ttl.sh "$(ENV_CONFIG)" "$(or $(MODE),incremental)"
+
+# Schema-only mode (for development)
+schema-only: env-check build
+	@echo "🎯 Schema-only Setup..."
+	@chmod +x scripts/enhanced-setup-v2.sh
+	@./scripts/enhanced-setup-v2.sh "$(ENV_CONFIG)" "schema-only"
+
+# Incremental update mode
+incremental-update: env-check build
+	@echo "🔄 Incremental Update..."
+	@chmod +x scripts/enhanced-setup-v2.sh
+# Enhanced Setup Legacy (for compatibility)
+enhanced-setup: env-check build
 	@echo "🚀 Running Enhanced Index Setup with TTL Metadata Integration..."
-	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
-		echo "❌ Error: AZURE_SEARCH_KEY environment variable is required"; \
-		echo "Usage: make enhanced-setup AZURE_SEARCH_KEY=<your-key> AZURE_OPENAI_KEY=<your-key> [INDEX_NAME=<index-name>]"; \
+	@# Load environment variables based on ENV_CONFIG
+	@if [ "$(ENV_CONFIG)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
+		set -a && . env/.env.playground.user && set +a && \
+		node lib/src/indexers/enhancedSetup.js "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	elif [ "$(ENV_CONFIG)" = "local" ] && [ -f "env/.env.local.user" ]; then \
+		set -a && . env/.env.local.user && set +a && \
+		node lib/src/indexers/enhancedSetup.js "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	elif [ "$(ENV_CONFIG)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
+		set -a && . env/.env.dev.user && set +a && \
+		node lib/src/indexers/enhancedSetup.js "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	elif [ -n "$(SECRET_AZURE_SEARCH_KEY)" ] && [ -n "$(SECRET_AZURE_OPENAI_API_KEY)" ]; then \
+		node lib/src/indexers/enhancedSetup.js "$(SECRET_AZURE_SEARCH_KEY)" "$(SECRET_AZURE_OPENAI_API_KEY)" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	else \
+		echo "❌ Error: SECRET_AZURE_SEARCH_KEY and SECRET_AZURE_OPENAI_API_KEY are required"; \
+		echo "Usage: make enhanced-setup SECRET_AZURE_SEARCH_KEY=<your-key> SECRET_AZURE_OPENAI_API_KEY=<your-key> [INDEX_NAME=<index-name>]"; \
+		echo "   or: make enhanced-setup ENV_CONFIG=playground (loads from env/.env.playground.user)"; \
+		echo "   or: make enhanced-setup ENV_CONFIG=local (loads from env/.env.local.user)"; \
+		echo "   or: make enhanced-setup ENV_CONFIG=dev (loads from env/.env.dev.user)"; \
+		exit 1; \
+	fi	@echo "🚀 Running Enhanced Index Setup with TTL Metadata Integration..."
+	@# Load environment variables based on ENV_CONFIG
+	@if [ "$(ENV_CONFIG)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
+		set -a && . env/.env.playground.user && set +a && \
+		node lib/src/indexers/enhancedSetup.js "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	elif [ "$(ENV_CONFIG)" = "local" ] && [ -f "env/.env.local.user" ]; then \
+		set -a && . env/.env.local.user && set +a && \
+		node lib/src/indexers/enhancedSetup.js "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	elif [ "$(ENV_CONFIG)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
+		set -a && . env/.env.dev.user && set +a && \
+		node lib/src/indexers/enhancedSetup.js "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	elif [ -n "$(SECRET_AZURE_SEARCH_KEY)" ] && [ -n "$(SECRET_AZURE_OPENAI_API_KEY)" ]; then \
+		node lib/src/indexers/enhancedSetup.js "$(SECRET_AZURE_SEARCH_KEY)" "$(SECRET_AZURE_OPENAI_API_KEY)" "$(or $(INDEX_NAME),enhanced-legis-qc)"; \
+	else \
+		echo "❌ Error: SECRET_AZURE_SEARCH_KEY and SECRET_AZURE_OPENAI_API_KEY are required"; \
+		echo "Usage: make enhanced-setup SECRET_AZURE_SEARCH_KEY=<your-key> SECRET_AZURE_OPENAI_API_KEY=<your-key> [INDEX_NAME=<index-name>]"; \
+		echo "   or: make enhanced-setup ENV_CONFIG=playground (loads from env/.env.playground.user)"; \
+		echo "   or: make enhanced-setup ENV_CONFIG=local (loads from env/.env.local.user)"; \
+		echo "   or: make enhanced-setup ENV_CONFIG=dev (loads from env/.env.dev.user)"; \
 		exit 1; \
 	fi
-	@if [ -z "$(AZURE_OPENAI_KEY)" ]; then \
-		echo "❌ Error: AZURE_OPENAI_KEY environment variable is required"; \
-		echo "Usage: make enhanced-setup AZURE_SEARCH_KEY=<your-key> AZURE_OPENAI_KEY=<your-key> [INDEX_NAME=<index-name>]"; \
-		exit 1; \
-	fi
-	npm run build
-	node lib/src/indexers/enhancedSetup.js "$(AZURE_SEARCH_KEY)" "$(AZURE_OPENAI_KEY)" "$(or $(INDEX_NAME),enhanced-legis-qc)"
 
 # Enhanced Setup Demo (with sample credentials for testing)
 enhanced-demo:

@@ -1,0 +1,176 @@
+{
+  "name": "legis-qc-ttl-driven",
+  "description": "Azure Search index dynamically generated from TTL metadata",
+  "version": "2.0.0",
+  "generatedFrom": "all.ttl",
+  "generatedAt": "2025-08-25T00:00:00Z",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "description": "Document unique identifier (legalIdentifier encoded)"
+    },
+    {
+      "name": "legalIdentifier",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "fr.lucene",
+      "description": "Legal document identifier from TTL"
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "fr.lucene",
+      "description": "Document title from TTL metadata"
+    },
+    {
+      "name": "documentType",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Type of legal document (extracted from TTL)"
+    },
+    {
+      "name": "legalStatus",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Legal status from TTL metadata"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "fr.lucene",
+      "description": "Extracted PDF content"
+    },
+    {
+      "name": "contentVector",
+      "type": "Collection(Edm.Single)",
+      "searchable": true,
+      "dimensions": 1536,
+      "vectorSearchProfile": "default-vector-config",
+      "description": "Content embedding vector"
+    },
+    {
+      "name": "keywords",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Keywords extracted from TTL"
+    },
+    {
+      "name": "sourceUrl",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "description": "Source URL from TTL"
+    },
+    {
+      "name": "enrichedAt",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true,
+      "description": "Enrichment timestamp from TTL"
+    }
+  ],
+  "scoringProfiles": [],
+  "corsOptions": {
+    "allowedOrigins": ["*"],
+    "maxAgeInSeconds": 300
+  },
+  "suggesters": [
+    {
+      "name": "legal-suggester",
+      "searchMode": "analyzingInfixMatching",
+      "sourceFields": ["title", "legalIdentifier", "keywords"]
+    }
+  ],
+  "analyzers": [],
+  "tokenizers": [],
+  "tokenFilters": [],
+  "charFilters": [],
+  "vectorSearch": {
+    "profiles": [
+      {
+        "name": "default-vector-config",
+        "algorithm": "hnsw",
+        "vectorizer": "openai"
+      }
+    ],
+    "algorithms": [
+      {
+        "name": "hnsw",
+        "kind": "hnsw",
+        "hnswParameters": {
+          "metric": "cosine",
+          "m": 4,
+          "efConstruction": 400,
+          "efSearch": 500
+        }
+      }
+    ],
+    "vectorizers": [
+      {
+        "name": "openai",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "${AZURE_OPENAI_ENDPOINT}",
+          "deploymentId": "${AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}",
+          "apiKey": "${SECRET_AZURE_OPENAI_API_KEY}"
+        }
+      }
+    ]
+  },
+  "mapping": {
+    "ttlToIndex": {
+      "legal:Identifier": "legalIdentifier",
+      "dct:title": "title",
+      "dct:type": "documentType",
+      "legal:status": "legalStatus", 
+      "dct:source": "sourceUrl",
+      "dcat:keyword": "keywords",
+      "prov:generatedAtTime": "enrichedAt"
+    },
+    "pdfProcessing": {
+      "contentField": "content",
+      "vectorField": "contentVector",
+      "chunkSize": 1000,
+      "chunkOverlap": 200
+    }
+  }
+}

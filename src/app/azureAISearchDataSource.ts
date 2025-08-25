@@ -3,13 +3,19 @@ import { TurnContext } from "botbuilder";
 import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
 
 /**
- * Defines the Document Interface.
+ * Defines the Document Interface based on TTL metadata.
  */
 export interface MyDocument {
-    docId?: string;
-    docTitle?: string | null;
+    id?: string;
+    legalIdentifier?: string | null;
+    title?: string | null;
     description?: string | null;
-    descriptionVector?: number[] | null;
+    content?: string | null;
+    contentVector?: number[] | null;
+    legalStatus?: string | null;
+    sourceUrl?: string | null;
+    keywords?: string[] | null;
+    documentType?: string | null;
 }
 
 /**
@@ -103,47 +109,118 @@ export class AzureAISearchDataSource implements DataSource {
         }
         
         const selectedFields = [
-            "docId",
-            "docTitle",
+            "id",
+            "legalIdentifier", 
+            "title",
             "description",
+            "content",
+            "legalStatus",
+            "sourceUrl",
+            "keywords",
+            "documentType"
         ];
 
         // hybrid search
         const queryVector: number[] = await this.getEmbeddingVector(query);
-        const searchResults = await this.searchClient.search(query, {
-            searchFields: ["docTitle", "description"],
+        
+        // Detect if user is asking for a specific legal identifier
+        const legalIdMatch = query.match(/\b([A-Z]-\d+(?:\.\d+)?)\b/);
+        
+        const searchOptions: any = {
+            searchFields: ["title", "description", "content"],
             select: selectedFields as any,
+            top: 10, // Limite explicite à 10 documents maximum
             vectorSearchOptions: {
                 queries: [
                     {
                         kind: "vector",
-                        fields: ["descriptionVector"],
-                        kNearestNeighborsCount: 2,
-                        // The query vector is the embedding of the user's input
+                        fields: ["contentVector"],
+                        kNearestNeighborsCount: 5, // Augmenté pour supporter plus de documents vectoriels
                         vector: queryVector
                     }
                 ]
             },
-        });
+        };
+        
+        // If specific legal ID mentioned, prioritize exact match
+        if (legalIdMatch) {
+            searchOptions.filter = `legalIdentifier eq '${legalIdMatch[1]}'`;
+            console.log(`🎯 Filtre spécifique appliqué: ${legalIdMatch[1]}`);
+        }
+        
+        const searchResults = await this.searchClient.search(query, searchOptions);
 
         if (!searchResults.results) {
+            console.log('❌ Aucun résultat retourné par Azure Search');
             return { output: "", length: 0, tooLong: false };
         }
+
+        // Count total results
+        let totalResults = 0;
+        const resultsArray = [];
+        for await (const result of searchResults.results) {
+            resultsArray.push(result);
+            totalResults++;
+        }
+        
+        console.log(`📊 Azure Search a retourné ${totalResults} documents pour la requête: "${query}"`);
 
         // Concatenate the documents string into a single document
         // until the maximum token limit is reached. This can be specified in the prompt template.
         let usedTokens = 0;
         let doc = "";
-        for await (const result of searchResults.results) {
-            const formattedResult = this.formatDocument(`${result.document.description}\n Citation title:${result.document.docTitle}.`);
+        let processedCount = 0;
+        
+        console.log(`📊 Limite de tokens pour données: ${maxTokens}`);
+        
+        for (const result of resultsArray) {
+            // Limiter le contenu pour éviter la surcharge de tokens
+            const fullContent = result.document.content || result.document.description || "";
+            // Tronquer le contenu à 1000 caractères max pour économiser les tokens
+            const documentContent = fullContent.length > 1000 ? 
+                fullContent.substring(0, 1000) + "..." : fullContent;
+            
+            const keywords = Array.isArray(result.document.keywords) ? result.document.keywords.join(', ') : '';
+            
+            // Debug: Afficher clairement quel document est trouvé
+            console.log(`🔍 Document ${processedCount + 1}: ${result.document.legalIdentifier} - Statut: "${result.document.legalStatus}"`);
+            
+            const documentData = `
+Titre: ${result.document.title}
+Identifiant: ${result.document.legalIdentifier}
+Type: ${result.document.documentType}
+Statut: ${result.document.legalStatus}
+URL: ${result.document.sourceUrl}
+Description: ${result.document.description}
+Mots-clés: ${keywords}
+Contenu: ${documentContent}
+            `.trim();
+            
+            const formattedResult = this.formatDocument(documentData);
             const tokens = tokenizer.encode(formattedResult).length;
+            
+            console.log(`📏 Document ${processedCount + 1} tokens: ${tokens}, Total utilisé: ${usedTokens}`);
 
             if (usedTokens + tokens > maxTokens) {
+                console.log(`⚠️  LIMITE ATTEINTE! Document ${processedCount + 1} tronqué (${tokens} tokens dépassent limite ${maxTokens})`);
                 break;
             }
 
             doc += formattedResult;
             usedTokens += tokens;
+            processedCount++;
+        }
+        
+        console.log(`✅ Envoyé au LLM: ${processedCount} documents, ${usedTokens}/${maxTokens} tokens`);
+
+        // SÉCURITÉ : Si aucun document envoyé, forcer une réponse sécurisée
+        if (processedCount === 0) {
+            console.log('🚨 SÉCURITÉ: Aucun document envoyé - forçage réponse sécurisée');
+            return { 
+                output: "AUCUNE_DONNEE_DISPONIBLE", 
+                length: 0, 
+                tooLong: false 
+            };
         }
 
         return { output: doc, length: usedTokens, tooLong: usedTokens > maxTokens };

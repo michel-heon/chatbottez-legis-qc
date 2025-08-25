@@ -15,7 +15,7 @@ import pdf from "pdf-parse";
 /**
  * Enhanced document interface combining TTL metadata with existing structure
  */
-interface EnrichedLegalDocument extends MyDocument {
+export interface EnrichedLegalDocument extends MyDocument {
     legalIdentifier: string;
     documentType: string;
     legalStatus: string;
@@ -66,10 +66,11 @@ class DocumentMapperInline {
         const contentHash = this.generateContentHash(ttlMetadata.legalIdentifier + ttlMetadata.title);
         
         return {
-            docId: this.encodeDocumentKey(ttlMetadata.legalIdentifier),
-            docTitle: ttlMetadata.title,
+            id: this.encodeDocumentKey(ttlMetadata.legalIdentifier),
+            title: ttlMetadata.title,
             description: enhancedDescription,
-            descriptionVector: contentEmbedding,
+            content: pdfContent,
+            contentVector: contentEmbedding,
             legalIdentifier: ttlMetadata.legalIdentifier,
             documentType: ttlMetadata.documentType,
             legalStatus: ttlMetadata.status,
@@ -126,20 +127,20 @@ class DocumentMapperInline {
     static validateDocument(doc: EnrichedLegalDocument): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
         
-        if (!doc.docId) errors.push('Missing docId');
-        if (!doc.docTitle) errors.push('Missing docTitle');
+        if (!doc.id) errors.push('Missing id');
+        if (!doc.title) errors.push('Missing title');
         if (!doc.legalIdentifier) errors.push('Missing legalIdentifier');
         if (!doc.documentType) errors.push('Missing documentType');
         if (!doc.legalStatus) errors.push('Missing legalStatus');
-        if (!doc.descriptionVector || doc.descriptionVector.length === 0) {
-            errors.push('Missing or empty descriptionVector');
+        if (!doc.contentVector || doc.contentVector.length === 0) {
+            errors.push('Missing or empty contentVector');
         }
         
         return { valid: errors.length === 0, errors };
     }
     
     static getDocumentSummary(doc: EnrichedLegalDocument): string {
-        return `${doc.legalIdentifier}: ${doc.docTitle.substring(0, 50)}... ` +
+        return `${doc.legalIdentifier}: ${doc.title?.substring(0, 50)}... ` +
                `(${doc.documentType}, ${doc.legalStatus}, ${doc.keywords.length} keywords)`;
     }
 }
@@ -264,10 +265,11 @@ class EnhancedIndexSetup {
                         
                         // Create minimal enhanced document
                         const basicDoc: EnrichedLegalDocument = {
-                            docId: legalIdentifier,
-                            docTitle: fileName.replace('.pdf', '').replace(/_/g, ' '),
+                            id: legalIdentifier,
+                            title: fileName.replace('.pdf', '').replace(/_/g, ' '),
                             description: chunks[0].substring(0, 1000),
-                            descriptionVector: embedding,
+                            content: pdfContent.text,
+                            contentVector: embedding,
                             legalIdentifier: legalIdentifier,
                             documentType: 'Loi',
                             legalStatus: 'unknown',
