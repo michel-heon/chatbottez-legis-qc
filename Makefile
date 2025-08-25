@@ -47,6 +47,18 @@ help:
 	@echo "  playground-env-setup    - Create playground environment files"
 	@echo "  playground-env-validate - Validate playground configuration"
 	@echo ""
+	@echo "TTL/RDF Metadata:"
+	@echo "  ttl-test         - Test TTL parser and SPARQL functionality"
+	@echo "  ttl-analyze      - Analyze TTL metadata structure"
+	@echo "  ttl-samples      - Generate enhanced document samples"
+	@echo "  ttl-capabilities - Show TTL parser capabilities"
+	@echo ""
+	@echo "Enhanced Setup:"
+	@echo "  enhanced-setup   - Setup enhanced index with TTL metadata integration"
+	@echo "  enhanced-demo    - Demo enhanced setup with sample credentials"
+	@echo "  create-enhanced-index - Create new enhanced index with TTL schema"
+	@echo "  enhanced-demo-env - Run enhanced demo with environment detection"
+	@echo ""
 	@echo "Usage Examples:"
 	@echo "  make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"
 	@echo "  make index-delete SECRET_AZURE_SEARCH_KEY=your_key"
@@ -258,6 +270,62 @@ playground-env-validate:
 # Populate data directory with random PDF files
 data-populate:
 	@echo "Populating data directory with random PDF files..."
+	@./scripts/data-populate.sh
+
+# TTL/RDF Metadata Commands
+ttl-test:
+	@echo "Testing TTL parser and SPARQL functionality..."
+	@./scripts/ttl-parser-utils.sh test
+
+ttl-analyze:
+	@echo "Analyzing TTL metadata structure..."
+	@./scripts/ttl-parser-utils.sh analyze
+
+ttl-samples:
+	@echo "Generating enhanced document samples..."
+	@./scripts/ttl-parser-utils.sh samples
+
+ttl-capabilities:
+	@echo "Showing TTL parser capabilities..."
+	@./scripts/ttl-parser-utils.sh capabilities
+
+# Enhanced Index Setup with TTL Metadata Integration
+enhanced-setup:
+	@echo "🚀 Running Enhanced Index Setup with TTL Metadata Integration..."
+	@if [ -z "$(AZURE_SEARCH_KEY)" ]; then \
+		echo "❌ Error: AZURE_SEARCH_KEY environment variable is required"; \
+		echo "Usage: make enhanced-setup AZURE_SEARCH_KEY=<your-key> AZURE_OPENAI_KEY=<your-key> [INDEX_NAME=<index-name>]"; \
+		exit 1; \
+	fi
+	@if [ -z "$(AZURE_OPENAI_KEY)" ]; then \
+		echo "❌ Error: AZURE_OPENAI_KEY environment variable is required"; \
+		echo "Usage: make enhanced-setup AZURE_SEARCH_KEY=<your-key> AZURE_OPENAI_KEY=<your-key> [INDEX_NAME=<index-name>]"; \
+		exit 1; \
+	fi
+	npm run build
+	node lib/src/indexers/enhancedSetup.js "$(AZURE_SEARCH_KEY)" "$(AZURE_OPENAI_KEY)" "$(or $(INDEX_NAME),enhanced-legis-qc)"
+
+# Enhanced Setup Demo (with sample credentials for testing)
+enhanced-demo:
+	@echo "🎭 Running Enhanced Setup Demo..."
+	@echo "⚠️  Using demo credentials - replace with real keys for production"
+	npm run build
+	node lib/src/indexers/enhancedSetup.js "demo-search-key" "demo-openai-key" "enhanced-legis-qc-demo"
+
+# Create Enhanced Index with new schema
+index-create-enhanced:
+	@echo "🏗️  Creating Enhanced Index with TTL metadata schema..."
+	@./scripts/index-create-enhanced.sh
+
+# Check Enhanced Index Status  
+index-status:
+	@echo "🔍 Checking Index Status..."
+	@./scripts/index-status.sh
+
+# Enhanced Demo with environment detection
+demo-enhanced:
+	@echo "🎭 Running Enhanced Demo with Environment Detection..."
+	@./scripts/demo-enhanced.sh
 	@./scripts/data-populate.sh
 
 # Validate naming conventions for scripts and Makefile rules

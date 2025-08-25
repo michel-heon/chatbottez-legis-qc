@@ -32,13 +32,13 @@ export function deleteIndex(client: SearchIndexClient, name: string): Promise<vo
 
 /**
  * Adds or updates the given documents in the index
- * @param {SearchClient<Restaurant>} client - The search index client
- * @param {Restaurant[]} documents - The documents to be added or updated
+ * @param {SearchClient<MyDocument>} client - The search index client
+ * @param {MyDocument[]} documents - The documents to be added or updated
  * @returns {Promise<IndexDocumentsResult>} The result of the operation
  */
-export async function upsertDocuments(
-    client: SearchClient<MyDocument>,
-    documents: MyDocument[]
+export async function upsertDocuments<T extends MyDocument>(
+    client: SearchClient<any>,
+    documents: T[]
 ): Promise<IndexDocumentsResult> {
     return await client.mergeOrUploadDocuments(documents);
 }
@@ -49,37 +49,14 @@ export async function upsertDocuments(
  * @param {string} name - The name of the index
  */
 export async function createIndexIfNotExists(client: SearchIndexClient, name: string): Promise<void> {
-    const MyDocumentIndex: SearchIndex = {
+    // Check if this is an enhanced index based on the name
+    const isEnhancedIndex = name.includes('enhanced') || name.includes('ttl');
+    
+    const indexFields = isEnhancedIndex ? getEnhancedIndexFields() : getBasicIndexFields();
+    
+    const DocumentIndex: SearchIndex = {
         name,
-        fields: [
-            {
-                type: "Edm.String",
-                name: "docId",
-                key: true,
-                filterable: true,
-                sortable: true
-            },
-            {
-                type: "Edm.String",
-                name: "docTitle",
-                searchable: true,
-                filterable: true,
-                sortable: true
-            },
-            {
-                type: "Edm.String",
-                name: "description",
-                searchable: true,
-                analyzerName: KnownAnalyzerNames.EnLucene
-            },
-            {
-                type: "Collection(Edm.Single)",
-                name: "descriptionVector",
-                searchable: true,
-                vectorSearchDimensions: 1536,
-                vectorSearchProfileName: "my-vector-config"
-            },
-        ],
+        fields: indexFields,
         corsOptions: {
             // for browser tests
             allowedOrigins: ["*"]
@@ -95,7 +72,177 @@ export async function createIndexIfNotExists(client: SearchIndexClient, name: st
         }
     };
 
-    await client.createOrUpdateIndex(MyDocumentIndex);
+    await client.createOrUpdateIndex(DocumentIndex);
+}
+
+/**
+ * Get basic index fields for MyDocument
+ */
+function getBasicIndexFields() {
+    return [
+        {
+            type: "Edm.String" as const,
+            name: "docId",
+            key: true,
+            filterable: true,
+            sortable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "docTitle",
+            searchable: true,
+            filterable: true,
+            sortable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "description",
+            searchable: true,
+            analyzerName: KnownAnalyzerNames.EnLucene
+        },
+        {
+            type: "Collection(Edm.Single)" as const,
+            name: "descriptionVector",
+            searchable: true,
+            vectorSearchDimensions: 1536,
+            vectorSearchProfileName: "my-vector-config"
+        }
+    ];
+}
+
+/**
+ * Get enhanced index fields for EnrichedLegalDocument
+ */
+function getEnhancedIndexFields() {
+    return [
+        // Core MyDocument fields
+        {
+            type: "Edm.String" as const,
+            name: "docId",
+            key: true,
+            filterable: true,
+            sortable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "docTitle",
+            searchable: true,
+            filterable: true,
+            sortable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "description",
+            searchable: true,
+            analyzerName: KnownAnalyzerNames.EnLucene
+        },
+        {
+            type: "Collection(Edm.Single)" as const,
+            name: "descriptionVector",
+            searchable: true,
+            vectorSearchDimensions: 1536,
+            vectorSearchProfileName: "my-vector-config"
+        },
+        // Enhanced TTL fields
+        {
+            type: "Edm.String" as const,
+            name: "legalIdentifier",
+            searchable: true,
+            filterable: true,
+            sortable: true,
+            facetable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "documentType",
+            searchable: true,
+            filterable: true,
+            facetable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "legalStatus",
+            searchable: true,
+            filterable: true,
+            facetable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "legalStatusLang",
+            filterable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "sourceUrl",
+            searchable: false,
+            filterable: false
+        },
+        {
+            type: "Edm.String" as const,
+            name: "pdfPath",
+            searchable: false,
+            filterable: false
+        },
+        {
+            type: "Edm.String" as const,
+            name: "pdfSource",
+            searchable: false,
+            filterable: false
+        },
+        {
+            type: "Edm.String" as const,
+            name: "titleLang",
+            filterable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "descriptionLang",
+            filterable: true
+        },
+        {
+            type: "Collection(Edm.String)" as const,
+            name: "keywords",
+            searchable: true,
+            filterable: true,
+            facetable: true
+        },
+        {
+            type: "Edm.DateTimeOffset" as const,
+            name: "enrichedAt",
+            filterable: true,
+            sortable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "enrichmentMethod",
+            filterable: true,
+            facetable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "downloadStatus",
+            filterable: true,
+            facetable: true
+        },
+        {
+            type: "Edm.DateTimeOffset" as const,
+            name: "lastModified",
+            filterable: true,
+            sortable: true
+        },
+        {
+            type: "Edm.String" as const,
+            name: "searchableText",
+            searchable: true,
+            analyzerName: KnownAnalyzerNames.FrLucene
+        },
+        {
+            type: "Edm.String" as const,
+            name: "contentHash",
+            filterable: true,
+            sortable: true
+        }
+    ];
 }
 
 /**
