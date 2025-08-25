@@ -118,10 +118,11 @@ export async function main() {
                 try {
                     const embeddingVector = await getEmbeddingVector(content);
                     data.push({
-                        docId: i+"",
-                        docTitle: fileName.replace('.pdf', ''),
+                        id: i+"",
+                        title: fileName.replace('.pdf', ''),
                         description: content,
-                        descriptionVector: embeddingVector,
+                        content: content,
+                        contentVector: embeddingVector,
                     });
                     console.log(`✅ Successfully processed ${fileName} as single document`);
                 } catch (embeddingError) {
@@ -143,10 +144,11 @@ export async function main() {
                     try {
                         const embeddingVector = await getEmbeddingVector(chunk);
                         data.push({
-                            docId: `${i}_${chunkIndex}`,
-                            docTitle: `${fileName.replace('.pdf', '')} (Partie ${chunkIndex + 1}/${chunks.length})`,
+                            id: `${i}_${chunkIndex}`,
+                            title: `${fileName.replace('.pdf', '')} (Partie ${chunkIndex + 1}/${chunks.length})`,
                             description: chunk,
-                            descriptionVector: embeddingVector,
+                            content: chunk,
+                            contentVector: embeddingVector,
                         });
                         chunkSuccessCount++;
                         console.log(`   ✅ Chunk ${chunkIndex + 1} processed successfully`);

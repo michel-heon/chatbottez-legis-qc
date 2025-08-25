@@ -251,6 +251,13 @@ export class TTLMetadataParser {
             throw error;
         }
     }
+
+    /**
+     * Public method to execute SPARQL queries
+     */
+    public query(sparqlQuery: string): any[] {
+        return this.executeSPARQL(sparqlQuery);
+    }
     
     /**
      * Basic pattern matching for common queries (simplified SPARQL)

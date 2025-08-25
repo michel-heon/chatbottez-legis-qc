@@ -19,15 +19,50 @@ load_env_file() {
     return 1
 }
 
-# Load environment variables from available files (prioritize local)
-if load_env_file "env/.env.local.user"; then
-    echo "   ✅ Loaded local environment"
-elif load_env_file "env/.env.playground.user"; then
-    echo "   ✅ Loaded playground environment"
-elif load_env_file "env/.env.dev.user"; then
-    echo "   ✅ Loaded dev environment"
+# Load environment variables based on ENV_CONFIG or available files
+if [ -n "$ENV_CONFIG" ]; then
+    # If ENV_CONFIG is specified, load that specific environment
+    case "$ENV_CONFIG" in
+        "playground")
+            if load_env_file "env/.env.playground.user"; then
+                echo "   ✅ Loaded playground environment (specified by ENV_CONFIG)"
+            else
+                echo "❌ ENV_CONFIG=playground specified but env/.env.playground.user not found"
+                exit 1
+            fi
+            ;;
+        "local")
+            if load_env_file "env/.env.local.user"; then
+                echo "   ✅ Loaded local environment (specified by ENV_CONFIG)"
+            else
+                echo "❌ ENV_CONFIG=local specified but env/.env.local.user not found"
+                exit 1
+            fi
+            ;;
+        "dev")
+            if load_env_file "env/.env.dev.user"; then
+                echo "   ✅ Loaded dev environment (specified by ENV_CONFIG)"
+            else
+                echo "❌ ENV_CONFIG=dev specified but env/.env.dev.user not found"
+                exit 1
+            fi
+            ;;
+        *)
+            echo "❌ Invalid ENV_CONFIG value: $ENV_CONFIG. Valid values: playground, local, dev"
+            exit 1
+            ;;
+    esac
 else
-    echo "⚠️  No environment files found, using system environment"
+    # Auto-detect environment (prioritize local)
+    if load_env_file "env/.env.local.user"; then
+        echo "   ✅ Loaded local environment"
+    elif load_env_file "env/.env.playground.user"; then
+        echo "   ✅ Loaded playground environment"
+    elif load_env_file "env/.env.dev.user"; then
+        echo "   ✅ Loaded dev environment"
+    else
+        echo "⚠️  No environment files found, using system environment"
+    fi
 fi
 
 # Required environment variables

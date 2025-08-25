@@ -1,0 +1,233 @@
+{
+  "generatedAt": "2025-08-25T10:52:29.706Z",
+  "ttlSource": "legisquebec-metadata-small.ttl",
+  "dataSourcePath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl",
+  "totalDocuments": 5,
+  "documentsWithPdf": 5,
+  "documentsMissingPdf": 0,
+  "documents": [
+    {
+      "legalIdentifier": "A-1",
+      "title": "Loi sur les abeilles",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-1_loi-sur-les-abeilles.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-1_loi-sur-les-abeilles.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-1",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 135154,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-1",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-1",
+        "title": "Loi sur les abeilles",
+        "abrogatedBy": "2000, c. 40, a. 43",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T15:40:47.533249",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-1_loi-sur-les-abeilles.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-1.pdf",
+        "status": "abrogée",
+        "description": "La Loi sur les abeilles visait principalement la prévention et le traitement des maladies contagieuses chez les abeilles, la protection des abeilles, ainsi que la protection contre les abeilles. Elle s'appliquait aux ruchers, aux propriétaires et possesseurs d'abeilles, et aux activités d'importation, de vente et de transport de matériel apicole. Les principales dispositions portaient sur l'inspection des ruchers, la destruction et l'indemnisation en cas de maladie, la réglementation de l'importation et de la vente d'abeilles, la protection contre les substances nuisibles, et l'encadrement de l'emplacement des ruches. Des sanctions étaient prévues pour les infractions aux différentes sections de la loi.",
+        "isReplacedBy": "true",
+        "keywords": [
+          "amende",
+          "certificat de santé",
+          "destruction des colonies",
+          "importation d’abeilles",
+          "indemnisation",
+          "inspection des ruchers",
+          "maladies contagieuses",
+          "ministre de l’Agriculture, des Pêcheries et de l’Alimentation",
+          "protection des abeilles",
+          "substances vénéneuses",
+          "traitement approprié",
+          "vente d’abeilles mères"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "A-10",
+      "title": "Loi sur les agents de voyages",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-10_loi-sur-les-agents-de-voyages.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-10_loi-sur-les-agents-de-voyages.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-10",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 160024,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-10",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-10",
+        "title": "Loi sur les agents de voyages",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T15:40:59.064925",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-10_loi-sur-les-agents-de-voyages.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-10.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur les agents de voyages a pour objet de réglementer les activités des agents de voyages au Québec, en définissant les conditions d'obtention, de suspension, d'annulation et de transfert des permis nécessaires à l'exercice de cette profession. Elle s'applique aux personnes, sociétés ou associations qui, pour autrui, effectuent ou offrent des services de location ou réservation d'hébergement, de transport ou d'organisation de voyages, sous réserve de certaines exceptions prévues. Les principales dispositions portent sur l'obligation de détenir un permis, la gestion des fonds des clients en fiducie, la création d'un fonds d’indemnisation pour les clients, les pouvoirs du président de l’Office de la protection du consommateur, ainsi que les recours et mesures administratives en cas de non-respect de la loi.",
+        "keywords": [
+          "Office de la protection du consommateur",
+          "administrateur provisoire",
+          "agent de voyages",
+          "annulation de permis",
+          "certificat",
+          "client",
+          "compte en fidéicommis",
+          "fonds d’indemnisation",
+          "permis",
+          "règlement",
+          "suspension de permis",
+          "établissement principal"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "A-12",
+      "title": "Loi sur les agronomes",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-12_loi-sur-les-agronomes.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-12_loi-sur-les-agronomes.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-12",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 125690,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-12",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-12",
+        "title": "Loi sur les agronomes",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T16:20:21.056655",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-12_loi-sur-les-agronomes.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-12.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur les agronomes a pour objet de constituer et d'encadrer l'Ordre des agronomes du Québec, en définissant son organisation, ses sections régionales et ses organes décisionnels. Elle s'applique à l'exercice de la profession d'agronome, à la délivrance de permis, à la gestion des sections et à la réglementation de l'exercice légal et illégal de la profession. Les principales dispositions portent sur la structure administrative de l'Ordre, les conditions d'exercice et d'admission à la profession, ainsi que les sanctions en cas d'exercice illégal. La loi prévoit également des modalités pour la délivrance de permis temporaires et la surveillance des sections régionales.",
+        "keywords": [
+          "Code des professions",
+          "Conseil d’administration",
+          "Ordre des agronomes du Québec",
+          "agronome",
+          "exercice de la profession",
+          "exercice illégal",
+          "mise en tutelle",
+          "permis temporaire",
+          "personne morale",
+          "rapport financier annuel",
+          "règlements",
+          "sections"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "A-12.1",
+      "title": "Loi sur l’aide au développement des coopératives et des personnes morales sans but lucratif",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-12.1_loi-sur-laide-au-développement-des-coopératives-et-des-personnes-morales-sans-but-lucratif.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-12.1_loi-sur-laide-au-développement-des-coopératives-et-des-personnes-morales-sans-but-lucratif.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-12.1",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 117541,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-12.1",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-12.1",
+        "title": "Loi sur l’aide au développement des coopératives et des personnes morales sans but lucratif",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T16:21:29.965670",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-12.1_loi-sur-laide-au-développement-des-coopératives-et-des-personnes-morales-sans-but-lucratif.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-12.1.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur l’aide au développement des coopératives et des personnes morales sans but lucratif vise à favoriser la création, le maintien et le développement des coopératives et des personnes morales sans but lucratif par l’octroi d’une aide financière ou technique. Elle s’applique aux coopératives, fédérations ou confédérations de coopératives régies par la Loi sur les coopératives, à leurs filiales, ainsi qu’aux personnes morales sans but lucratif constituées selon la partie III de la Loi sur les compagnies. Les principales dispositions portent sur l’établissement de programmes d’aide, les formes d’aide financière, les modalités de demande et d’administration de l’aide, ainsi que des mesures transitoires concernant la gestion des droits, obligations et biens des organismes concernés.",
+        "keywords": [
+          "Loi sur les compagnies",
+          "Loi sur les coopératives",
+          "Société de développement industriel du Québec",
+          "acquisition de parts privilégiées",
+          "aide financière",
+          "aide technique",
+          "coopératives",
+          "garantie de remboursement",
+          "ministre de l’Économie et de l’Innovation",
+          "personnes morales sans but lucratif",
+          "programme d’aide",
+          "prêt avec ou sans intérêt"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "A-13",
+      "title": "Loi sur l’aide au développement industriel",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-13_loi-sur-laide-au-développement-industriel.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-13_loi-sur-laide-au-développement-industriel.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-13",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 90205,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-13",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-13",
+        "title": "Loi sur l’aide au développement industriel",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T16:21:36.938355",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-13_loi-sur-laide-au-développement-industriel.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-13.pdf",
+        "status": "abrogée",
+        "description": "La loi sur l’aide au développement industriel avait pour objet principal de favoriser le développement industriel, tel qu’énoncé dans son titre. Elle s’appliquait au domaine industriel, selon le texte. Les principales dispositions portaient sur l’aide au développement industriel, sans autres précisions dans le document fourni.",
+        "isReplacedBy": "true",
+        "keywords": [
+          "Société de développement industriel du Québec",
+          "abrogé",
+          "aide",
+          "application industrielle",
+          "chapitre A-13",
+          "développement industriel",
+          "loi",
+          "numéro S-11.01",
+          "secteur industriel",
+          "Éditeur officiel du Québec"
+        ]
+      }
+    }
+  ],
+  "statistics": {
+    "documentTypes": {
+      "Unknown": 5
+    },
+    "averageFileSize": 125723,
+    "totalSize": 628614
+  }
+}

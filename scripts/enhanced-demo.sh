@@ -71,7 +71,7 @@ if [ $? -eq 0 ]; then
         fi
     else
         echo "🚀 Enhanced Setup ready with real Azure credentials:"
-        echo "   make enhanced-setup SECRET_AZURE_SEARCH_KEY=<real-key> SECRET_AZURE_OPENAI_API_KEY=<real-key>"
+        echo "   make enhanced-setup AZURE_SEARCH_KEY=<real-key> AZURE_OPENAI_KEY=<real-key>"
         echo ""
         echo "   Or set environment variables:"
         echo "   export SECRET_AZURE_SEARCH_KEY=<your-search-key>"
@@ -89,7 +89,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "🎯 Next Steps for Production:"
     echo "   1. Obtain real Azure Search and OpenAI API keys"
-    echo "   2. Run: make enhanced-setup SECRET_AZURE_SEARCH_KEY=<key> SECRET_AZURE_OPENAI_API_KEY=<key>"
+    echo "   2. Run: make enhanced-setup AZURE_SEARCH_KEY=<key> AZURE_OPENAI_KEY=<key>"
     echo "   3. Monitor enhanced index creation with 15+ enriched fields"
     echo "   4. Verify TTL metadata integration with legal documents"
 else
