@@ -1,6 +1,6 @@
 # Makefile for Azure AI Search Index Management - Ontology-Driven Architecture
 # Microsoft 365 Teams Agent - Chatbot Legis QC
-# Version: v1.3.0-priority
+# Version: v1.3.0-cleanup
 #
 # CHANGELOG v1.3.0 (2025-08-26):
 # - NETTOYAGE COMPLET: Suppression des doublons de scripts obsolètes (45→34 scripts)
@@ -21,10 +21,10 @@ export ENV_CONFIG
 
 # Default target
 help:
-	@echo "Azure AI Search Index Management Commands - Ontology-Driven v1.3.0 (Priority)"
+	@echo "Azure AI Search Index Management Commands - Ontology-Driven v1.3.0 (Cleanup)"
 	@echo "================================================================="
 	@echo ""
-	@echo "🧠 ONTOLOGY-DRIVEN ARCHITECTURE (PRIORITY - v1.3.0):"
+	@echo "🧠 ONTOLOGY-DRIVEN ARCHITECTURE (CLEANED - v1.3.0):"
 	@echo "  ontology-driven-setup    - Complete TTL → Azure Search → Teams AI pipeline (RECOMMENDED)"
 	@echo "  ttl-ontology-pipeline    - Execute full ontology-driven workflow"
 	@echo "  ttl-schema-generate      - Generate Azure Search schema from TTL metadata"
