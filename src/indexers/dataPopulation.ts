@@ -182,7 +182,7 @@ async function main() {
     ];
     
     const searchApiKey = process.argv[2];
-    const indexName = process.argv[3] || 'enhanced-legis-qc-parallels';
+    const indexName = process.argv[3] || process.env.AZURE_SEARCH_INDEX_NAME || 'legis-qc-index-dev-07';
     const dataSourcePath = process.argv[4] || config.externalDataSourcePath;
     
     if (!searchApiKey) {

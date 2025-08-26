@@ -30,10 +30,10 @@ fi
 
 # API configuration
 API_VERSION="2024-07-01"
-ENHANCED_INDEX="enhanced-legis-qc-parallels"
-BASIC_INDEX="legis-qc-lois-dev-02"
+CONFIGURED_INDEX="${AZURE_SEARCH_INDEX_NAME:-legis-qc-index-dev-07}"
 
 echo "🔗 Search Endpoint: $AZURE_SEARCH_ENDPOINT"
+echo "🎯 Target Index: $CONFIGURED_INDEX"
 echo ""
 
 # Function to check index status
@@ -102,8 +102,7 @@ check_index() {
     echo ""
 }
 
-# Check both indexes
-check_index "$ENHANCED_INDEX" "Enhanced"
-check_index "$BASIC_INDEX" "Basic"
+# Check the configured index only
+check_index "$CONFIGURED_INDEX" "Configured"
 
 echo "🎉 Index status check completed!"

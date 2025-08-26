@@ -79,44 +79,43 @@ class IndexStatusChecker {
         console.log('🚀 Enhanced Index Status Check');
         console.log('='.repeat(50));
         
-        const indexesToCheck = [
-            'enhanced-legis-qc-parallels',
-            'legis-qc-lois-dev-02',  // Original basic index
-            'my-documents'
-        ];
+        // Use environment variable for index name
+        const configuredIndex = process.env.AZURE_SEARCH_INDEX_NAME || 'legis-qc-index-dev-07';
         
-        for (const indexName of indexesToCheck) {
-            const status = await this.checkIndexStatus(indexName);
+        // Only check the configured index from environment variable
+        const indexName = configuredIndex;
+        
+        const status = await this.checkIndexStatus(indexName);
+        
+        console.log(`\n📊 Index: ${status.name}`);
+        console.log(`   Status: ${status.exists ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+        
+        if (status.exists) {
+            console.log(`   Documents: ${status.documentCount}`);
+            console.log(`   Fields: ${status.fields?.length || 0}`);
             
-            console.log(`\n📊 Index: ${status.name}`);
-            console.log(`   Status: ${status.exists ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+            // Check if it's an enhanced index
+            const isEnhanced = status.fields?.includes('legalIdentifier') && 
+                             status.fields?.includes('documentType') &&
+                             status.fields?.includes('legalStatus');
+                             
+            console.log(`   Type: ${isEnhanced ? '🚀 ENHANCED (TTL)' : '📝 BASIC'}`);
             
-            if (status.exists) {
-                console.log(`   Documents: ${status.documentCount}`);
-                console.log(`   Fields: ${status.fields?.length || 0}`);
-                
-                // Check if it's an enhanced index
-                const isEnhanced = status.fields?.includes('legalIdentifier') && 
-                                 status.fields?.includes('documentType') &&
-                                 status.fields?.includes('legalStatus');
-                                 
-                console.log(`   Type: ${isEnhanced ? '🚀 ENHANCED (TTL)' : '📝 BASIC'}`);
-                
-                if (isEnhanced) {
-                    console.log(`   TTL Fields: ✅ legalIdentifier, documentType, legalStatus, keywords`);
-                }
-            } else {
-                console.log(`   Error: ${status.error}`);
+            if (isEnhanced) {
+                console.log(`   TTL Fields: ✅ legalIdentifier, documentType, legalStatus, keywords`);
             }
+        } else {
+            console.log(`   Error: ${status.error}`);
         }
         
-        // Sample documents from enhanced index if it exists
+        // Sample documents from the configured index if it exists
         await this.sampleEnhancedDocuments();
     }
     
     async sampleEnhancedDocuments(): Promise<void> {
         try {
-            const indexName = 'enhanced-legis-qc-parallels';
+            // Use environment variable for index name
+            const indexName = process.env.AZURE_SEARCH_INDEX_NAME || 'legis-qc-index-dev-07';
             const searchClient = new SearchClient(
                 config.azureSearchEndpoint,
                 indexName,
