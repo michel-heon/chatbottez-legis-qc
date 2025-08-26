@@ -19,8 +19,8 @@ interface IndexField {
     facetable?: boolean;
     retrievable?: boolean;
     analyzer?: string;
-    dimensions?: number;
-    vectorSearchConfiguration?: string;
+    vectorSearchDimensions?: number;        // Azure SDK property name
+    vectorSearchProfileName?: string;       // Azure SDK property name 
     description: string;
 }
 
@@ -282,6 +282,36 @@ export class TTLSchemaAnalyzer {
             }
         }
         
+        // Add documentType field if not already present (required by application code)
+        const hasDocumentType = fields.some(field => field.name === 'documentType');
+        if (!hasDocumentType) {
+            fields.push({
+                name: 'documentType',
+                type: 'Edm.String',
+                searchable: true,
+                filterable: true,
+                sortable: false,
+                facetable: true,
+                retrievable: true,
+                description: 'Document type classification (from manifest data)'
+            });
+        }
+
+        // Add legalType field if not already present (required by population code)
+        const hasLegalType = fields.some(field => field.name === 'legalType');
+        if (!hasLegalType) {
+            fields.push({
+                name: 'legalType',
+                type: 'Edm.String',
+                searchable: true,
+                filterable: true,
+                sortable: false,
+                facetable: true,
+                retrievable: true,
+                description: 'Legal document type (Loi, Règlement, etc.)'
+            });
+        }
+
         // Add standard content fields with vector search capability
         fields.push(
             {
@@ -299,8 +329,8 @@ export class TTLSchemaAnalyzer {
                 name: 'contentVector',
                 type: 'Collection(Edm.Single)',
                 searchable: true,
-                dimensions: 1536,
-                vectorSearchConfiguration: 'default-vector-config',
+                vectorSearchDimensions: 1536,
+                vectorSearchProfileName: 'default',
                 description: 'Content embedding vector for semantic search'
             }
         );
@@ -386,7 +416,7 @@ export class TTLSchemaAnalyzer {
             ],
             profiles: [
                 {
-                    name: "default-vector-config",
+                    name: "default",
                     algorithmConfigurationName: "hnsw-algorithm"
                 }
             ]

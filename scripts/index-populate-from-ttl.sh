@@ -27,9 +27,14 @@ if [ ! -f "$SCHEMA_FILE" ]; then
     exit 1
 fi
 
-# Get index name from schema
-INDEX_NAME=$(node -e "console.log(require('./$SCHEMA_FILE').name)")
-echo "📄 Target Index: $INDEX_NAME"
+# Get index name from environment variable (prioritized) or schema file (fallback)
+if [ -n "$AZURE_SEARCH_INDEX_NAME" ]; then
+    INDEX_NAME="$AZURE_SEARCH_INDEX_NAME"
+    echo "📄 Target Index: $INDEX_NAME (from environment)"
+else
+    INDEX_NAME=$(node -e "console.log(require('./$SCHEMA_FILE').name)")
+    echo "📄 Target Index: $INDEX_NAME (from schema file)"
+fi
 
 # Run population
 echo "🚀 Starting index population..."

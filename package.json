@@ -50,6 +50,6 @@
     "typescript": "^5.5.4"
   },
   "config": {
-    "azure_search_index_name": "legis-qc-lois-dev-01"
+    "azure_search_index_name": "test-index"
   }
 }

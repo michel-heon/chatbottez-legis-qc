@@ -38,7 +38,7 @@ test_search() {
         -H "Content-Type: application/json" \
         -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
         "$AZURE_SEARCH_ENDPOINT/indexes/$INDEX_NAME/docs/search?api-version=2023-11-01" \
-        -d "{\"search\": \"$escaped_query\", \"top\": 10, \"select\": \"docId,docTitle,description\"}")
+        -d "{\"search\": \"$escaped_query\", \"top\": 10, \"select\": \"id,title,legalIdentifier,description\"}")
     
     # Check if the response contains results
     local count=$(echo "$response" | jq -r '.value | length' 2>/dev/null || echo "0")
@@ -47,7 +47,7 @@ test_search() {
         echo "   ✅ Found $count results (expected: >=$min_results)"
         
         # Show first result title
-        local first_title=$(echo "$response" | jq -r '.value[0].docTitle // .value[0].docId // "No title"' 2>/dev/null)
+        local first_title=$(echo "$response" | jq -r '.value[0].title // .value[0].legalIdentifier // .value[0].id // "No title"' 2>/dev/null)
         echo "   📄 First result: $first_title"
     else
         echo "   ❌ Found only $count results (expected: >=$min_results)"
@@ -101,9 +101,9 @@ sample_documents() {
         -H "Content-Type: application/json" \
         -H "api-key: $SECRET_AZURE_SEARCH_KEY" \
         "$AZURE_SEARCH_ENDPOINT/indexes/$INDEX_NAME/docs/search?api-version=2023-11-01" \
-        -d '{"search": "*", "top": 3, "select": "docId,docTitle"}')
+        -d '{"search": "*", "top": 3, "select": "id,title,legalIdentifier"}')
     
-    local titles=$(echo "$response" | jq -r '.value[]? | "   • " + (.docTitle // .docId // "Untitled")' 2>/dev/null)
+    local titles=$(echo "$response" | jq -r '.value[]? | "   • " + (.title // .legalIdentifier // .id // "Untitled")' 2>/dev/null)
     
     if [ -n "$titles" ]; then
         echo "$titles"

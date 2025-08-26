@@ -1,9 +1,9 @@
 {
-  "name": "legis-qc-index-dev-06",
+  "name": "legis-qc-index-dev-02",
   "description": "Azure Search index dynamically generated from TTL metadata",
   "version": "2.0.0",
   "generatedFrom": "legisquebec-metadata-small.ttl",
-  "generatedAt": "2025-08-25T11:20:34.539Z",
+  "generatedAt": "2025-08-26T21:22:35.556Z",
   "fields": [
     {
       "name": "id",
@@ -142,6 +142,26 @@
       "analyzer": "fr.lucene"
     },
     {
+      "name": "documentType",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Document type classification (from manifest data)"
+    },
+    {
+      "name": "legalType",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Legal document type (Loi, Règlement, etc.)"
+    },
+    {
       "name": "content",
       "type": "Edm.String",
       "searchable": true,
@@ -156,8 +176,8 @@
       "name": "contentVector",
       "type": "Collection(Edm.Single)",
       "searchable": true,
-      "dimensions": 1536,
-      "vectorSearchConfiguration": "default-vector-config",
+      "vectorSearchDimensions": 1536,
+      "vectorSearchProfileName": "default",
       "description": "Content embedding vector for semantic search"
     }
   ],
@@ -187,7 +207,7 @@
     ],
     "profiles": [
       {
-        "name": "default-vector-config",
+        "name": "default",
         "algorithmConfigurationName": "hnsw-algorithm"
       }
     ]

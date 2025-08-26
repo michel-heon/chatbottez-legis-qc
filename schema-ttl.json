@@ -1,5 +1,5 @@
 {
-  "name": "legis-qc-index-dev-06",
+  "name": "legis-qc-index-dev-02",
   "description": "Azure Search index dynamically generated from TTL metadata",
   "version": "2.0.0",
   "generatedFrom": "legisquebec-metadata-small.ttl",

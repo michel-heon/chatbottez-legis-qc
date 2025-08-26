@@ -10,8 +10,6 @@
 # - NETTOYAGE DOCUMENTATION: Réorganisation docs/ avec suppression fichiers racine obsolètes
 # - NETTOYAGE CONVENTIONS: Mise en conformité structure projet (docs/, scripts/, src/)
 # - OPTIMISATION: Priorisation approche ontology-driven (playground-setup → ontology-driven-setup)
-# - REFACTORISATION ONTOLOGY-DRIVEN: Transformation complète des règles utilitaires en règles ontology-driven
-# - ENVIRONNEMENT PAR DÉFAUT: ENV_CONFIG=playground (ontology-driven ready)
 #
 # CONVENTION OBLIGATOIRE : Toutes les règles doivent suivre <objet>-<action>
 # Voir docs/NAMING_CONVENTIONS.md pour les détails complets
@@ -19,7 +17,7 @@
 # Export ENV_CONFIG to sub-shells
 export ENV_CONFIG
 
-.PHONY: help install build index-setup index-create index-delete index-reindex index-status index-test env-check config-validate clean index-name-set index-config-list index-populate playground-env-setup playground-env-validate data-populate data-sparql-populate conventions-validate ttl-ontology-pipeline ontology-driven-setup ontology-validate ttl-schema-generate ttl-index-create ttl-populate test-index-content
+.PHONY: help install build index-setup index-delete index-reindex index-status index-test env-check config-validate clean index-name-set index-config-list playground-env-setup playground-env-validate data-populate data-sparql-populate conventions-validate ttl-ontology-pipeline ontology-driven-setup ontology-validate ttl-schema-generate ttl-index-create ttl-populate ttl-test-semantic
 
 # Default target
 help:
@@ -32,7 +30,7 @@ help:
 	@echo "  ttl-schema-generate      - Generate Azure Search schema from TTL metadata"
 	@echo "  ttl-index-create         - Create index using ontology-driven schema"
 	@echo "  ttl-populate             - Populate index with TTL metadata + PDF content"
-	@echo "  test-index-content       - Test index content with ontological coherence"
+	@echo "  ttl-test-semantic        - Test semantic search with ontological coherence"
 	@echo "  ontology-validate        - Validate TTL ↔ Azure ↔ Teams AI coherence"
 	@echo ""
 	@echo "Setup Commands:"
@@ -41,16 +39,14 @@ help:
 	@echo ""
 	@echo "Index Management (Ontology-Driven Priority):"
 	@echo "  ontology-driven-setup - 🧠 Complete TTL → Azure Search → Teams AI pipeline (RECOMMENDED)"
-	@echo "  index-create     - 🧠 Create index with TTL metadata schema"
 	@echo "  index-reindex    - Delete and recreate index (ontology-driven - 5 docs TTL)"
-	@echo "  index-status     - 🧠 Check index status with TTL metadata validation"
-	@echo "  index-test       - 🧠 Test index with semantic coherence validation"
+	@echo "  index-status     - Check index status and statistics"
+	@echo "  index-test       - Test index content and search functionality"
 	@echo "  index-setup      - ⚠️  Legacy: Create index with ALL 62 PDFs (use with caution)"
-	@echo "  index-delete     - 🧠 Delete index with ontological validation"
-	@echo "  index-name-set   - 🧠 Set index name with TTL coherence validation"
-	@echo "  index-config-list - 🧠 List configurations with TTL metadata analysis"
-	@echo "  index-populate   - 🧠 Populate index with TTL metadata integration"
-	@echo "  documents-add    - 🧠 Add documents with TTL metadata integration"
+	@echo "  index-delete     - Delete the search index"
+	@echo "  index-name-set   - Set custom index name"
+	@echo "  index-config-list - List current index configurations"
+	@echo "  documents-add    - Add new documents to existing index"
 	@echo "  data-populate    - Populate data directory with random PDF files"
 	@echo "  data-sparql-populate - Populate Azure Search index using SPARQL queries"
 	@echo "  conventions-validate - Validate naming conventions for scripts and rules"
@@ -58,7 +54,6 @@ help:
 	@echo "Environment:"
 	@echo "  env-check        - Validate environment variables"
 	@echo "  config-validate  - Validate Azure Search configuration"
-	@echo "  diagnostic       - 🔍 Run comprehensive system diagnostic"
 	@echo "  playground-env-setup - Setup Preview Playground environment files"
 	@echo "  playground-env-validate - Validate Preview Playground configuration"
 	@echo ""
@@ -97,7 +92,7 @@ help:
 	@echo "Usage Examples:"
 	@echo "  make ontology-driven-setup ENV_CONFIG=playground    # Complete ontology-driven pipeline"
 	@echo "  make ttl-schema-generate ENV_CONFIG=playground      # Generate schema from TTL"
-	@echo "  make test-index-content ENV_CONFIG=playground       # Test index coherence"
+	@echo "  make ttl-test-semantic ENV_CONFIG=playground        # Test semantic coherence"
 	@echo "  make index-setup SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_API_KEY=your_key"
 	@echo "  make index-delete SECRET_AZURE_SEARCH_KEY=your_key"
 	@echo "  make index-status SECRET_AZURE_SEARCH_KEY=your_key"
@@ -108,18 +103,12 @@ help:
 	@echo "  make ttl-ontology-pipeline ENV_CONFIG=playground    # Full semantic pipeline"
 	@echo "  make ontology-validate ENV_CONFIG=playground        # Validate coherence TTL ↔ IA"
 	@echo ""
-	@echo "Environment-based Commands (ontology-driven):"
-	@echo "  make index-create ENV_CONFIG=playground"
+	@echo "Environment-based Commands (auto-load keys):"
 	@echo "  make index-delete ENV_CONFIG=playground"
 	@echo "  make index-delete ENV_CONFIG=local"
 	@echo "  make index-delete ENV_CONFIG=playground FORCE=true  # Skip confirmation"
 	@echo "  make index-status ENV_CONFIG=playground"
-	@echo "  make index-test ENV_CONFIG=playground"
-	@echo "  make index-populate ENV_CONFIG=playground"
-	@echo "  make documents-add ENV_CONFIG=playground"
-	@echo "  make index-name-set INDEX_NAME=legis-qc-v2 ENV_CONFIG=playground"
-	@echo "  make index-config-list  # Shows TTL metadata analysis"
-	@echo "  make index-setup ENV_CONFIG=playground  # Legacy (use ontology-driven-setup instead)"
+	@echo "  make index-setup ENV_CONFIG=playground"
 	@echo ""
 	@echo "  make playground-setup  # Uses keys from env/.env.playground.user"
 	@echo ""
@@ -141,9 +130,9 @@ help:
 SECRET_AZURE_SEARCH_KEY ?= 
 SECRET_AZURE_OPENAI_API_KEY ?= 
 INDEX_NAME ?= my-documents
-ENV_CONFIG ?= playground
+ENV_CONFIG ?= local
 FORCE ?= false
-ENVIRONMENT ?= playground
+ENVIRONMENT ?= local
 NODE_ENV ?= development
 
 # Install dependencies
@@ -194,53 +183,42 @@ index-setup: env-check build
 		exit 1; \
 	fi
 
-# 🧠 ONTOLOGY-DRIVEN: Delete Azure Search index with ontological validation
+# Delete Azure Search index
 index-delete: env-check build
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX DELETION - Validating TTL coherence..."
-	@echo "=============================================================="
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@# Validate TTL coherence before deletion
-	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
-		echo "🔍 Validating ontological coherence before deletion..."; \
-		set -a && . env/.env.playground.user && set +a && \
+	@echo "Deleting Azure Search index..."
+	@# Auto-load keys from ENV_CONFIG if not provided
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "playground" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Index to delete: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
 		if [ "$(FORCE)" = "true" ]; then \
 			echo "yes" | ./scripts/index-delete.sh "$$SECRET_AZURE_SEARCH_KEY"; \
 		else \
 			./scripts/index-delete.sh "$$SECRET_AZURE_SEARCH_KEY"; \
 		fi; \
-	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
-		echo "🔍 Validating ontological coherence before deletion..."; \
-		set -a && . env/.env.local.user && set +a && \
+	elif [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "local" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Index to delete: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
 		if [ "$(FORCE)" = "true" ]; then \
 			echo "yes" | ./scripts/index-delete.sh "$$SECRET_AZURE_SEARCH_KEY"; \
 		else \
 			./scripts/index-delete.sh "$$SECRET_AZURE_SEARCH_KEY"; \
 		fi; \
-	elif [ "$(EFFECTIVE_ENV)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
-		echo "🔍 Validating ontological coherence before deletion..."; \
-		set -a && . env/.env.dev.user && set +a && \
+	elif [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "dev" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.dev.user | cut -d'=' -f2); \
-		echo "📊 Index to delete: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
 		if [ "$(FORCE)" = "true" ]; then \
 			echo "yes" | ./scripts/index-delete.sh "$$SECRET_AZURE_SEARCH_KEY"; \
 		else \
 			./scripts/index-delete.sh "$$SECRET_AZURE_SEARCH_KEY"; \
+		fi; \
+	elif [ -n "$(SECRET_AZURE_SEARCH_KEY)" ]; then \
+		if [ "$(FORCE)" = "true" ]; then \
+			echo "yes" | ./scripts/index-delete.sh "$(SECRET_AZURE_SEARCH_KEY)"; \
+		else \
+			./scripts/index-delete.sh "$(SECRET_AZURE_SEARCH_KEY)"; \
 		fi; \
 	else \
-		echo "❌ Error: No valid environment configuration found"; \
-		echo "🔧 Current ENV_CONFIG: $(ENV_CONFIG) (effective: $(EFFECTIVE_ENV))"; \
-		echo "Usage: make index-delete [ENV_CONFIG=playground|local|dev]"; \
+		echo "Error: SECRET_AZURE_SEARCH_KEY is required"; \
+		echo "Usage: make index-delete SECRET_AZURE_SEARCH_KEY=your_key"; \
+		echo "   or: make index-delete ENV_CONFIG=playground"; \
 		echo "   or: make index-delete ENV_CONFIG=playground FORCE=true"; \
-		echo "🧠 Ontology-driven approach ensures TTL ↔ Azure coherence validation"; \
-		echo "📁 Available environment files:"; \
-		ls -la env/.env.*.user 2>/dev/null || echo "   No environment files found"; \
 		exit 1; \
 	fi
 
@@ -263,280 +241,73 @@ dev: build
 	@echo "Starting development server..."
 	npm run dev:teamsfx
 
-# 🧠 ONTOLOGY-DRIVEN: Add documents with TTL metadata integration
+# Advanced index management
 documents-add: env-check build
-	@echo "🧠 ONTOLOGY-DRIVEN DOCUMENT ADDITION - TTL Metadata Integration"
-	@echo "================================================================"
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
-		echo "🔧 Using playground environment with ontological document addition"; \
-		set -a && . env/.env.playground.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		SECRET_AZURE_OPENAI_API_KEY=$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Adding documents with ontological coherence validation..."; \
-		./scripts/documents-add.sh "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY"; \
-		echo "✅ Ontology-driven document addition completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
-		echo "🔧 Using local environment with ontological document addition"; \
-		set -a && . env/.env.local.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		SECRET_AZURE_OPENAI_API_KEY=$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Adding documents with ontological coherence validation..."; \
-		./scripts/documents-add.sh "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY"; \
-		echo "✅ Ontology-driven document addition completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
-		echo "🔧 Using dev environment with ontological document addition"; \
-		set -a && . env/.env.dev.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.dev.user | cut -d'=' -f2); \
-		SECRET_AZURE_OPENAI_API_KEY=$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.dev.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Adding documents with ontological coherence validation..."; \
-		./scripts/documents-add.sh "$$SECRET_AZURE_SEARCH_KEY" "$$SECRET_AZURE_OPENAI_API_KEY"; \
-		echo "✅ Ontology-driven document addition completed"; \
-	else \
-		echo "❌ Error: No valid environment configuration found"; \
-		echo "🔧 Current ENV_CONFIG: $(ENV_CONFIG) (effective: $(EFFECTIVE_ENV))"; \
-		echo "Usage: make documents-add [ENV_CONFIG=playground|local|dev]"; \
-		echo "🧠 Ontology-driven approach ensures TTL metadata integration"; \
-		echo "📁 Available environment files:"; \
-		ls -la env/.env.*.user 2>/dev/null || echo "   No environment files found"; \
+	@echo "Adding new documents to index..."
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] || [ -z "$(SECRET_AZURE_OPENAI_API_KEY)" ]; then \
+		echo "Error: SECRET_AZURE_SEARCH_KEY and SECRET_AZURE_OPENAI_API_KEY are required"; \
 		exit 1; \
 	fi
+	@./scripts/documents-add.sh "$(SECRET_AZURE_SEARCH_KEY)" "$(SECRET_AZURE_OPENAI_API_KEY)"
 
-# 🧠 ONTOLOGY-DRIVEN: Create index with TTL metadata schema
-index-create: env-check
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX CREATION - TTL Schema Generation"
-	@echo "=========================================================="
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
-		echo "🔧 Using playground environment with ontological index creation"; \
-		set -a && . env/.env.playground.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Creating Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Schema Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Generating schema from TTL ontology..."; \
-		node lib/src/indexers/ttlSchemaAnalyzer.js "$$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE" "schema-output.json"; \
-		echo "🏗️ Creating Azure Search index from ontological schema..."; \
-		node lib/src/indexers/indexCreatorFromTTL.js "$$SECRET_AZURE_SEARCH_KEY" "schema-output.json" "$$AZURE_SEARCH_INDEX_NAME"; \
-		echo "✅ Ontology-driven index creation completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
-		echo "🔧 Using local environment with ontological index creation"; \
-		set -a && . env/.env.local.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Creating Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Schema Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Generating schema from TTL ontology..."; \
-		node lib/src/indexers/ttlSchemaAnalyzer.js "$$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE" "schema-output.json"; \
-		echo "🏗️ Creating Azure Search index from ontological schema..."; \
-		node lib/src/indexers/indexCreatorFromTTL.js "$$SECRET_AZURE_SEARCH_KEY" "schema-output.json" "$$AZURE_SEARCH_INDEX_NAME"; \
-		echo "✅ Ontology-driven index creation completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
-		echo "🔧 Using dev environment with ontological index creation"; \
-		set -a && . env/.env.dev.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.dev.user | cut -d'=' -f2); \
-		echo "📊 Creating Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Schema Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Generating schema from TTL ontology..."; \
-		node lib/src/indexers/ttlSchemaAnalyzer.js "$$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE" "schema-output.json"; \
-		echo "🏗️ Creating Azure Search index from ontological schema..."; \
-		node lib/src/indexers/indexCreatorFromTTL.js "$$SECRET_AZURE_SEARCH_KEY" "schema-output.json" "$$AZURE_SEARCH_INDEX_NAME"; \
-		echo "✅ Ontology-driven index creation completed"; \
-	else \
-		echo "❌ Error: No valid environment configuration found"; \
-		echo "🔧 Current ENV_CONFIG: $(ENV_CONFIG) (effective: $(EFFECTIVE_ENV))"; \
-		echo "Usage: make index-create [ENV_CONFIG=playground|local|dev]"; \
-		echo "🧠 Ontology-driven approach generates Azure Search schema from TTL metadata"; \
-		echo "📁 Available environment files:"; \
-		ls -la env/.env.*.user 2>/dev/null || echo "   No environment files found"; \
-		exit 1; \
-	fi
-
-# 🧠 ONTOLOGY-DRIVEN: Check index status with TTL metadata validation
+# Check index status
 index-status: env-check
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX STATUS - TTL ↔ Azure Coherence Analysis"
-	@echo "=================================================================="
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
-		echo "🔧 Using playground environment with ontological validation"; \
-		set -a && . env/.env.playground.user && set +a && \
+	@echo "Checking index status..."
+	@# Auto-load keys from ENV_CONFIG if not provided
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "playground" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Analyzing ontological coherence..."; \
 		./scripts/index-status.sh "$$SECRET_AZURE_SEARCH_KEY"; \
-		echo "✅ Ontology-driven status check completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
-		echo "🔧 Using local environment with ontological validation"; \
-		set -a && . env/.env.local.user && set +a && \
+	elif [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "local" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Analyzing ontological coherence..."; \
 		./scripts/index-status.sh "$$SECRET_AZURE_SEARCH_KEY"; \
-		echo "✅ Ontology-driven status check completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
-		echo "🔧 Using dev environment with ontological validation"; \
-		set -a && . env/.env.dev.user && set +a && \
+	elif [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "dev" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.dev.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Analyzing ontological coherence..."; \
 		./scripts/index-status.sh "$$SECRET_AZURE_SEARCH_KEY"; \
-		echo "✅ Ontology-driven status check completed"; \
+	elif [ -n "$(SECRET_AZURE_SEARCH_KEY)" ]; then \
+		./scripts/index-status.sh "$(SECRET_AZURE_SEARCH_KEY)"; \
 	else \
-		echo "❌ Error: No valid environment configuration found"; \
-		echo "🔧 Current ENV_CONFIG: $(ENV_CONFIG) (effective: $(EFFECTIVE_ENV))"; \
-		echo "Usage: make index-status [ENV_CONFIG=playground|local|dev]"; \
-		echo "🧠 Ontology-driven approach provides TTL ↔ Azure coherence analysis"; \
-		echo "📁 Available environment files:"; \
-		ls -la env/.env.*.user 2>/dev/null || echo "   No environment files found"; \
+		echo "Error: SECRET_AZURE_SEARCH_KEY is required"; \
+		echo "Usage: make index-status SECRET_AZURE_SEARCH_KEY=your_key"; \
+		echo "   or: make index-status ENV_CONFIG=playground"; \
 		exit 1; \
 	fi
 
-# 🧠 ONTOLOGY-DRIVEN: Test index with semantic coherence validation
+# Test index content and search functionality
 index-test: env-check
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX TESTING - Semantic Coherence Validation"
-	@echo "=================================================================="
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
-		echo "🔧 Using playground environment with ontological testing"; \
-		set -a && . env/.env.playground.user && set +a && \
+	@echo "Testing index content and search functionality..."
+	@# Auto-load keys from ENV_CONFIG if not provided
+	@if [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "playground" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Testing Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Validation: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧪 Running ontological coherence tests..."; \
 		./scripts/index-test.sh "$$SECRET_AZURE_SEARCH_KEY"; \
-		echo "🧠 Validating TTL ↔ Azure Search semantic mapping..."; \
-		node test-index-content.js; \
-		echo "✅ Ontology-driven testing completed with semantic validation"; \
-	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
-		echo "🔧 Using local environment with ontological testing"; \
-		set -a && . env/.env.local.user && set +a && \
+	elif [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "local" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Testing Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Validation: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧪 Running ontological coherence tests..."; \
 		./scripts/index-test.sh "$$SECRET_AZURE_SEARCH_KEY"; \
-		echo "🧠 Validating TTL ↔ Azure Search semantic mapping..."; \
-		node test-index-content.js; \
-		echo "✅ Ontology-driven testing completed with semantic validation"; \
-	elif [ "$(EFFECTIVE_ENV)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
-		echo "🔧 Using dev environment with ontological testing"; \
-		set -a && . env/.env.dev.user && set +a && \
+	elif [ -z "$(SECRET_AZURE_SEARCH_KEY)" ] && [ "$(ENV_CONFIG)" = "dev" ]; then \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.dev.user | cut -d'=' -f2); \
-		echo "📊 Testing Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Validation: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧪 Running ontological coherence tests..."; \
 		./scripts/index-test.sh "$$SECRET_AZURE_SEARCH_KEY"; \
-		echo "🧠 Validating TTL ↔ Azure Search semantic mapping..."; \
-		node test-index-content.js; \
-		echo "✅ Ontology-driven testing completed with semantic validation"; \
+	elif [ -n "$(SECRET_AZURE_SEARCH_KEY)" ]; then \
+		./scripts/index-test.sh "$(SECRET_AZURE_SEARCH_KEY)"; \
 	else \
-		echo "❌ Error: No valid environment configuration found"; \
-		echo "🔧 Current ENV_CONFIG: $(ENV_CONFIG) (effective: $(EFFECTIVE_ENV))"; \
-		echo "Usage: make index-test [ENV_CONFIG=playground|local|dev]"; \
-		echo "🧠 Ontology-driven testing includes semantic coherence validation"; \
-		echo "📁 Available environment files:"; \
-		ls -la env/.env.*.user 2>/dev/null || echo "   No environment files found"; \
+		echo "Error: SECRET_AZURE_SEARCH_KEY is required"; \
+		echo "Usage: make index-test SECRET_AZURE_SEARCH_KEY=your_key"; \
+		echo "   or: make index-test ENV_CONFIG=playground"; \
 		exit 1; \
 	fi
 
-# 🧠 ONTOLOGY-DRIVEN: Set index name with TTL coherence validation
+# Set custom index name
 index-name-set:
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX NAME CONFIGURATION"
-	@echo "============================================"
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
+	@echo "Setting index name..."
 	@if [ -z "$(INDEX_NAME)" ]; then \
-		echo "❌ Error: INDEX_NAME is required for ontology-driven configuration"; \
-		echo "Usage: make index-name-set INDEX_NAME=your-index-name [ENV_CONFIG=playground|local|dev]"; \
-		echo "🧠 Ontology-driven naming ensures TTL ↔ Azure coherence"; \
+		echo "Error: INDEX_NAME is required"; \
+		echo "Usage: make index-name-set INDEX_NAME=your-index-name [ENVIRONMENT=local|playground]"; \
 		exit 1; \
 	fi
-	@echo "🔧 Setting ontology-driven index name: $(INDEX_NAME)"
-	@echo "🌍 Environment: $(EFFECTIVE_ENV)"
-	@echo "🧠 Validating TTL metadata coherence..."
-	@./scripts/index-name-set.sh "$(INDEX_NAME)" "$(EFFECTIVE_ENV)"
-	@echo "✅ Ontology-driven index name configuration completed"
+	@./scripts/index-name-set.sh "$(INDEX_NAME)" "$(ENVIRONMENT)"
 
-# 🧠 ONTOLOGY-DRIVEN: List index configurations with TTL metadata analysis
+# List current index configurations
 index-config-list:
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX CONFIGURATIONS - TTL Metadata Analysis"
-	@echo "================================================================="
-	@echo "🔍 Analyzing ontological index configurations..."
-	@if [ -f "env/.env.playground.user" ]; then \
-		echo "🌍 Playground Environment:"; \
-		set -a && . env/.env.playground.user && set +a && \
-		echo "   📊 Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "   🔗 TTL Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "   🏢 Search Endpoint: $$AZURE_SEARCH_ENDPOINT"; \
-	fi
-	@if [ -f "env/.env.local.user" ]; then \
-		echo "🏠 Local Environment:"; \
-		set -a && . env/.env.local.user && set +a && \
-		echo "   📊 Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "   🔗 TTL Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "   🏢 Search Endpoint: $$AZURE_SEARCH_ENDPOINT"; \
-	fi
-	@if [ -f "env/.env.dev.user" ]; then \
-		echo "🚀 Development Environment:"; \
-		set -a && . env/.env.dev.user && set +a && \
-		echo "   📊 Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "   🔗 TTL Source: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "   🏢 Search Endpoint: $$AZURE_SEARCH_ENDPOINT"; \
-	fi
-	@echo "🧠 Executing traditional configuration listing..."
+	@echo "Listing index configurations..."
 	@./scripts/index-config-list.sh
-	@echo "✅ Ontology-driven configuration analysis completed"
-
-# 🧠 ONTOLOGY-DRIVEN: Populate index with TTL metadata integration
-index-populate: env-check build
-	@echo "🧠 ONTOLOGY-DRIVEN INDEX POPULATION - TTL Metadata Integration"
-	@echo "==============================================================="
-	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
-		echo "🔧 Using playground environment with ontological index population"; \
-		set -a && . env/.env.playground.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		SECRET_AZURE_OPENAI_API_KEY=$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Populating index with ontological coherence..."; \
-		ENV_CONFIG="$(EFFECTIVE_ENV)" ./scripts/index-populate-from-ttl.sh "$(EFFECTIVE_ENV)" "incremental"; \
-		echo "✅ Ontology-driven index population completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
-		echo "🔧 Using local environment with ontological index population"; \
-		set -a && . env/.env.local.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		SECRET_AZURE_OPENAI_API_KEY=$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Populating index with ontological coherence..."; \
-		ENV_CONFIG="$(EFFECTIVE_ENV)" ./scripts/index-populate-from-ttl.sh "$(EFFECTIVE_ENV)" "incremental"; \
-		echo "✅ Ontology-driven index population completed"; \
-	elif [ "$(EFFECTIVE_ENV)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
-		echo "🔧 Using dev environment with ontological index population"; \
-		set -a && . env/.env.dev.user && set +a && \
-		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.dev.user | cut -d'=' -f2); \
-		SECRET_AZURE_OPENAI_API_KEY=$$(grep SECRET_AZURE_OPENAI_API_KEY env/.env.dev.user | cut -d'=' -f2); \
-		echo "📊 Target Index: $$AZURE_SEARCH_INDEX_NAME"; \
-		echo "🔗 TTL Metadata: $$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE"; \
-		echo "🧠 Populating index with ontological coherence..."; \
-		ENV_CONFIG="$(EFFECTIVE_ENV)" ./scripts/index-populate-from-ttl.sh "$(EFFECTIVE_ENV)" "incremental"; \
-		echo "✅ Ontology-driven index population completed"; \
-	else \
-		echo "❌ Error: No valid environment configuration found"; \
-		echo "🔧 Current ENV_CONFIG: $(ENV_CONFIG) (effective: $(EFFECTIVE_ENV))"; \
-		echo "Usage: make index-populate [ENV_CONFIG=playground|local|dev]"; \
-		echo "🧠 Ontology-driven approach ensures TTL metadata integration"; \
-		echo "📁 Available environment files:"; \
-		ls -la env/.env.*.user 2>/dev/null || echo "   No environment files found"; \
-		exit 1; \
-	fi
 
 # Setup Preview Playground environment files
 playground-env-setup:
@@ -670,8 +441,8 @@ ttl-ontology-pipeline: env-check build
 	@make ttl-index-create ENV_CONFIG=$(ENV_CONFIG)
 	@echo "3️⃣ TTL-driven Population..."
 	@make ttl-populate ENV_CONFIG=$(ENV_CONFIG)
-	@echo "4️⃣ Index Content Validation..."
-	@make test-index-content ENV_CONFIG=$(ENV_CONFIG)
+	@echo "4️⃣ Semantic Validation..."
+	@make ttl-test-semantic ENV_CONFIG=$(ENV_CONFIG)
 	@echo "✅ Complete ontology-driven pipeline executed!"
 
 # Generate Azure Search Schema from TTL Metadata
@@ -728,19 +499,19 @@ ttl-populate: env-check build
 		exit 1; \
 	fi
 
-# Test Index Content with Ontological Coherence
-test-index-content: env-check build
+# Test Semantic Search with Ontological Coherence
+ttl-test-semantic: env-check build
 	@echo "🧪 TESTING SEMANTIC SEARCH - ONTOLOGICAL COHERENCE"
 	@echo "==================================================="
 	@if [ "$(ENV_CONFIG)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
 		set -a && . env/.env.playground.user && set +a && \
-		node test-index-content.js; \
+		node test-semantic.js; \
 	elif [ "$(ENV_CONFIG)" = "local" ] && [ -f "env/.env.local.user" ]; then \
 		set -a && . env/.env.local.user && set +a && \
-		node test-index-content.js; \
+		node test-semantic.js; \
 	elif [ "$(ENV_CONFIG)" = "dev" ] && [ -f "env/.env.dev.user" ]; then \
 		set -a && . env/.env.dev.user && set +a && \
-		node test-index-content.js; \
+		node test-semantic.js; \
 	else \
 		echo "❌ Error: ENV_CONFIG environment required"; \
 		exit 1; \
@@ -758,8 +529,8 @@ ontology-validate: env-check build
 		echo "❌ Error: ENV_CONFIG=playground required"; \
 		exit 1; \
 	fi
-	@echo "2️⃣ Testing index content coherence..."
-	@make test-index-content ENV_CONFIG=$(ENV_CONFIG)
+	@echo "2️⃣ Testing semantic search coherence..."
+	@make ttl-test-semantic ENV_CONFIG=$(ENV_CONFIG)
 	@echo "3️⃣ Validating TTL metadata consistency..."
 	@node lib/src/indexers/ttlFilesDiscovery.js
 	@echo "✅ Ontological coherence validation completed!"
@@ -804,30 +575,11 @@ local-setup: env-check
 
 # Test playground environment with ontology-driven approach
 playground-test: env-check
-	@make test-index-content ENV_CONFIG=playground
+	@make ttl-test-semantic ENV_CONFIG=playground
 
 # Test local environment with ontology-driven approach
 local-test: env-check
-	@make test-index-content ENV_CONFIG=local
-
-# ============================================================================
-# 🔍 DIAGNOSTIC AND TROUBLESHOOTING
-# ============================================================================
-
-# Run comprehensive system diagnostic
-diagnostic:
-	@echo "🔍 Running comprehensive system diagnostic..."
-	@echo "Using environment: $(or $(ENV_CONFIG),playground)"
-	@$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
-	@echo "Loading environment from env/.env.$(EFFECTIVE_ENV).user"
-	@if [ -f "env/.env.$(EFFECTIVE_ENV).user" ]; then \
-		export $$(grep -v '^#' env/.env.$(EFFECTIVE_ENV).user | xargs) && \
-		./scripts/diagnostic-ontology.sh; \
-	else \
-		echo "❌ Environment file not found: env/.env.$(EFFECTIVE_ENV).user"; \
-		echo "💡 Run 'make playground-env-setup' to create it"; \
-		exit 1; \
-	fi
+	@make ttl-test-semantic ENV_CONFIG=local
 
 # ============================================================================
 # End of Ontology-Driven Architecture Rules
