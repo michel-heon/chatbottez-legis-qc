@@ -18,7 +18,7 @@ load_env_file() {
 load_env_file "env/.env.playground"
 load_env_file "env/.env.playground.user"
 
-echo "🎯 Target Index: enhanced-legis-qc-parallels"
+echo "🎯 Target Index: ${AZURE_SEARCH_INDEX_NAME:-legis-qc-index-dev-07}"
 echo "🔗 Search Endpoint: $AZURE_SEARCH_ENDPOINT"
 
 # Check if we have the required environment variables

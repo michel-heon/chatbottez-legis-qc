@@ -25,7 +25,7 @@ make playground-env-setup
 # 4. Validation de la configuration
 make playground-env-validate
 
-# 5. Configuration de l'index Azure Search
+# 5. Configuration de l'index Azure Search (Ontology-Driven)
 make playground-setup
 
 # 6. Démarrage de l'application Playground
@@ -39,7 +39,8 @@ make help                    # Affiche toutes les commandes disponibles
 make playground-env-setup    # Configuration environnement Playground
 make playground-env-validate # Validation configuration Playground
 make index-status           # Vérifie l'état de l'index
-make index-reindex          # Reconstruit l'index complet
+make index-reindex          # Reconstruit l'index (mode ontology-driven - 5 docs TTL)
+make ontology-driven-setup  # Pipeline complet TTL → Azure Search → Teams AI
 ```
 
 ## 📚 Documentation complète
@@ -131,6 +132,14 @@ The following are Microsoft 365 Agents Toolkit specific project files. You can [
 |`m365agents.yml`|This is the main Microsoft 365 Agents Toolkit project file. The project file defines two primary things:  Properties and configuration Stage definitions. |
 |`m365agents.local.yml`|This overrides `m365agents.yml` with actions that enable local execution and debugging.|
 |`m365agents.playground.yml`| This overrides `m365agents.yml` with actions that enable local execution and debugging in Microsoft 365 Agents Playground.|
+
+## 📚 Documentation complète
+
+Pour une documentation complète du projet, consultez le **[dossier docs/](./docs/README.md)** qui contient :
+- 📖 Guides utilisateur détaillés
+- 🔧 Référence technique des scripts  
+- 📊 Architecture et développement
+- 🚀 Guides de configuration avancés
 
 ## Extend the template
 
