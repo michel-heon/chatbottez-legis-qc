@@ -56,20 +56,47 @@ export class ContentProcessor {
     private processedDir: string;
     private embeddingsDir: string;
     private manifest: FilesManifest;
+    private force: boolean;
     
     constructor(
         manifestPath: string, 
         openaiApiKey: string, 
         batchSize: number = 10,
         processedDir: string = 'src/indexers/data/processed',
-        embeddingsDir: string = 'src/indexers/data/embeddings'
+        embeddingsDir: string = 'src/indexers/data/embeddings',
+        force: boolean = false
     ) {
         this.manifestPath = manifestPath;
         this.openaiApiKey = openaiApiKey;
         this.batchSize = batchSize;
         this.processedDir = processedDir;
         this.embeddingsDir = embeddingsDir;
+        this.force = force;
         this.manifest = this.loadManifest();
+    }
+    
+    /**
+     * Get the subdirectory path based on the first letter of the legal identifier
+     */
+    private getSubdirectoryPath(legalIdentifier: string, baseDir: string): string {
+        const firstLetter = legalIdentifier.charAt(0).toUpperCase();
+        return path.join(baseDir, firstLetter);
+    }
+    
+    /**
+     * Get the full file path for a processed document
+     */
+    private getProcessedFilePath(legalIdentifier: string): string {
+        const subdirectory = this.getSubdirectoryPath(legalIdentifier, this.processedDir);
+        return path.join(subdirectory, `${legalIdentifier}.json`);
+    }
+    
+    /**
+     * Get the full file path for an embeddings document
+     */
+    private getEmbeddingFilePath(legalIdentifier: string): string {
+        const subdirectory = this.getSubdirectoryPath(legalIdentifier, this.embeddingsDir);
+        return path.join(subdirectory, `${legalIdentifier}.json`);
     }
     
     /**
@@ -107,6 +134,21 @@ export class ContentProcessor {
             fs.mkdirSync(this.embeddingsDir, { recursive: true });
         }
         
+        // Create subdirectories for each letter (A-Z)
+        console.log("📁 Creating subdirectories for organized file storage...");
+        for (let i = 65; i <= 90; i++) { // A-Z
+            const letter = String.fromCharCode(i);
+            const processedSubdir = path.join(this.processedDir, letter);
+            const embeddingsSubdir = path.join(this.embeddingsDir, letter);
+            
+            if (!fs.existsSync(processedSubdir)) {
+                fs.mkdirSync(processedSubdir, { recursive: true });
+            }
+            if (!fs.existsSync(embeddingsSubdir)) {
+                fs.mkdirSync(embeddingsSubdir, { recursive: true });
+            }
+        }
+        
         const errors: string[] = [];
         let processedCount = 0;
         let skippedCount = 0;
@@ -120,14 +162,18 @@ export class ContentProcessor {
             
             for (const doc of batch) {
                 try {
-                    // Check if already processed
-                    const processedPath = path.join(this.processedDir, `${doc.legalIdentifier}.json`);
-                    const embeddingPath = path.join(this.embeddingsDir, `${doc.legalIdentifier}.json`);
+                    // Check if already processed (skip only if not in force mode)
+                    const processedPath = this.getProcessedFilePath(doc.legalIdentifier);
+                    const embeddingPath = this.getEmbeddingFilePath(doc.legalIdentifier);
                     
-                    if (fs.existsSync(processedPath) && fs.existsSync(embeddingPath)) {
+                    if (!this.force && fs.existsSync(processedPath) && fs.existsSync(embeddingPath)) {
                         console.log(`⏭️  Skipping ${doc.legalIdentifier} (already processed)`);
                         skippedCount++;
                         continue;
+                    }
+                    
+                    if (this.force && fs.existsSync(processedPath) && fs.existsSync(embeddingPath)) {
+                        console.log(`🔄 Force reprocessing ${doc.legalIdentifier} (overwriting existing files)`);
                     }
                     
                     console.log(`⚙️  Processing: ${doc.legalIdentifier}`);
@@ -283,7 +329,12 @@ export class ContentProcessor {
      * Save processed document to file
      */
     private saveProcessedDocument(processedDoc: ProcessedDocument): void {
-        const filePath = path.join(this.processedDir, `${processedDoc.legalIdentifier}.json`);
+        const filePath = this.getProcessedFilePath(processedDoc.legalIdentifier);
+        // Ensure the subdirectory exists
+        const subdirectory = path.dirname(filePath);
+        if (!fs.existsSync(subdirectory)) {
+            fs.mkdirSync(subdirectory, { recursive: true });
+        }
         fs.writeFileSync(filePath, JSON.stringify(processedDoc, null, 2));
     }
     
@@ -291,22 +342,50 @@ export class ContentProcessor {
      * Save embeddings to file
      */
     private saveEmbeddings(embeddingData: EmbeddingData): void {
-        const filePath = path.join(this.embeddingsDir, `${embeddingData.legalIdentifier}.json`);
+        const filePath = this.getEmbeddingFilePath(embeddingData.legalIdentifier);
+        // Ensure the subdirectory exists
+        const subdirectory = path.dirname(filePath);
+        if (!fs.existsSync(subdirectory)) {
+            fs.mkdirSync(subdirectory, { recursive: true });
+        }
         fs.writeFileSync(filePath, JSON.stringify(embeddingData, null, 2));
+    }
+    
+    /**
+     * Count files recursively in a directory
+     */
+    private countFilesRecursively(directory: string): number {
+        let count = 0;
+        if (!fs.existsSync(directory)) {
+            return count;
+        }
+        
+        const items = fs.readdirSync(directory);
+        for (const item of items) {
+            const itemPath = path.join(directory, item);
+            const stats = fs.statSync(itemPath);
+            
+            if (stats.isDirectory()) {
+                count += this.countFilesRecursively(itemPath);
+            } else if (item.endsWith('.json') && item !== 'errors.log') {
+                count++;
+            }
+        }
+        return count;
     }
     
     /**
      * Get processing statistics
      */
     getProcessingStats(): any {
-        const processedFiles = fs.readdirSync(this.processedDir).filter(f => f.endsWith('.json') && f !== 'errors.log');
-        const embeddingFiles = fs.readdirSync(this.embeddingsDir).filter(f => f.endsWith('.json'));
+        const processedFiles = this.countFilesRecursively(this.processedDir);
+        const embeddingFiles = this.countFilesRecursively(this.embeddingsDir);
         
         return {
-            processedDocuments: processedFiles.length,
-            embeddingFiles: embeddingFiles.length,
+            processedDocuments: processedFiles,
+            embeddingFiles: embeddingFiles,
             totalDocumentsInManifest: this.manifest.documentsWithPdf,
-            completionRate: Math.round((processedFiles.length / this.manifest.documentsWithPdf) * 100)
+            completionRate: Math.round((processedFiles / this.manifest.documentsWithPdf) * 100)
         };
     }
 }
@@ -320,14 +399,15 @@ async function main() {
     const batchSize = parseInt(process.argv[4]) || 10;
     const processedDir = process.argv[5] || 'src/indexers/data/processed';
     const embeddingsDir = process.argv[6] || 'src/indexers/data/embeddings';
+    const force = process.argv[7] === 'true';
     
     if (!manifestPath || !openaiApiKey) {
-        console.error('Usage: node contentProcessor.js <manifest-path> <openai-api-key> [batch-size] [processed-dir] [embeddings-dir]');
+        console.error('Usage: node contentProcessor.js <manifest-path> <openai-api-key> [batch-size] [processed-dir] [embeddings-dir] [force]');
         process.exit(1);
     }
     
     try {
-        const processor = new ContentProcessor(manifestPath, openaiApiKey, batchSize, processedDir, embeddingsDir);
+        const processor = new ContentProcessor(manifestPath, openaiApiKey, batchSize, processedDir, embeddingsDir, force);
         await processor.processAllDocuments();
         
         const stats = processor.getProcessingStats();

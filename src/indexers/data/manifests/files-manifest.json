@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2025-08-25T10:52:29.706Z",
+  "generatedAt": "2025-08-27T15:56:47.591Z",
   "ttlSource": "legisquebec-metadata-small.ttl",
   "dataSourcePath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl",
-  "totalDocuments": 5,
-  "documentsWithPdf": 5,
+  "totalDocuments": 11,
+  "documentsWithPdf": 11,
   "documentsMissingPdf": 0,
   "documents": [
     {
@@ -221,13 +221,294 @@
           "Éditeur officiel du Québec"
         ]
       }
+    },
+    {
+      "legalIdentifier": "M-19.1",
+      "title": "Loi sur le ministère de la Main-d’oeuvre, de la Sécurité du revenu et de la Formation professionnelle",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.1_loi-sur-le-ministère-de-la-main-doeuvre-de-la-sécurité-du-revenu-et-de-la-formation-professionnelle.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.1_loi-sur-le-ministère-de-la-main-doeuvre-de-la-sécurité-du-revenu-et-de-la-formation-professionnelle.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-19.1",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 90226,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "M-19.1",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-19.1",
+        "title": "Loi sur le ministère de la Main-d’oeuvre, de la Sécurité du revenu et de la Formation professionnelle",
+        "abrogatedBy": "https://legisquebec.gouv.qc.ca/ontology/loi/M-19.2.1",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T20:03:04.241291",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.1_loi-sur-le-ministère-de-la-main-doeuvre-de-la-sécurité-du-revenu-et-de-la-formation-professionnelle.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/M-19.1.pdf",
+        "status": "abrogée",
+        "description": "La loi sur le ministère de la Main-d’œuvre, de la Sécurité du revenu et de la Formation professionnelle visait principalement à régir les fonctions et responsabilités du ministère dans ces domaines. Elle s'appliquait aux secteurs liés à la main-d’œuvre, à la sécurité du revenu et à la formation professionnelle. Le document mentionnait également que le titre du chapitre avait été remplacé par «Loi sur le ministère de la Sécurité du revenu» et que le chapitre était désormais numéroté M-19.2.1. Cette loi fut abrogée le 1er novembre 1995.",
+        "isReplacedBy": "true",
+        "keywords": [
+          "Éditeur officiel du Québec",
+          "chapitre M-19.1",
+          "chapitre M-19.2.1",
+          "formation professionnelle",
+          "loi abrogée",
+          "ministère de la Main-d’œuvre",
+          "responsabilités ministérielles",
+          "réglementation",
+          "secteurs d’activité",
+          "sécurité du revenu",
+          "titre du chapitre"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "M-19.1.2",
+      "title": "Loi sur le ministère de la Recherche, de la Science et de la Technologie",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.1.2_loi-sur-le-ministère-de-la-recherche-de-la-science-et-de-la-technologie.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.1.2_loi-sur-le-ministère-de-la-recherche-de-la-science-et-de-la-technologie.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-19.1.2",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 190288,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "M-19.1.2",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-19.1.2",
+        "title": "Loi sur le ministère de la Recherche, de la Science et de la Technologie",
+        "abrogatedBy": "https://legisquebec.gouv.qc.ca/ontology/loi/M-30.01",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T20:03:27.578328",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.1.2_loi-sur-le-ministère-de-la-recherche-de-la-science-et-de-la-technologie.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/M-19.1.2.pdf",
+        "status": "abrogée",
+        "description": "La Loi sur le ministère de la Recherche, de la Science et de la Technologie visait principalement à encadrer la promotion et le soutien de la recherche, de la science, de la technologie et de l'innovation au Québec. Elle définissait les responsabilités du ministre, l'organisation du ministère, ainsi que la création et le fonctionnement du Conseil de la Science et de la Technologie et des Fonds de soutien à la recherche. La loi prévoyait notamment l'élaboration d'une politique gouvernementale, la gestion des fonds dédiés à différents domaines scientifiques, et la production de rapports d'activités et d'évaluations destinés à l'Assemblée nationale.",
+        "isReplacedBy": "true",
+        "keywords": [
+          "Conseil de la Science et de la Technologie",
+          "Fonds de la recherche en santé du Québec",
+          "Fonds québécois de la recherche sur la nature et les technologies",
+          "Fonds québécois de la recherche sur la société et la culture",
+          "bourses d'excellence",
+          "conseil d'administration",
+          "ministère de la Recherche, de la Science et de la Technologie",
+          "politique de la recherche, de la science, de la technologie et de l'innovation",
+          "promotion de la recherche",
+          "rapport d'activités",
+          "subventions pour dégagements de tâche",
+          "évaluation des politiques"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "M-19.3",
+      "title": "Loi sur le ministère de la Sécurité publique",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.3_loi-sur-le-ministère-de-la-sécurité-publique.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.3_loi-sur-le-ministère-de-la-sécurité-publique.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-19.3",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 137139,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "M-19.3",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-19.3",
+        "title": "Loi sur le ministère de la Sécurité publique",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T20:04:04.014236",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-19.3_loi-sur-le-ministère-de-la-sécurité-publique.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/M-19.3.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur le ministère de la Sécurité publique organise la structure et les fonctions du ministère, dirigé par un ministre et un sous-ministre nommés selon des lois spécifiques. Elle définit les pouvoirs du ministre en matière de sécurité publique, incluant la prévention de la criminalité, la coordination policière, la gestion des établissements de détention, la surveillance de la circulation routière, et la sécurité civile et incendie. La loi institue également un fonds spécial pour le financement des services de police et encadre la signature et l'authenticité des documents ministériels. Enfin, elle prévoit des dispositions transitoires relatives au transfert des fonctions et ressources du ministère du Solliciteur général au ministère de la Sécurité publique.",
+        "keywords": [
+          "Fonds des services de police",
+          "Loi sur la fonction publique",
+          "Loi sur la police",
+          "Loi sur la sécurité civile",
+          "Loi sur la sécurité incendie",
+          "Loi sur la sécurité privée",
+          "Loi sur l’administration publique",
+          "coordination policière",
+          "documents ministériels",
+          "fonction publique",
+          "ministre de la Sécurité publique",
+          "ministère de la Sécurité publique",
+          "ministère du Solliciteur général",
+          "prévention de la criminalité",
+          "services d’agents de probation",
+          "signature électronique",
+          "sous-ministre",
+          "sécurité civile",
+          "sécurité publique",
+          "transfert des fonctions",
+          "établissements de détention"
+        ],
+        "abrogates": "https://legisquebec.gouv.qc.ca/ontology/loi/M-31.01"
+      }
+    },
+    {
+      "legalIdentifier": "M-20",
+      "title": "Loi sur le ministère des Affaires culturelles",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-20_loi-sur-le-ministère-des-affaires-culturelles.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-20_loi-sur-le-ministère-des-affaires-culturelles.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-20",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 136867,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "M-20",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-20",
+        "title": "Loi sur le ministère des Affaires culturelles",
+        "abrogatedBy": "https://legisquebec.gouv.qc.ca/ontology/loi/M-17.1",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T20:04:28.436621",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-20_loi-sur-le-ministère-des-affaires-culturelles.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/M-20.pdf",
+        "status": "abrogée",
+        "description": "La Loi sur le ministère des Affaires culturelles visait principalement à organiser la direction et l'administration du ministère des Affaires culturelles au Québec. Elle s'appliquait aux domaines des arts, des lettres, des bibliothèques, musées, archives, conservatoires et concours artistiques, littéraires ou scientifiques. Le ministre était chargé de favoriser l'épanouissement culturel, de gérer la Commission des biens culturels, d'administrer diverses institutions culturelles et de proposer une politique pour le développement de l'industrie du livre. La loi prévoyait également la gestion du «Prix d’Europe» par l'Académie de musique du Québec, incluant l'attribution de bourses et la tenue de concours.",
+        "isReplacedBy": "true",
+        "keywords": [
+          "Académie de musique du Québec",
+          "Commission des biens culturels du Québec",
+          "Prix d’Europe",
+          "administration publique",
+          "archives",
+          "arts et lettres",
+          "bibliothèques",
+          "bourses",
+          "concours artistiques, littéraires ou scientifiques",
+          "conservatoires de musique et d’art dramatique",
+          "industrie du livre",
+          "ministre",
+          "ministère des Affaires culturelles",
+          "musées nationaux",
+          "politique culturelle",
+          "rapport annuel",
+          "subvention"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "M-22",
+      "title": "Loi sur le ministère des Affaires municipales",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-22_loi-sur-le-ministère-des-affaires-municipales.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-22_loi-sur-le-ministère-des-affaires-municipales.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-22",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 144248,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "M-22",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-22",
+        "title": "Loi sur le ministère des Affaires municipales",
+        "abrogatedBy": "https://legisquebec.gouv.qc.ca/ontology/loi/M-22.1",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T20:05:01.775506",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-22_loi-sur-le-ministère-des-affaires-municipales.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/M-22.pdf",
+        "status": "abrogée",
+        "description": "La Loi sur le ministère des Affaires municipales visait principalement à régir l'administration et la surveillance du système municipal au Québec par le ministre des Affaires municipales et son ministère. Elle s'appliquait aux conseils municipaux de diverses municipalités, excluant celles de Québec et Montréal, et prévoyait la création d'un bureau d'inspecteurs-vérificateurs chargés de contrôler la tenue des livres, la gestion des deniers publics et le respect des lois municipales. La loi établissait aussi les obligations des secrétaires-trésoriers en matière de rapports financiers et les pouvoirs d'enquête des inspecteurs, ainsi que les sanctions en cas de non-conformité. Enfin, elle autorisait le gouvernement à fixer des règlements relatifs à la comptabilité et à la vérification des municipalités.",
+        "isReplacedBy": "true",
+        "keywords": [
+          "fonction publique",
+          "amendes",
+          "comptabilité municipale",
+          "conseils municipaux",
+          "enquête municipale",
+          "gestion des deniers publics",
+          "inspecteurs-vérificateurs",
+          "ministère des Affaires municipales",
+          "rapports financiers",
+          "règlements gouvernementaux",
+          "secrétaire-trésorier",
+          "vérification des comptes"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "M-22.1",
+      "title": "Loi sur le ministère des Affaires municipales, des Régions et de l’Occupation du territoire",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-22.1_loi-sur-le-ministère-des-affaires-municipales-des-régions-et-de-loccupation-du-territoire.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-22.1_loi-sur-le-ministère-des-affaires-municipales-des-régions-et-de-loccupation-du-territoire.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-22.1",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 210509,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "M-22.1",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/M-22.1",
+        "title": "Loi sur le ministère des Affaires municipales, des Régions et de l’Occupation du territoire",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T20:05:14.211858",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/M/M-22.1_loi-sur-le-ministère-des-affaires-municipales-des-régions-et-de-loccupation-du-territoire.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/M-22.1.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur le ministère des Affaires municipales, des Régions et de l’Occupation du territoire établit l'organisation, les responsabilités et les pouvoirs du ministère désormais nommé ministère des Affaires municipales et de l'Habitation. Elle régit principalement l'administration municipale, le développement régional, la gestion de la métropole, ainsi que les politiques d'habitation. Le ministre est chargé de veiller à la bonne administration municipale, de promouvoir la démocratie municipale, de soutenir le développement régional et métropolitain, et de coordonner les actions gouvernementales dans ces domaines. La loi prévoit aussi des mécanismes de contrôle, de formation des membres municipaux, de vérification, d'enquête et de publication des directives ministérielles.",
+        "keywords": [
+          "Commission municipale du Québec",
+          "administration municipale",
+          "coordination interministérielle",
+          "démocratie municipale",
+          "développement régional",
+          "ententes gouvernementales",
+          "formation des membres des conseils municipaux",
+          "habitation",
+          "indicateurs de gestion",
+          "ministère des Affaires municipales et de l'Habitation",
+          "métropole",
+          "vérification et enquête"
+        ],
+        "abrogates": "https://legisquebec.gouv.qc.ca/ontology/loi/M-22"
+      }
     }
   ],
   "statistics": {
     "documentTypes": {
-      "Unknown": 5
+      "Unknown": 11
     },
-    "averageFileSize": 125723,
-    "totalSize": 628614
+    "averageFileSize": 139808,
+    "totalSize": 1537891
   }
 }

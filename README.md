@@ -12,35 +12,46 @@ Ce projet démontre la construction d'un chatbot sophistiqué capable de répond
 
 ## ⚡ Démarrage rapide
 
-### 🚀 Installation automatisée avec Makefile
+### 🚀 Installation simplifiée (3 étapes)
 ```bash
 # 1. Installation des dépendances
 make install
 
-# 2. Configuration de l'environnement Playground
-make playground-env-setup
+# 2. Configuration de l'environnement (clés API)
+make env-setup
 
-# 3. Éditer env/.env.playground.user avec vos clés Azure
-
-# 4. Validation de la configuration
-make playground-env-validate
-
-# 5. Configuration de l'index Azure Search (Ontology-Driven)
-make playground-setup
-
-# 6. Démarrage de l'application Playground
-npm run dev:teamsfx:testtool
-npm run dev:teamsfx:launch-testtool
+# 3. Configuration complète automatique
+make setup-complete
 ```
 
-### 📋 Commandes disponibles
+### 🔍 Vérification
 ```bash
-make help                    # Affiche toutes les commandes disponibles
-make playground-env-setup    # Configuration environnement Playground
-make playground-env-validate # Validation configuration Playground
-make index-status           # Vérifie l'état de l'index
-make index-reindex          # Reconstruit l'index (mode ontology-driven - 5 docs TTL)
-make ontology-driven-setup  # Pipeline complet TTL → Azure Search → Teams AI
+# Vérifier l'état de l'index
+make index-status
+
+# Tester les recherches
+make index-test
+
+# Voir toutes les commandes disponibles
+make help
+```
+
+### 📋 Commandes principales
+```bash
+# Configuration et gestion
+make setup-complete          # ✨ Configuration complète (RECOMMANDÉ)
+make setup-index-only        # Créer seulement l'index
+make populate-content        # Ajouter du contenu à l'index
+
+# Gestion quotidienne  
+make index-status           # Vérifier l'état de l'index
+make index-test             # Tester les recherches
+make index-delete           # Supprimer l'index
+make index-reindex          # Recréer complètement l'index
+
+# Diagnostic
+make env-check              # Vérifier la configuration
+make diagnostic             # Diagnostic complet du système
 ```
 
 ## 📚 Documentation complète

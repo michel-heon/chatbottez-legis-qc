@@ -21,18 +21,29 @@ if [ ! -f "$MANIFEST_FILE" ]; then
     exit 1
 fi
 
-# Create output directories
-mkdir -p src/indexers/data/processed
-mkdir -p src/indexers/data/embeddings
+# Create output directories with letter subdirectories
+PROCESSED_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/processed"
+EMBEDDINGS_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/embeddings"
+mkdir -p "$PROCESSED_DIR"
+mkdir -p "$EMBEDDINGS_DIR"
+
+# Create subdirectories for each letter (A-Z)
+echo "📁 Creating subdirectories for organized file storage..."
+for letter in {A..Z}; do
+    mkdir -p "$PROCESSED_DIR/$letter"
+    mkdir -p "$EMBEDDINGS_DIR/$letter"
+done
 
 # Run content processing
 echo "🔧 Processing PDF content and generating embeddings..."
+FORCE_PARAM=${FORCE:-false}
 node lib/src/indexers/contentProcessor.js \
     "$MANIFEST_FILE" \
     "$SECRET_AZURE_OPENAI_API_KEY" \
     "$BATCH_SIZE" \
-    "src/indexers/data/processed" \
-    "src/indexers/data/embeddings"
+    "$PROCESSED_DIR" \
+    "$EMBEDDINGS_DIR" \
+    "$FORCE_PARAM"
 
 if [ $? -eq 0 ]; then
     echo "✅ Content processing completed successfully"
@@ -40,13 +51,13 @@ if [ $? -eq 0 ]; then
     # Show processing summary
     echo ""
     echo "📋 Content Processing Summary:"
-    ls -la src/indexers/data/processed/ | wc -l | xargs echo "Processed Files:"
-    ls -la src/indexers/data/embeddings/ | wc -l | xargs echo "Embedding Files:"
+    find "$PROCESSED_DIR" -name "*.json" -not -name "errors.log" | wc -l | xargs echo "Processed Files:"
+    find "$EMBEDDINGS_DIR" -name "*.json" | wc -l | xargs echo "Embedding Files:"
     
     # Check for any errors
-    if [ -f "src/indexers/data/processed/errors.log" ]; then
+    if [ -f "$PROCESSED_DIR/errors.log" ]; then
         echo "⚠️  Some files had processing errors:"
-        cat src/indexers/data/processed/errors.log
+        cat "$PROCESSED_DIR/errors.log"
     fi
 else
     echo "❌ Content processing failed"

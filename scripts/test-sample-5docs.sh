@@ -68,10 +68,12 @@ echo ""
 # Étape 4: Traitement du contenu (5 documents max)
 echo "=== ÉTAPE 4: Traitement du contenu (échantillon) ==="
 echo "📊 Traitement des fichiers découverts..."
+PROCESSED_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/processed"
+EMBEDDINGS_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/embeddings"
 node lib/src/indexers/contentProcessor.js \
     "src/indexers/data/manifests/files-manifest-sample.json" \
-    "src/indexers/data/processed" \
-    "src/indexers/data/embeddings" \
+    "$PROCESSED_DIR" \
+    "$EMBEDDINGS_DIR" \
     5  # Limite à 5 documents max
 
 echo ""
