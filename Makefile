@@ -41,6 +41,7 @@ help:
 	@echo "    index-status               - Vérifier l'état de l'index"
 	@echo "    index-test                 - Tester les recherches"
 	@echo "    index-delete               - Supprimer l'index"
+	@echo "    reset-caches               - Reset des caches et configurations"
 	@echo ""
 	@echo "📊 GESTION D'INDEX:"
 	@echo "  index-create               - Créer un nouvel index"
@@ -111,6 +112,28 @@ populate-content: env-check build
 
 # Configuration de l'environnement (alias plus clair)
 env-setup: playground-env-setup
+
+# Reset des caches et fichiers temporaires
+reset-caches: clean
+	@echo "🧹 Reset complet des caches et configurations temporaires..."
+	@echo "📁 Nettoyage des caches Node.js..."
+	@rm -rf node_modules/.cache 2>/dev/null || true
+	@rm -rf .nyc_output 2>/dev/null || true
+	@rm -rf coverage 2>/dev/null || true
+	@echo "🗃️ Nettoyage des fichiers temporaires..."
+	@rm -f *.log *.tmp 2>/dev/null || true
+	@rm -f diagnostic-*.log 2>/dev/null || true
+	@rm -f schema-*.json 2>/dev/null || true
+	@echo "🔄 Arrêt des processus Node.js en cours..."
+	@pkill -f "node.*index.ts" 2>/dev/null || true
+	@pkill -f "nodemon" 2>/dev/null || true
+	@echo "⚡ Synchronisation des fichiers de configuration..."
+	@if [ -f "env/.env.playground.user" ] && [ -f ".localConfigs.playground" ]; then \
+		AZURE_SEARCH_INDEX_NAME=$$(grep AZURE_SEARCH_INDEX_NAME env/.env.playground.user | cut -d'=' -f2); \
+		sed -i "s/AZURE_SEARCH_INDEX_NAME=.*/AZURE_SEARCH_INDEX_NAME=$$AZURE_SEARCH_INDEX_NAME/" .localConfigs.playground; \
+		echo "✅ Synchronisé .localConfigs.playground avec env/.env.playground.user"; \
+	fi
+	@echo "✅ Reset terminé! Vous pouvez maintenant relancer l'application."
 
 # =====================================
 # Aliases de compatibilité (anciens noms)

@@ -21,6 +21,12 @@ lib/
 # devTools
 devTools/
 
+# Logs and temporary files
+*.log
+*.tmp
+diagnostic-*.log
+schema-*.json
+
 # Data files (PDF documents, backups)
 src/indexers/data/*.pdf
 src/indexers/data-original/
