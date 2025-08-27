@@ -5,7 +5,7 @@
 set -e
 
 # Load environment
-ENV_CONFIG=${1:-${ENV_CONFIG:-local}}
+ENV_CONFIG=${1:-${ENV_CONFIG:-playground}}
 MODE=${2:-full}  # full, incremental, schema-only
 source "$(dirname "$0")/env-check.sh"
 

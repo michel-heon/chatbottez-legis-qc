@@ -19,7 +19,7 @@
 # Export ENV_CONFIG to sub-shells
 export ENV_CONFIG
 
-.PHONY: help install build index-setup index-create index-delete index-reindex index-status index-test env-check config-validate clean index-name-set index-config-list index-populate playground-env-setup playground-env-validate data-populate data-sparql-populate conventions-validate ttl-ontology-pipeline ontology-driven-setup ontology-validate ttl-schema-generate ttl-index-create ttl-populate test-index-content
+.PHONY: help install build index-setup index-create index-delete index-reindex index-status index-test env-check env-sync config-validate clean json-data-purge index-name-set index-config-list index-populate playground-env-setup playground-env-validate data-populate data-sparql-populate conventions-validate ttl-ontology-pipeline ontology-driven-setup ontology-validate ttl-schema-generate ttl-index-create ttl-populate test-index-content
 
 # Default target
 help:
@@ -31,6 +31,7 @@ help:
 	@echo "  📋 ÉTAPE 1 - Configuration initiale:"
 	@echo "    install                    - Installer les dépendances"
 	@echo "    env-setup                  - Configurer l'environnement (clés API)"
+	@echo "    env-sync                   - Synchroniser fichiers environnement"
 	@echo ""
 	@echo "  🏗️  ÉTAPE 2 - Créer et peupler l'index:"
 	@echo "    setup-complete             - ✨ Configuration complète (RECOMMANDÉ)"
@@ -57,6 +58,7 @@ help:
 	@echo "🛠️  DÉVELOPPEMENT:"
 	@echo "  build                      - Compiler le projet TypeScript"
 	@echo "  clean                      - Nettoyer les fichiers temporaires"
+	@echo "  json-data-purge            - Purger les fichiers JSON d'embedding et traitement"
 	@echo "  dev                        - Démarrer le serveur de développement"
 	@echo ""
 	@echo "📝 EXEMPLES D'UTILISATION:"
@@ -70,10 +72,19 @@ help:
 	@echo "  make populate-content      # Ajouter des documents"
 	@echo "  make index-test            # Tester les recherches"
 	@echo ""
+	@echo "  # Maintenance et nettoyage:"
+	@echo "  make json-data-purge                    # Purger les fichiers JSON"
+	@echo "  make json-data-purge DRY_RUN=true       # Simulation sans suppression"
+	@echo "  make json-data-purge ENV_CONFIG=local   # Purger l'environnement local"
+	@echo ""
 	@echo "⚙️  ENVIRONNEMENTS DISPONIBLES:"
 	@echo "  ENV_CONFIG=playground      - Environnement de test (par défaut)"
 	@echo "  ENV_CONFIG=local           - Environnement local"
 	@echo "  ENV_CONFIG=dev             - Environnement de développement"
+	@echo ""
+	@echo "🎛️  OPTIONS DISPONIBLES:"
+	@echo "  DRY_RUN=true               - Mode simulation (json-data-purge, index-delete)"
+	@echo "  FORCE=true                 - Forcer l'action sans confirmation (index-delete)"
 	@echo ""
 	@echo "� AIDE RAPIDE:"
 	@echo "  Pour commencer rapidement: make setup-complete"
@@ -85,6 +96,7 @@ SECRET_AZURE_OPENAI_API_KEY ?=
 INDEX_NAME ?= my-documents
 ENV_CONFIG ?= playground
 FORCE ?= false
+DRY_RUN ?= false
 ENVIRONMENT ?= playground
 NODE_ENV ?= development
 
@@ -92,8 +104,15 @@ NODE_ENV ?= development
 # 🚀 COMMANDES PRINCIPALES SIMPLIFIÉES
 # ================================================================
 
+# Synchronisation automatique des fichiers d'environnement
+env-sync:
+	@echo "🔄 Synchronisation des fichiers d'environnement..."
+	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
+	@chmod +x scripts/env-sync.sh
+	@./scripts/env-sync.sh "$(EFFECTIVE_ENV)"
+
 # Configuration complète automatique (recommandée pour débuter)
-setup-complete: install env-check build
+setup-complete: install env-sync env-check build
 	@echo "🚀 Configuration complète du système Azure Search..."
 	@echo "📋 Cela va créer l'index et y ajouter du contenu"
 	$(call check_env_config)
@@ -284,6 +303,17 @@ clean:
 	rm -rf dist/
 	rm -rf node_modules/.cache/
 
+# Purger les fichiers JSON d'embedding et de traitement
+json-data-purge: env-check
+	@echo "🗑️  Purge des fichiers JSON d'embedding et de traitement..."
+	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
+	@chmod +x scripts/json-data-purge.sh
+	@if [ "$(DRY_RUN)" = "true" ]; then \
+		./scripts/json-data-purge.sh "$(EFFECTIVE_ENV)" --dry-run; \
+	else \
+		./scripts/json-data-purge.sh "$(EFFECTIVE_ENV)"; \
+	fi
+
 # Démarrer le serveur de développement
 dev: build
 	@echo "🚀 Démarrage du serveur de développement..."
@@ -335,4 +365,4 @@ ttl-analyze:
 	@echo "📊 Analyse de la structure TTL..."
 	@./scripts/ttl-parser-utils.sh analyze
 
-.PHONY: help install build env-check config-validate clean dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze
+.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze

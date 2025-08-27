@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2025-08-27T15:56:47.591Z",
+  "generatedAt": "2025-08-27T18:59:09.241Z",
   "ttlSource": "legisquebec-metadata-small.ttl",
   "dataSourcePath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl",
-  "totalDocuments": 11,
-  "documentsWithPdf": 11,
+  "totalDocuments": 13,
+  "documentsWithPdf": 13,
   "documentsMissingPdf": 0,
   "documents": [
     {
@@ -48,6 +48,92 @@
           "substances vénéneuses",
           "traitement approprié",
           "vente d’abeilles mères"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "A-19.1",
+      "title": "Loi sur l’aménagement et l’urbanisme",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-19.1_loi-sur-laménagement-et-lurbanisme.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-19.1_loi-sur-laménagement-et-lurbanisme.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 871841,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-19.1",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1",
+        "title": "Loi sur l’aménagement et l’urbanisme",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T16:29:00.695780",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-19.1_loi-sur-laménagement-et-lurbanisme.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-19.1.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur l’aménagement et l’urbanisme institue un régime visant à favoriser un aménagement réfléchi et durable du territoire du Québec, en partageant les responsabilités entre le gouvernement, les communautés métropolitaines, les municipalités régionales de comté et les municipalités locales. Elle s’applique à la planification, à la gestion et à la réglementation de l’aménagement du territoire, incluant la protection des milieux naturels, le développement urbain, agricole et forestier, ainsi que la participation publique. Les principales dispositions portent sur la planification territoriale (plans métropolitains, schémas, plans d’urbanisme), la réglementation (zonage, lotissement, permis), la consultation publique, la protection de certains milieux, et l’administration municipale.",
+        "keywords": [
+          "aménagement du territoire",
+          "communauté métropolitaine",
+          "consultation publique",
+          "développement durable",
+          "milieux humides et hydriques",
+          "municipalité régionale de comté",
+          "plan métropolitain",
+          "planification territoriale",
+          "règlement d’urbanisme",
+          "schéma d’aménagement",
+          "urbanisme",
+          "zonage"
+        ]
+      }
+    },
+    {
+      "legalIdentifier": "A-14",
+      "title": "Loi sur l’aide juridique et sur la prestation de certains autres services juridiques",
+      "documentType": "Unknown",
+      "pdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-14_loi-sur-laide-juridique-et-sur-la-prestation-de-certains-autres-services-juridiques.pdf",
+      "pdfFullPath": "/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-14_loi-sur-laide-juridique-et-sur-la-prestation-de-certains-autres-services-juridiques.pdf",
+      "pdfExists": true,
+      "sourceUrl": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-14",
+      "lastModified": "2025-08-22T11:45:28.000Z",
+      "fileSize": 262814,
+      "metadata": {
+        "type": [
+          "http://www.legalruleml.org/ns/LegalRule",
+          "https://legisquebec.gouv.qc.ca/ontology/Loi"
+        ],
+        "format": "application/pdf",
+        "identifier": "A-14",
+        "source": "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-14",
+        "title": "Loi sur l’aide juridique et sur la prestation de certains autres services juridiques",
+        "downloadStatus": "succès",
+        "enrichedAt": "2025-08-20T16:23:04.840297",
+        "enrichmentMethod": "Azure OpenAI LLM Analysis",
+        "isPartOf": "https://legisquebec.gouv.qc.ca/ontology/collection/lois-codifiees-quebec",
+        "localPdfPath": "/home/parallels/00-GIT/cotechnoe-kb-legis-qc/etl/extract/pdf/A/A-14_loi-sur-laide-juridique-et-sur-la-prestation-de-certains-autres-services-juridiques.pdf",
+        "pdfSource": "https://www.legisquebec.gouv.qc.ca/fr/pdf/lc/A-14.pdf",
+        "status": "en vigueur",
+        "description": "La Loi sur l’aide juridique et sur la prestation de certains autres services juridiques institue un régime d’aide juridique visant à permettre aux personnes admissibles de bénéficier de services juridiques selon les modalités prévues. Elle s’applique principalement à l’aide juridique en matière criminelle, pénale, familiale et administrative, ainsi qu’à certains autres services juridiques spécifiques, notamment pour les victimes de violence sexuelle ou conjugale. Le texte précise les critères d’admissibilité financière, les types de services couverts ou exclus, les modalités de paiement des honoraires et frais, ainsi que l’organisation et les fonctions des organismes chargés de l’aide juridique. Des dispositions communes, pénales et diverses encadrent la mise en œuvre et l’administration du régime.",
+        "keywords": [
+          "Commission des services juridiques",
+          "admissibilité financière",
+          "aide juridique",
+          "centre d’aide juridique",
+          "frais de justice",
+          "honoraires",
+          "matière criminelle",
+          "matière familiale",
+          "matière pénale",
+          "recours administratif",
+          "services juridiques",
+          "victimes de violence sexuelle ou conjugale"
         ]
       }
     },
@@ -506,9 +592,9 @@
   ],
   "statistics": {
     "documentTypes": {
-      "Unknown": 11
+      "Unknown": 13
     },
-    "averageFileSize": 139808,
-    "totalSize": 1537891
+    "averageFileSize": 205580,
+    "totalSize": 2672546
   }
 }
