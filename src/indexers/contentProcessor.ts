@@ -44,6 +44,11 @@ interface EmbeddingData {
     embeddingModel: string;
     generatedAt: string;
     error?: string;
+    metadata?: {
+        totalChunks?: number;
+        successfulChunks?: number;
+        failedChunks?: number;
+    };
 }
 
 /**
@@ -150,7 +155,9 @@ export class ContentProcessor {
         }
         
         const errors: string[] = [];
+        const warnings: string[] = [];
         let processedCount = 0;
+        let partialSuccessCount = 0;
         let skippedCount = 0;
         
         for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
@@ -183,13 +190,31 @@ export class ContentProcessor {
                     this.saveProcessedDocument(processedDoc);
                     
                     // Generate embeddings
+                    let hasEmbeddingErrors = false;
                     if (!processedDoc.error) {
                         const embeddingData = await this.generateEmbeddings(processedDoc);
                         this.saveEmbeddings(embeddingData);
+                        
+                        // Check if there were embedding failures
+                        if (embeddingData.error) {
+                            const warningMsg = `⚠️  ${doc.legalIdentifier}: Content embedding failed - ${embeddingData.error}`;
+                            warnings.push(warningMsg);
+                            hasEmbeddingErrors = true;
+                        } else if (embeddingData.chunkVectors.length < processedDoc.chunks.length) {
+                            const failedChunks = processedDoc.chunks.length - embeddingData.chunkVectors.length;
+                            const warningMsg = `⚠️  ${doc.legalIdentifier}: ${failedChunks} chunk embeddings failed`;
+                            warnings.push(warningMsg);
+                            hasEmbeddingErrors = true;
+                        }
                     }
                     
+                    if (hasEmbeddingErrors) {
+                        partialSuccessCount++;
+                        console.log(`⚠️  Partially completed: ${doc.legalIdentifier} (with embedding issues)`);
+                    } else {
+                        console.log(`✅ Completed: ${doc.legalIdentifier}`);
+                    }
                     processedCount++;
-                    console.log(`✅ Completed: ${doc.legalIdentifier}`);
                     
                 } catch (error) {
                     const errorMsg = `Error processing ${doc.legalIdentifier}: ${error}`;
@@ -212,10 +237,24 @@ export class ContentProcessor {
             console.log(`⚠️  ${errors.length} errors saved to: ${errorLogPath}`);
         }
         
+        // Save warnings log
+        if (warnings.length > 0) {
+            const warningsLogPath = path.join(this.processedDir, 'warnings.log');
+            fs.writeFileSync(warningsLogPath, warnings.join('\n'));
+            console.log(`⚠️  ${warnings.length} warnings saved to: ${warningsLogPath}`);
+        }
+
         console.log(`\n🎉 Processing completed!`);
-        console.log(`✅ Processed: ${processedCount}`);
+        console.log(`✅ Fully processed: ${processedCount - partialSuccessCount}`);
+        console.log(`⚠️  Partially processed: ${partialSuccessCount} (with embedding issues)`);
         console.log(`⏭️  Skipped: ${skippedCount}`);
         console.log(`❌ Errors: ${errors.length}`);
+        
+        // Show specific issues if any
+        if (partialSuccessCount > 0) {
+            console.log(`\n🔍 Documents with embedding issues:`);
+            warnings.forEach(warning => console.log(`   ${warning}`));
+        }
     }
     
     /**
@@ -289,6 +328,8 @@ export class ContentProcessor {
             
             // Generate embeddings for chunks
             const chunkVectors: number[][] = [];
+            let failedChunks = 0;
+            
             for (let i = 0; i < processedDoc.chunks.length; i++) {
                 const chunk = processedDoc.chunks[i];
                 try {
@@ -301,17 +342,29 @@ export class ContentProcessor {
                     }
                 } catch (error) {
                     console.warn(`⚠️  Failed to generate embedding for chunk ${i} of ${processedDoc.legalIdentifier}:`, error);
+                    failedChunks++;
                     // Continue with other chunks
                 }
             }
             
-            return {
+            const result: EmbeddingData = {
                 legalIdentifier: processedDoc.legalIdentifier,
                 contentVector,
                 chunkVectors,
                 embeddingModel: 'text-embedding-ada-002',
                 generatedAt: new Date().toISOString()
             };
+            
+            // Add metadata about failed chunks if any
+            if (failedChunks > 0) {
+                result.metadata = {
+                    totalChunks: processedDoc.chunks.length,
+                    successfulChunks: chunkVectors.length,
+                    failedChunks: failedChunks
+                };
+            }
+            
+            return result;
             
         } catch (error) {
             return {
