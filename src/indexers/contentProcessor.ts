@@ -159,6 +159,7 @@ export class ContentProcessor {
         let processedCount = 0;
         let partialSuccessCount = 0;
         let skippedCount = 0;
+        let currentDocumentIndex = 0; // Compteur global pour tous les documents
         
         for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
             const startIndex = batchIndex * this.batchSize;
@@ -168,22 +169,23 @@ export class ContentProcessor {
             console.log(`\n📦 Processing batch ${batchIndex + 1}/${totalBatches} (documents ${startIndex + 1}-${endIndex})`);
             
             for (const doc of batch) {
+                currentDocumentIndex++; // Incrémenter le compteur pour chaque document
                 try {
                     // Check if already processed (skip only if not in force mode)
                     const processedPath = this.getProcessedFilePath(doc.legalIdentifier);
                     const embeddingPath = this.getEmbeddingFilePath(doc.legalIdentifier);
                     
                     if (!this.force && fs.existsSync(processedPath) && fs.existsSync(embeddingPath)) {
-                        console.log(`⏭️  Skipping ${doc.legalIdentifier} (already processed)`);
+                        console.log(`⏭️  Skipping (${currentDocumentIndex}/${documentsToProcess.length}): ${doc.legalIdentifier} (already processed)`);
                         skippedCount++;
                         continue;
                     }
                     
                     if (this.force && fs.existsSync(processedPath) && fs.existsSync(embeddingPath)) {
-                        console.log(`🔄 Force reprocessing ${doc.legalIdentifier} (overwriting existing files)`);
+                        console.log(`🔄 Force reprocessing (${currentDocumentIndex}/${documentsToProcess.length}): ${doc.legalIdentifier} (overwriting existing files)`);
                     }
                     
-                    console.log(`⚙️  Processing: ${doc.legalIdentifier}`);
+                    console.log(`⚙️  Processing (${currentDocumentIndex}/${documentsToProcess.length}): ${doc.legalIdentifier}`);
                     
                     // Process PDF content
                     const processedDoc = await this.processPDF(doc);
@@ -210,15 +212,15 @@ export class ContentProcessor {
                     
                     if (hasEmbeddingErrors) {
                         partialSuccessCount++;
-                        console.log(`⚠️  Partially completed: ${doc.legalIdentifier} (with embedding issues)`);
+                        console.log(`⚠️  Partially completed (${currentDocumentIndex}/${documentsToProcess.length}): ${doc.legalIdentifier} (with embedding issues)`);
                     } else {
-                        console.log(`✅ Completed: ${doc.legalIdentifier}`);
+                        console.log(`✅ Completed (${currentDocumentIndex}/${documentsToProcess.length}): ${doc.legalIdentifier}`);
                     }
                     processedCount++;
                     
                 } catch (error) {
                     const errorMsg = `Error processing ${doc.legalIdentifier}: ${error}`;
-                    console.error(`❌ ${errorMsg}`);
+                    console.error(`❌ Failed (${currentDocumentIndex}/${documentsToProcess.length}): ${errorMsg}`);
                     errors.push(errorMsg);
                 }
             }
