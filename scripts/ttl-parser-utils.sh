@@ -55,7 +55,7 @@ test_ttl_parser() {
 analyze_ttl_metadata() {
     log_info "Analyzing TTL metadata structure..."
     
-    local ttl_file="/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl/extract/rdf/legisquebec-metadata.ttl"
+    local ttl_file="$EXTERNAL_DATA_SOURCE_PATH/$TTL_METADATA_FILE"
     
     if [ ! -f "$ttl_file" ]; then
         log_error "TTL file not found: $ttl_file"

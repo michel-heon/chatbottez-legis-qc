@@ -1,9 +1,9 @@
 {
-  "name": "legis-qc-index-dev-02",
+  "name": "legis-qc-lois-dev-01",
   "description": "Azure Search index dynamically generated from TTL metadata",
   "version": "2.0.0",
   "generatedFrom": "legisquebec-metadata-small.ttl",
-  "generatedAt": "2025-08-25T18:04:24.289Z",
+  "generatedAt": "2025-08-27T15:56:44.061Z",
   "fields": [
     {
       "name": "id",
@@ -57,26 +57,6 @@
       "name": "title",
       "type": "Edm.String",
       "analyzer": "fr.lucene"
-    },
-    {
-      "searchable": false,
-      "filterable": true,
-      "sortable": false,
-      "facetable": true,
-      "retrievable": true,
-      "description": "Field mapped from TTL predicate: http://www.legalruleml.org/ns/LegalRule",
-      "name": "documentType",
-      "type": "Edm.String"
-    },
-    {
-      "searchable": false,
-      "filterable": true,
-      "sortable": false,
-      "facetable": true,
-      "retrievable": true,
-      "description": "Field mapped from TTL predicate: https://legisquebec.gouv.qc.ca/ontology/Loi",
-      "name": "legalType",
-      "type": "Edm.String"
     },
     {
       "searchable": true,
@@ -162,6 +142,26 @@
       "analyzer": "fr.lucene"
     },
     {
+      "name": "documentType",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Document type classification (from manifest data)"
+    },
+    {
+      "name": "legalType",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true,
+      "description": "Legal document type (Loi, Règlement, etc.)"
+    },
+    {
       "name": "content",
       "type": "Edm.String",
       "searchable": true,
@@ -176,12 +176,8 @@
       "name": "contentVector",
       "type": "Collection(Edm.Single)",
       "searchable": true,
-      "retrievable": false,
-      "filterable": false,
-      "facetable": false,
-      "sortable": false,
       "vectorSearchDimensions": 1536,
-      "vectorSearchProfileName": "default-vector-config",
+      "vectorSearchProfileName": "default",
       "description": "Content embedding vector for semantic search"
     }
   ],
@@ -211,7 +207,7 @@
     ],
     "profiles": [
       {
-        "name": "default-vector-config",
+        "name": "default",
         "algorithmConfigurationName": "hnsw-algorithm"
       }
     ]

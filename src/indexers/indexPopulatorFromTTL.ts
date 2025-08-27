@@ -85,8 +85,8 @@ export class IndexPopulatorFromTTL {
         indexName: string,
         manifestPath: string,
         mode: string = 'incremental',
-        processedDir: string = 'src/indexers/data/processed',
-        embeddingsDir: string = 'src/indexers/data/embeddings'
+        processedDir: string = path.join(process.env.EXTERNAL_DATA_SOURCE_PATH || 'src/indexers/data', 'transform/processed'),
+        embeddingsDir: string = path.join(process.env.EXTERNAL_DATA_SOURCE_PATH || 'src/indexers/data', 'transform/embeddings')
     ) {
         // Initialize Azure Search client
         this.searchClient = new SearchClient<IndexDocument>(
@@ -99,11 +99,255 @@ export class IndexPopulatorFromTTL {
         this.mode = mode;
         this.processedDir = processedDir;
         this.embeddingsDir = embeddingsDir;
-        this.manifest = this.loadManifest();
+        // Load manifest dynamically from TTL instead of pre-generated file
+        this.manifest = this.loadManifestFromTTL();
     }
     
     /**
-     * Load files manifest
+     * Load files manifest from TTL file directly
+     */
+    private loadManifestFromTTL(): FilesManifest {
+        console.log(`📖 Loading TTL metadata directly from source...`);
+        
+        // Get TTL file path from environment or config
+        const ttlPath = process.env.EXTERNAL_DATA_SOURCE_PATH && process.env.TTL_METADATA_FILE 
+            ? path.join(process.env.EXTERNAL_DATA_SOURCE_PATH, process.env.TTL_METADATA_FILE)
+            : this.manifestPath; // fallback to manifest path if TTL not configured
+        
+        console.log(`🔍 TTL Source: ${ttlPath}`);
+        
+        if (!fs.existsSync(ttlPath)) {
+            // Fallback to pre-generated manifest if TTL not found
+            console.warn(`⚠️  TTL file not found: ${ttlPath}, falling back to manifest`);
+            return this.loadManifest();
+        }
+        
+        try {
+            const documents = this.parseTTLDocuments(ttlPath);
+            const manifest: FilesManifest = {
+                documents: documents,
+                totalDocuments: documents.length
+            };
+            
+            console.log(`✅ TTL parsed: ${manifest.totalDocuments} documents found`);
+            
+            // Debug: show found documents
+            if (documents.length > 0) {
+                console.log(`📋 TTL Documents found:`);
+                documents.forEach((doc, index) => {
+                    console.log(`   ${index + 1}. ${doc.legalIdentifier} - ${doc.title}`);
+                });
+            }
+            
+            return manifest;
+            
+        } catch (error) {
+            console.warn(`⚠️  Failed to parse TTL, falling back to manifest:`, error);
+            return this.loadManifest();
+        }
+    }
+    
+    /**
+     * Parse TTL file to extract document metadata
+     */
+    private parseTTLDocuments(ttlPath: string): DocumentManifest[] {
+        const ttlContent = fs.readFileSync(ttlPath, 'utf-8');
+        const documents: DocumentManifest[] = [];
+        
+        // Split TTL into individual document blocks
+        const documentBlocks = this.splitTTLIntoDocuments(ttlContent);
+        
+        for (const block of documentBlocks) {
+            try {
+                const doc = this.parseTTLDocumentBlock(block);
+                if (doc) {
+                    documents.push(doc);
+                }
+            } catch (error) {
+                console.warn(`⚠️  Failed to parse TTL document block:`, error);
+            }
+        }
+        
+        return documents;
+    }
+    
+    /**
+     * Split TTL content into individual document blocks
+     */
+    private splitTTLIntoDocuments(ttlContent: string): string[] {
+        const lines = ttlContent.split('\n');
+        const documentBlocks: string[] = [];
+        let currentBlock: string[] = [];
+        let inDocument = false;
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            // Skip empty lines and comments
+            if (!trimmedLine || trimmedLine.startsWith('#') || trimmedLine.startsWith('@prefix')) {
+                continue;
+            }
+            
+            // Detect start of a new document (URI with ontology/loi/)
+            if (trimmedLine.includes('ontology/loi/') && trimmedLine.startsWith('<')) {
+                // Save previous document if exists
+                if (currentBlock.length > 0) {
+                    documentBlocks.push(currentBlock.join('\n'));
+                }
+                // Start new document
+                currentBlock = [line];
+                inDocument = true;
+            } else if (inDocument) {
+                currentBlock.push(line);
+                
+                // End of document block (line ending with .)
+                if (trimmedLine.endsWith(' .') || trimmedLine === '.') {
+                    documentBlocks.push(currentBlock.join('\n'));
+                    currentBlock = [];
+                    inDocument = false;
+                }
+            }
+        }
+        
+        // Add last document if exists
+        if (currentBlock.length > 0) {
+            documentBlocks.push(currentBlock.join('\n'));
+        }
+        
+        console.log(`📋 Found ${documentBlocks.length} document blocks in TTL`);
+        return documentBlocks;
+    }
+    
+    /**
+     * Parse a single TTL document block into DocumentManifest
+     */
+    private parseTTLDocumentBlock(block: string): DocumentManifest | null {
+        const lines = block.split('\n');
+        let legalIdentifier = '';
+        let title = '';
+        let sourceUrl = '';
+        const metadata: Record<string, any> = {};
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            // Extract document URI and identifier from ontology/loi/
+            if (trimmedLine.includes('ontology/loi/') && trimmedLine.startsWith('<')) {
+                const match = trimmedLine.match(/<https:\/\/legisquebec\.gouv\.qc\.ca\/ontology\/loi\/([^>]+)>/);
+                if (match) {
+                    legalIdentifier = match[1];
+                    // Map to document URL for sourceUrl
+                    sourceUrl = `https://www.legisquebec.gouv.qc.ca/fr/document/lc/${legalIdentifier}`;
+                }
+            }
+            
+            // Extract dcterms:source as alternative source URL
+            if (trimmedLine.includes('dcterms:source')) {
+                const sourceMatch = trimmedLine.match(/<([^>]+)>/);
+                if (sourceMatch) {
+                    sourceUrl = sourceMatch[1];
+                }
+            }
+            
+            // Extract title
+            if (trimmedLine.includes('dcterms:title')) {
+                const titleMatch = trimmedLine.match(/"([^"]+)"/);
+                if (titleMatch) {
+                    title = titleMatch[1];
+                }
+            }
+            
+            // Extract other metadata fields
+            this.extractMetadataField(trimmedLine, 'legis:status', metadata, 'status');
+            this.extractMetadataField(trimmedLine, 'legis:abrogatedBy', metadata, 'abrogatedBy');
+            this.extractMetadataField(trimmedLine, 'legis:downloadStatus', metadata, 'downloadStatus');
+            this.extractMetadataField(trimmedLine, 'legis:enrichmentMethod', metadata, 'enrichmentMethod');
+            this.extractMetadataField(trimmedLine, 'dcterms:format', metadata, 'format');
+            this.extractMetadataField(trimmedLine, 'schema:description', metadata, 'description');
+            
+            // Extract identifier
+            if (trimmedLine.includes('dcterms:identifier')) {
+                const idMatch = trimmedLine.match(/"([^"]+)"/);
+                if (idMatch) {
+                    metadata.identifier = idMatch[1];
+                }
+            }
+            
+            // Extract boolean fields
+            if (trimmedLine.includes('schema:isReplacedBy')) {
+                metadata.isReplacedBy = trimmedLine.includes('true');
+            }
+            
+            // Extract datetime fields
+            if (trimmedLine.includes('legis:enrichedAt')) {
+                const dateMatch = trimmedLine.match(/"([^"]+)"/);
+                if (dateMatch) {
+                    metadata.enrichedAt = dateMatch[1];
+                }
+            }
+            
+            // Extract keywords (multiple values)
+            if (trimmedLine.includes('schema:keywords')) {
+                if (!metadata.keywords) metadata.keywords = [];
+                const keywordMatch = trimmedLine.match(/"([^"]+)"/);
+                if (keywordMatch) {
+                    metadata.keywords.push(keywordMatch[1]);
+                }
+            }
+            
+            // Extract RDF types
+            if (trimmedLine.includes(' a ') && !trimmedLine.includes('schema:')) {
+                if (!metadata.type) metadata.type = [];
+                const typeMatches = trimmedLine.match(/a\s+([^,;.]+)/);
+                if (typeMatches) {
+                    const types = typeMatches[1].split(',').map(t => t.trim());
+                    metadata.type.push(...types);
+                }
+            }
+        }
+        
+        if (!legalIdentifier) {
+            return null;
+        }
+        
+        // Check if PDF exists
+        const pdfPath = this.constructPDFPath(legalIdentifier);
+        
+        return {
+            legalIdentifier,
+            title: title || `Document ${legalIdentifier}`,
+            documentType: 'Loi',
+            pdfPath,
+            pdfFullPath: pdfPath,
+            pdfExists: fs.existsSync(pdfPath),
+            sourceUrl,
+            metadata
+        };
+    }
+    
+    /**
+     * Extract metadata field from TTL line
+     */
+    private extractMetadataField(line: string, property: string, metadata: Record<string, any>, key: string): void {
+        if (line.includes(property)) {
+            const match = line.match(/"([^"]+)"/);
+            if (match) {
+                metadata[key] = match[1];
+            }
+        }
+    }
+    
+    /**
+     * Construct PDF path based on legal identifier
+     */
+    private constructPDFPath(legalIdentifier: string): string {
+        const basePath = process.env.EXTERNAL_DATA_SOURCE_PATH || '/media/psf/Developpement/00-GIT/cotechnoe-kb-legis-qc/etl';
+        const firstLetter = legalIdentifier.charAt(0);
+        return path.join(basePath, 'extract/pdf', firstLetter, `${legalIdentifier}_*.pdf`);
+    }
+    
+    /**
+     * Load files manifest (fallback method)
      */
     private loadManifest(): FilesManifest {
         console.log(`📖 Loading files manifest: ${this.manifestPath}`);
@@ -129,7 +373,7 @@ export class IndexPopulatorFromTTL {
             await this.clearIndex();
         }
         
-        const documentsToProcess = this.getDocumentsToProcess();
+        const documentsToProcess = await this.getDocumentsToProcess();
         console.log(`📋 Found ${documentsToProcess.length} documents to process`);
         
         if (documentsToProcess.length === 0) {
@@ -158,6 +402,10 @@ export class IndexPopulatorFromTTL {
                     await this.uploadBatch(indexDocuments);
                     successCount += indexDocuments.length;
                     console.log(`✅ Batch ${batchIndex + 1} uploaded successfully (${indexDocuments.length} documents)`);
+                    
+                    // Add verification step
+                    console.log(`🔍 Verifying batch upload...`);
+                    await this.verifyBatchUpload(indexDocuments);
                 } else {
                     console.log(`⏭️  Batch ${batchIndex + 1} skipped (no valid documents)`);
                 }
@@ -169,9 +417,10 @@ export class IndexPopulatorFromTTL {
                 errorCount += batch.length;
             }
             
-            // Small delay between batches
+            // Increased delay between batches for better stability
             if (batchIndex < totalBatches - 1) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                console.log('⏳ Waiting 3 seconds before next batch...');
+                await new Promise(resolve => setTimeout(resolve, 3000));
             }
         }
         
@@ -189,18 +438,81 @@ export class IndexPopulatorFromTTL {
     }
     
     /**
+     * Get the subdirectory path based on the first letter of the legal identifier
+     */
+    private getSubdirectoryPath(legalIdentifier: string, baseDir: string): string {
+        const firstLetter = legalIdentifier.charAt(0).toUpperCase();
+        return path.join(baseDir, firstLetter);
+    }
+    
+    /**
+     * Get the full file path for a processed document
+     */
+    private getProcessedFilePath(legalIdentifier: string): string {
+        const subdirectory = this.getSubdirectoryPath(legalIdentifier, this.processedDir);
+        return path.join(subdirectory, `${legalIdentifier}.json`);
+    }
+    
+    /**
+     * Get the full file path for an embeddings document
+     */
+    private getEmbeddingFilePath(legalIdentifier: string): string {
+        const subdirectory = this.getSubdirectoryPath(legalIdentifier, this.embeddingsDir);
+        return path.join(subdirectory, `${legalIdentifier}.json`);
+    }
+    
+    /**
      * Get documents to process based on mode
      */
-    private getDocumentsToProcess(): DocumentManifest[] {
+    private async getDocumentsToProcess(): Promise<DocumentManifest[]> {
+        console.log(`🔍 Checking available documents from TTL manifest...`);
+        console.log(`📊 TTL manifest contains: ${this.manifest.totalDocuments} documents`);
+        
         const availableDocuments = this.manifest.documents.filter(doc => {
-            const processedPath = path.join(this.processedDir, `${doc.legalIdentifier}.json`);
-            return fs.existsSync(processedPath);
+            const processedPath = this.getProcessedFilePath(doc.legalIdentifier);
+            const hasProcessed = fs.existsSync(processedPath);
+            
+            if (!hasProcessed) {
+                console.log(`⚠️  No processed file found for ${doc.legalIdentifier} at ${processedPath}`);
+            }
+            
+            return hasProcessed;
         });
         
+        console.log(`📋 Available documents with processed content: ${availableDocuments.length}/${this.manifest.totalDocuments}`);
+        
         if (this.mode === 'incremental') {
-            // TODO: Implement logic to check which documents are already in the index
-            // For now, return all available documents
-            return availableDocuments;
+            console.log('🔍 Checking existing documents in index for incremental mode...');
+            
+            // Check which documents already exist in the index
+            const existingDocuments = new Set<string>();
+            
+            try {
+                const searchResults = await this.searchClient.search('*', {
+                    select: ['legalIdentifier'],
+                    top: 1000
+                });
+                
+                for await (const result of searchResults.results) {
+                    if (result.document.legalIdentifier) {
+                        existingDocuments.add(result.document.legalIdentifier);
+                    }
+                }
+                
+                console.log(`📊 Found ${existingDocuments.size} existing documents in index`);
+                
+                // Filter out documents that already exist
+                const newDocuments = availableDocuments.filter(doc => 
+                    !existingDocuments.has(doc.legalIdentifier)
+                );
+                
+                console.log(`📋 ${newDocuments.length} new documents to process (${availableDocuments.length - newDocuments.length} already exist)`);
+                return newDocuments;
+                
+            } catch (error) {
+                console.warn('⚠️  Could not check existing documents, processing all:', error);
+                return availableDocuments;
+            }
         }
         
         return availableDocuments;
@@ -265,9 +577,9 @@ export class IndexPopulatorFromTTL {
      */
     private async prepareDocument(doc: DocumentManifest): Promise<IndexDocument | null> {
         // Load processed content
-        const processedPath = path.join(this.processedDir, `${doc.legalIdentifier}.json`);
+        const processedPath = this.getProcessedFilePath(doc.legalIdentifier);
         if (!fs.existsSync(processedPath)) {
-            console.warn(`⚠️  Processed file not found for ${doc.legalIdentifier}`);
+            console.warn(`⚠️  Processed file not found for ${doc.legalIdentifier} at ${processedPath}`);
             return null;
         }
         
@@ -279,7 +591,7 @@ export class IndexPopulatorFromTTL {
         }
         
         // Load embeddings if available
-        const embeddingPath = path.join(this.embeddingsDir, `${doc.legalIdentifier}.json`);
+        const embeddingPath = this.getEmbeddingFilePath(doc.legalIdentifier);
         let embeddingData: EmbeddingData | null = null;
         
         if (fs.existsSync(embeddingPath)) {
@@ -404,6 +716,35 @@ export class IndexPopulatorFromTTL {
                 console.warn(`   ${failure.key}: ${failure.errorMessage}`);
             });
         }
+    }
+    
+    /**
+     * Verify that uploaded documents are actually available in the index
+     */
+    private async verifyBatchUpload(documents: IndexDocument[]): Promise<void> {
+        // Wait a bit for indexing to complete
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        let verified = 0;
+        for (const doc of documents) {
+            try {
+                const searchResults = await this.searchClient.search(`legalIdentifier:${doc.legalIdentifier}`, {
+                    select: ['id', 'legalIdentifier'],
+                    top: 1
+                });
+                
+                const found = await searchResults.results.next();
+                if (!found.done) {
+                    verified++;
+                } else {
+                    console.warn(`⚠️  Document ${doc.legalIdentifier} not found in index after upload`);
+                }
+            } catch (error) {
+                console.warn(`⚠️  Could not verify document ${doc.legalIdentifier}:`, error);
+            }
+        }
+        
+        console.log(`✅ Verified ${verified}/${documents.length} documents in index`);
     }
     
     /**

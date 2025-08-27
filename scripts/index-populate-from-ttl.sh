@@ -38,14 +38,16 @@ fi
 
 # Run population
 echo "🚀 Starting index population..."
+PROCESSED_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/processed"
+EMBEDDINGS_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/embeddings"
 node lib/src/indexers/indexPopulatorFromTTL.js \
     "$SECRET_AZURE_SEARCH_KEY" \
     "$SECRET_AZURE_OPENAI_API_KEY" \
     "$INDEX_NAME" \
     "$MANIFEST_FILE" \
     "$MODE" \
-    "src/indexers/data/processed" \
-    "src/indexers/data/embeddings"
+    "$PROCESSED_DIR" \
+    "$EMBEDDINGS_DIR"
 
 if [ $? -eq 0 ]; then
     echo "✅ Index population completed successfully"

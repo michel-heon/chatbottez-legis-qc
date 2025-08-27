@@ -1,6 +1,6 @@
 #!/bin/bash
-# Enhanced Setup V2 - Complete TTL-driven workflow
-# Usage: ./enhanced-setup-v2.sh [ENV_CONFIG] [MODE]
+# Setup Index Pipeline - Complete TTL-driven workflow
+# Usage: ./setup-index-pipeline.sh [ENV_CONFIG] [MODE]
 
 set -e
 
@@ -9,8 +9,8 @@ ENV_CONFIG=${1:-${ENV_CONFIG:-local}}
 MODE=${2:-full}  # full, incremental, schema-only
 source "$(dirname "$0")/env-check.sh"
 
-echo "🚀 Enhanced Setup V2 - TTL-Driven Architecture"
-echo "================================================"
+echo "🚀 Setup Index Pipeline - TTL-Driven Architecture"
+echo "=================================================="
 echo "📋 Environment: $ENV_CONFIG"
 echo "🔄 Mode: $MODE"
 echo ""
@@ -25,7 +25,7 @@ run_phase() {
     echo "🔧 Running: $script_name"
     
     if [ "$required" = "true" ] || [ "$MODE" = "full" ]; then
-        if ./scripts/$script_name $ENV_CONFIG; then
+        if FORCE="${FORCE:-false}" ./scripts/$script_name $ENV_CONFIG; then
             echo "✅ $phase_name completed successfully"
         else
             echo "❌ $phase_name failed"
@@ -60,7 +60,8 @@ fi
 run_phase "Files Discovery" "ttl-files-discover.sh" "true"
 
 # Phase 4: Content Processing (can be skipped for incremental if already done)
-if [ "$MODE" = "full" ] || [ ! -d "src/indexers/data/processed" ]; then
+PROCESSED_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/processed"
+if [ "$MODE" = "full" ] || [ ! -d "$PROCESSED_DIR" ]; then
     run_phase "Content Processing" "content-process-batch.sh" "false"
 else
     echo "📍 Phase: Content Processing"
@@ -71,7 +72,7 @@ fi
 # Phase 5: Index Population (always run)
 run_phase "Index Population" "index-populate-from-ttl.sh" "true"
 
-echo "🎉 Enhanced Setup V2 completed successfully!"
+echo "🎉 Setup Index Pipeline completed successfully!"
 echo ""
 echo "📊 Summary:"
 echo "  Mode: $MODE"

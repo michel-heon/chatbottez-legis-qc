@@ -38,16 +38,16 @@
 - **Modes** : incremental | full
 - **Usage** : `make index-populate ENV_CONFIG=playground MODE=incremental`
 
-### 6. **enhanced-setup-v2.sh**
+### 6. **setup-index-pipeline.sh**
 - **Rôle** : Orchestrer tout le workflow
 - **Modes** : full | incremental | schema-only
-- **Usage** : `make enhanced-setup-v2 ENV_CONFIG=playground`
+- **Usage** : `make setup-complete ENV_CONFIG=playground`
 
 ## 📋 **Nouvelles Règles Makefile**
 
 ```bash
 # Workflow complet
-make enhanced-setup-v2 ENV_CONFIG=playground
+make setup-complete ENV_CONFIG=playground
 
 # Phases individuelles
 make ttl-analyze ENV_CONFIG=playground

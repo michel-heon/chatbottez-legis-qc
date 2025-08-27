@@ -66,7 +66,7 @@ if [ -z "$EXTERNAL_DATA_SOURCE_PATH" ]; then
 fi
 
 # Verify TTL file exists
-TTL_FILE="$EXTERNAL_DATA_SOURCE_PATH/extract/rdf/legisquebec-metadata.ttl"
+TTL_FILE="$EXTERNAL_DATA_SOURCE_PATH/$TTL_METADATA_FILE"
 if [ ! -f "$TTL_FILE" ]; then
     echo "❌ TTL metadata file not found: $TTL_FILE"
     exit 1
@@ -99,7 +99,9 @@ echo "📋 Processing sample documents using SPARQL queries from TTL..."
 
 # Run TTL-driven data population with correct index name
 echo "🎯 Using TTL-driven indexing: ONLY files defined in $TTL_METADATA_FILE"
-node lib/src/indexers/indexPopulatorFromTTL.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY" "$AZURE_SEARCH_INDEX_NAME" "$EXTERNAL_DATA_SOURCE_PATH/$TTL_METADATA_FILE" "full" "src/indexers/data/processed" "src/indexers/data/embeddings"
+PROCESSED_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/processed"
+EMBEDDINGS_DIR="${EXTERNAL_DATA_SOURCE_PATH}/transform/embeddings"
+node lib/src/indexers/indexPopulatorFromTTL.js "$SECRET_AZURE_SEARCH_KEY" "$SECRET_AZURE_OPENAI_API_KEY" "$AZURE_SEARCH_INDEX_NAME" "$EXTERNAL_DATA_SOURCE_PATH/$TTL_METADATA_FILE" "full" "$PROCESSED_DIR" "$EMBEDDINGS_DIR"
 
 echo ""
 echo "🎉 SPARQL Data Population completed!"

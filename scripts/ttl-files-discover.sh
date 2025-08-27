@@ -16,7 +16,12 @@ mkdir -p src/indexers/data/manifests
 
 # Run file discovery
 echo "📊 Scanning TTL for file references..."
-TTL_FILE_PATH="$EXTERNAL_DATA_SOURCE_PATH/extract/rdf/${TTL_METADATA_FILE:-legisquebec-metadata.ttl}"
+# Check if TTL_METADATA_FILE already contains the path
+if [[ "$TTL_METADATA_FILE" == extract/rdf/* ]]; then
+    TTL_FILE_PATH="$EXTERNAL_DATA_SOURCE_PATH/$TTL_METADATA_FILE"
+else
+    TTL_FILE_PATH="$EXTERNAL_DATA_SOURCE_PATH/extract/rdf/${TTL_METADATA_FILE:-legisquebec-metadata.ttl}"
+fi
 echo "📁 Using TTL file: $TTL_FILE_PATH"
 
 node lib/src/indexers/ttlFilesDiscovery.js \
