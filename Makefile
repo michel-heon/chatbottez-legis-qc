@@ -1,6 +1,14 @@
 # Makefile for Azure AI Search Index Management - Ontology-Driven Architecture
 # Microsoft 365 Teams Agent - Chatbot Legis QC
-# Version: v1.3.0-cleanup
+# Version: v1.4.0-ui-cleanup
+#
+# CHANGELOG v1.4.0 (2025-08-28):
+# - UI CLEANUP: Suppression des icônes excessives pour améliorer la lisibilité
+# - DIAGNOSTIC TOOLS: Ajout de règles make réutilisables (index-summary, index-warnings)
+# - ERROR ANALYSIS: Script complet d'analyse des erreurs selon conventions projet
+# - MAKEFILE CLEANUP: Interface utilisateur plus professionnelle et lisible
+# - EXIT CODE FIX: Gestion appropriée des codes de sortie pour les commandes de diagnostic
+# - ENVIRONMENT SUPPORT: Support multi-environnement (playground/local) pour toutes les nouvelles commandes
 #
 # CHANGELOG v1.3.0 (2025-08-26):
 # - NETTOYAGE COMPLET: Suppression des doublons de scripts obsolètes (45→34 scripts)
