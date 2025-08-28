@@ -56,6 +56,13 @@ export interface AzureAISearchDataSourceOptions {
      * Azure AI Search endpoint.
      */
     azureAISearchEndpoint: string;
+
+    /**
+     * Strictness level for document relevance filtering (1-5).
+     * 1 = Very permissive, 5 = Very strict. Default is 3.
+     * Higher values filter out more documents that are less relevant.
+     */
+    strictness?: number;
 }
 
 /**
@@ -126,21 +133,37 @@ export class AzureAISearchDataSource implements DataSource {
         // Detect if user is asking for a specific legal identifier
         const legalIdMatch = query.match(/\b([A-Z]-\d+(?:\.\d+)?)\b/);
         
+        // Get strictness from options (default: 3)
+        const strictness = this.options.strictness || 3;
+        
+        // Azure SDK normalizes all scores to 0-1, so we use the same threshold for both
+        const threshold = this.getStrictnessThreshold(strictness);
+
         const searchOptions: any = {
             searchFields: ["title", "description", "content"],
             select: selectedFields as any,
-            top: 10, // Limite explicite à 10 documents maximum
+            top: 20, // Limite explicite à 20 documents maximum
+            // Utiliser la recherche hybride simple (texte + vecteur)
+            queryType: "simple",
+            searchMode: "any", // Mode permissif pour de meilleurs résultats
+            minimumCoverage: 80, // Exige 80% de couverture des résultats pour la qualité
+            // Strictness équivalent Azure AI Foundry (seuil de pertinence)
+            scoringStatistics: "global", // Améliore la cohérence du scoring
             vectorSearchOptions: {
                 queries: [
                     {
                         kind: "vector",
                         fields: ["contentVector"],
-                        kNearestNeighborsCount: 5, // Augmenté pour supporter plus de documents vectoriels
-                        vector: queryVector
+                        kNearestNeighborsCount: 20, // Documents vectoriels correspondant au top (recherche équilibrée)
+                        vector: queryVector,
+                        // Équivalent strictness pour la recherche vectorielle
+                        threshold: threshold // Seuil de similarité vectorielle basé sur strictness
                     }
                 ]
             },
         };
+
+        console.log(`🎯 Strictness configurée: ${strictness} (seuil: ${threshold})`);
         
         // If specific legal ID mentioned, prioritize exact match
         if (legalIdMatch) {
@@ -163,7 +186,58 @@ export class AzureAISearchDataSource implements DataSource {
             totalResults++;
         }
         
-        console.log(`📊 Azure Search a retourné ${totalResults} documents pour la requête: "${query}"`);
+        console.log(`📊 Azure Search a retourné ${totalResults} documents bruts pour la requête: "${query}"`);
+
+        // Debug: afficher la structure d'un résultat
+        if (resultsArray.length > 0) {
+            const firstResult = resultsArray[0];
+            console.log('🔧 DEBUG Structure du premier résultat:');
+            console.log('  - Keys:', Object.keys(firstResult));
+            console.log('  - @search.score:', firstResult['@search.score']);
+            console.log('  - score:', firstResult.score);
+            if (firstResult.document) {
+                console.log('  - document keys:', Object.keys(firstResult.document));
+                console.log('  - document.legalIdentifier:', firstResult.document.legalIdentifier);
+            }
+        }
+
+        // Apply strictness filtering
+        const filteredResults = this.filterByStrictness(resultsArray, strictness);
+        
+        // Sort results: prioritize "en vigueur" and null status over "abrogée"
+        const sortedResults = filteredResults.sort((a, b) => {
+            const statusA = a.document.legalStatus;
+            const statusB = b.document.legalStatus;
+            
+            // Priority order: "en vigueur" > null > "modifiée" > "abrogée"
+            const getPriority = (status: string) => {
+                if (status === "en vigueur") return 4;
+                if (status === null || status === "null") return 3;
+                if (status === "modifiée") return 2;
+                if (status === "abrogée") return 1;
+                return 0;
+            };
+            
+            const priorityA = getPriority(statusA);
+            const priorityB = getPriority(statusB);
+            
+            if (priorityA !== priorityB) {
+                return priorityB - priorityA; // Descending priority
+            }
+            
+            // If same status, sort by score (descending)
+            return (b.score || 0) - (a.score || 0);
+        });
+        
+        const filteredCount = sortedResults.length;
+        
+        console.log(`🎯 Après filtrage strictness (${strictness}): ${filteredCount} documents conservés (${totalResults - filteredCount} filtrés)`);
+        console.log(`📊 Tri appliqué: lois en vigueur priorisées sur lois abrogées`);
+
+        if (filteredCount === 0) {
+            console.log(`⚠️  Strictness trop élevée (${strictness}) - aucun document suffisamment pertinent`);
+            return { output: "AUCUNE_DONNEE_DISPONIBLE", length: 0, tooLong: false };
+        }
 
         // Concatenate the documents string into a single document
         // until the maximum token limit is reached. This can be specified in the prompt template.
@@ -173,7 +247,7 @@ export class AzureAISearchDataSource implements DataSource {
         
         console.log(`📊 Limite de tokens pour données: ${maxTokens}`);
         
-        for (const result of resultsArray) {
+        for (const result of sortedResults) {
             // Limiter le contenu pour éviter la surcharge de tokens
             const fullContent = result.document.content || result.document.description || "";
             // Tronquer le contenu à 1000 caractères max pour économiser les tokens
@@ -224,6 +298,54 @@ Contenu: ${documentContent}
         }
 
         return { output: doc, length: usedTokens, tooLong: usedTokens > maxTokens };
+    }
+
+    /**
+     * Calculate strictness threshold for result filtering.
+     * Maps AI Foundry strictness (1-5) to search score threshold
+     * Note: Azure SDK normalizes scores to 0-1 range, typically 0.01-0.05 for good matches
+     */
+    private getStrictnessThreshold(strictness: number = 3): number {
+        // Map strictness 1-5 to threshold for Azure SDK normalized scores (0-1)
+        const thresholds = {
+            1: 0.005, // Very permissive - accept most results
+            2: 0.010, // Permissive - good for broad searches  
+            3: 0.020, // Default (balanced) - reasonably relevant
+            4: 0.030, // Strict - highly relevant only
+            5: 0.040  // Very strict - only top matches
+        };
+        return thresholds[Math.max(1, Math.min(5, strictness))] || 0.020;
+    }
+
+    /**
+     * Filter results based on strictness level
+     */
+    private filterByStrictness(results: any[], strictness: number = 3): any[] {
+        const threshold = this.getStrictnessThreshold(strictness);
+        
+        return results.filter(result => {
+            // Azure Search SDK peut avoir le score dans différents endroits
+            const score = result['@search.score'] || result.score || (result.document && result.document['@search.score']) || 0;
+            const isRelevant = score >= threshold;
+            
+            // Debug pour voir la structure
+            if (results.indexOf(result) === 0) {
+                console.log('� DEBUG Premier résultat structure:', {
+                    '@search.score': result['@search.score'],
+                    'score': result.score,
+                    'document@search.score': result.document && result.document['@search.score'],
+                    'finalScore': score,
+                    'threshold': threshold
+                });
+            }
+            
+            if (!isRelevant) {
+                const docId = (result.document && result.document.legalIdentifier) || result.legalIdentifier || 'UNKNOWN';
+                console.log(`🔍 Document filtré par strictness: ${docId} (score: ${score.toFixed(3)} < ${threshold})`);
+            }
+            
+            return isRelevant;
+        });
     }
 
     /**
