@@ -5,6 +5,62 @@ All notable changes to the Chatbot Legis QC project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.7.0-ui-diagnostic-tools] - 2025-08-28 ✨ OUTILS DIAGNOSTIC ET NETTOYAGE UI
+
+### 🎨 UI/UX Improvements
+- **UI CLEANUP**: Suppression des icônes excessives pour améliorer la lisibilité
+- **MAKEFILE CLEANUP**: Interface utilisateur plus professionnelle et lisible
+- Suppression de tous les émojis superflus des commandes help pour une meilleure expérience développeur
+
+### 🔧 Diagnostic Tools
+- **DIAGNOSTIC TOOLS**: Ajout de règles make réutilisables (`index-summary`, `index-warnings`)
+- **ERROR ANALYSIS**: Script complet d'analyse des erreurs selon conventions projet (`tests/documents-error-analysis.js`)
+- **EXIT CODE FIX**: Gestion appropriée des codes de sortie pour les commandes de diagnostic
+- **ENVIRONMENT SUPPORT**: Support multi-environnement (playground/local) pour toutes les nouvelles commandes
+
+### ✨ Added
+- Nouvelle commande `make index-summary` : Affichage du sommaire des documents indexés et identification des problèmes
+- Nouvelle commande `make index-warnings` : Analyse détaillée des avertissements d'indexation
+- Script d'analyse complète des erreurs avec validation des documents critiques
+- Support multi-environnement pour toutes les nouvelles fonctionnalités
+
+### 🏗️ Technical Infrastructure
+- Intégration complète des outils de diagnostic dans le système make
+- Amélioration de la robustesse des scripts avec gestion d'erreur appropriée
+- Documentation technique mise à jour pour les nouveaux outils
+
+## [v1.4.0] - 2025-08-28 🔍 AMÉLIORATIONS DIAGNOSTIC ET SURVEILLANCE
+
+### 🔧 Diagnostic Enhancements
+- **DIAGNOSTIC ENHANCEMENTS**: Amélioration des outils de diagnostic et d'analyse
+- **INDEXATION MONITORING**: Outils de surveillance de l'indexation en temps réel
+- **MAINTENANCE WORKFLOWS**: Flux de travail de maintenance simplifiés
+
+### ✨ Added
+- Outils avancés de surveillance de l'indexation
+- Amélioration des workflows de maintenance
+- Diagnostic en temps réel des processus d'indexation
+
+## [v1.3.0] - 2025-08-26 🧹 NETTOYAGE ARCHITECTURE COMPLÈTE
+
+### 🏗️ Architecture Cleanup
+- **NETTOYAGE COMPLET**: Suppression des doublons de scripts obsolètes (45→34 scripts)
+- **NETTOYAGE INDEX STATUS**: Correction rapport pour vérifier uniquement l'index configuré
+- **NETTOYAGE ARCHITECTURE**: Élimination vérifications multiples d'index legacy
+- **NETTOYAGE ENVIRONNEMENT**: Focus sur variable AZURE_SEARCH_INDEX_NAME unique
+- **NETTOYAGE DOCUMENTATION**: Réorganisation docs/ avec suppression fichiers racine obsolètes
+- **NETTOYAGE CONVENTIONS**: Mise en conformité structure projet (docs/, scripts/, src/)
+
+### 🚀 Optimizations
+- **OPTIMISATION**: Priorisation approche ontology-driven (playground-setup → ontology-driven-setup)
+- **REFACTORISATION ONTOLOGY-DRIVEN**: Transformation complète des règles utilitaires en règles ontology-driven
+- **ENVIRONNEMENT PAR DÉFAUT**: ENV_CONFIG=playground (ontology-driven ready)
+
+### 🏗️ Infrastructure
+- Restructuration complète du système de scripts
+- Élimination des redondances architecturales
+- Mise en conformité avec les conventions de nommage obligatoires
+
 ## [2.1.0] - 2025-08-25 🔥 CRITIQUE - Résolution Bug Hallucination Juridique
 
 ### ⚠️ PROBLÈME RÉSOLU

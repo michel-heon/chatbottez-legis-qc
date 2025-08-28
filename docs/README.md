@@ -1,33 +1,65 @@
-# 📚 Documentation - Chatbot Legis QC
+# 📚 D## 📋 Navigation rapide
 
-Bienvenue dans la documentation complète du projet **Chatbot Legis Q### Ajout de nouveaux documents
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [🚀 Guide de démarrage](./getting-started.md) | Installation et configuration complète | Tous |
+| [⚙️ Configuration](./configuration.md) | Variables d'environnement et paramètres | Développeurs |
+| [🛠️ Commandes Make](./make-commands.md) | Référence complète des commandes disponibles | Utilisateurs |
+| [🔧 Dépannage](./troubleshooting.md) | Solutions aux problèmes courants | Support |
+| [👩‍💻 Guide développeur](./developer-guide.md) | Architecture et conventions | Développeurs |
+| [🤖 Guide Agent IA](./ai-agent-guidelines.md) | Conventions pour assistants IA | Agents IA |
+
+### Documents spécialisés
+| Document | Description |
+|----------|-------------|
+| [📝 Conventions](./NAMING_CONVENTIONS.md) | Standards de nommage obligatoires |
+| [🔍 Gestion Azure](./azure-search-management.md) | Guide Azure AI Search avancé |
+| [⚡ SPARQL/RDF](./apache-jena-integration.md) | Intégration Apache Jena |
+| [🎮 Playground](./playground-guide.md) | Microsoft 365 Agents |
+| [📜 Scripts](./scripts-reference.md) | Documentation technique scripts |ion - Chatbot Legis QC
+
+## 🎯 Vue d'ensemble
+
+Système de gestion d'index juridique utilisant Azure AI Search avec architecture ontology-driven pour Microsoft 365 Teams.
+
+## 📋 Navigation rapide
+
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [🚀 Guide de démarrage](./getting-started.md) | Installation et configuration complète | Tous |
+| [⚙️ Configuration](./configuration.md) | Variables d'environnement et paramètres | Développeurs |
+| [�️ Commandes Make](./make-commands.md) | Référence complète des commandes disponibles | Utilisateurs |
+| [🔧 Dépannage](./troubleshooting.md) | Solutions aux problèmes courants | Support |
+| [👩‍💻 Guide développeur](./developer-guide.md) | Architecture et conventions | Développeurs |
+
+## ⚡ Démarrage ultra-rapide
+
 ```bash
-# 1. Placer les fichiers .md dans src/indexers/new-data/
-# 2. Indexer
-make documents-add SECRET_SECRET_AZURE_SEARCH_KEY=key SECRET_AZURE_OPENAI_API_KEY=key
+# Configuration en 3 étapes
+make install                # 1. Installer les dépendances
+make env-setup             # 2. Configurer l'environnement  
+make setup-complete        # 3. Créer l'index et peupler
+
+# Vérification
+make index-status          # État de l'index
+make index-test           # Tester les recherches
 ```
 
-### 2. Test et validation
-```bash
-# Vérifier l'index
-make index-status SECRET_SECRET_AZURE_SEARCH_KEY=key
+## 🌍 Environnements disponibles
 
-# Démarrer l'application
-make dev
-```conversationnel Microsoft 365 Teams avec capacités RAG (Retrieval Augmented Generation) alimenté par Azure AI Search.
+- **`playground`** (défaut) - Environnement de test Microsoft 365 Agents
+- **`local`** - Développement local
+- **`dev`** - Environnement de développement
 
-## 🗂️ Organisation de la documentation
+## 📞 Support
 
-### 📖 Guides utilisateur
-- **[playground-guide.md](./playground-guide.md)** - Guide complet Microsoft 365 Agents Playground
-- **[azure-search-management.md](./azure-search-management.md)** - Guide complet de gestion de l'index Azure AI Search
-- **[setup-guide.md](./setup-guide.md)** - Guide d'installation et configuration pas à pas
+- **Commandes** : `make help`
+- **Documentation** : Consultez les guides ci-dessus
+- **Diagnostic** : `make diagnostic`
 
-### 🔧 Référence technique
-- **[scripts-reference.md](./scripts-reference.md)** - Documentation technique détaillée des scripts
-- **[apache-jena-integration.md](./apache-jena-integration.md)** - Guide d'intégration Apache Jena pour SPARQL et traitement RDF/TTL
-- **[troubleshooting-ontology-driven.md](./troubleshooting-ontology-driven.md)** - Guide de dépannage pour l'architecture ontology-driven
-- **[troubleshooting-azure-search-vector-fields.md](./troubleshooting-azure-search-vector-fields.md)** - Résolution des problèmes de champs vectoriels Azure Search
+---
+
+*Version documentation : v1.7.0-ui-diagnostic-tools | Dernière mise à jour : 2025-08-28*
 
 ### 🆘 Dépannage
 - **[🚀 Référence Rapide](./quick-troubleshooting-reference.md)** - Solutions express et one-liners
