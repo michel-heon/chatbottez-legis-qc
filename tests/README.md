@@ -84,4 +84,25 @@ node tests/debug-status.js
 
 ---
 
+## 🔄 Règles de Développement
+
+### ⚠️ **PRIORITÉ RÉUTILISABILITÉ**
+**Avant de créer un nouveau script de test/debug :**
+
+1. **VÉRIFIER** si un script existant peut être modifié/étendu
+2. **RÉUTILISER** les scripts dans `tests/` en priorité  
+3. **ÉVITER** la création de nouveaux scripts sauf nécessité absolue
+4. **DOCUMENTER** toute modification dans ce README
+
+### 📋 **Guide de Réutilisation**
+- **Diagnostic général** → `debug-status.js` 
+- **Test correction A-3** → `simulate-fixed-search.js`
+- **Debug tri/priorité** → `test-sorting-logic.js`
+- **Problèmes scores** → `test-sdk-thresholds.js`  
+- **Investigation A-3** → `debug-a3-investigation.js`
+
+**Objectif** : Maintenir un workspace propre et éviter la prolifération de scripts redondants.
+
+---
+
 *Ces scripts valident que la correction critique du problème de priorisation légale fonctionne correctement.*
