@@ -3,7 +3,7 @@
   "description": "Azure Search index dynamically generated from TTL metadata",
   "version": "2.0.0",
   "generatedFrom": "legisquebec-metadata.ttl",
-  "generatedAt": "2025-08-27T19:30:08.577Z",
+  "generatedAt": "2025-08-28T10:12:28.360Z",
   "fields": [
     {
       "name": "id",
@@ -209,6 +209,34 @@
       {
         "name": "default",
         "algorithmConfigurationName": "hnsw-algorithm"
+      }
+    ]
+  },
+  "semantic": {
+    "configurations": [
+      {
+        "name": "default",
+        "prioritizedFields": {
+          "titleField": {
+            "fieldName": "title"
+          },
+          "prioritizedContentFields": [
+            {
+              "fieldName": "content"
+            },
+            {
+              "fieldName": "description"
+            }
+          ],
+          "prioritizedKeywordsFields": [
+            {
+              "fieldName": "keywords"
+            },
+            {
+              "fieldName": "legalIdentifier"
+            }
+          ]
+        }
       }
     ]
   },

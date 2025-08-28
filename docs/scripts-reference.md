@@ -28,7 +28,26 @@ AZURE_OPENAI_DEPLOYMENT_NAME
 
 # Optionnelles mais recommandées
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME
+
+# IMPORTANT: Variables avec préfixe SECRET_
+# Variables sensibles masquées dans les logs
+SECRET_AZURE_OPENAI_API_KEY     # Clé API Azure OpenAI (sensible)
+SECRET_AZURE_SEARCH_KEY         # Clé d'accès Azure Search (sensible)
+
+# Variables standard sans préfixe SECRET_
+AZURE_SEARCH_INDEX_NAME         # Nom de l'index (non sensible)
+AZURE_SEARCH_ENDPOINT           # URL du service (non sensible)
 ```
+
+#### ⚠️ Convention de sécurité des variables
+**IMPORTANT** : Les variables sensibles utilisent le préfixe `SECRET_` selon les conventions Microsoft 365 Agents Toolkit :
+
+- **❌ N'utilisez pas** : `AZURE_OPENAI_API_KEY` (visible dans les logs)  
+- **✅ Utilisez** : `SECRET_AZURE_OPENAI_API_KEY` (masquée dans les logs)
+
+- **✅ Variable standard** : `AZURE_SEARCH_INDEX_NAME` (nom d'index non sensible)
+
+Ces variables `SECRET_*` sont automatiquement masquées dans les logs et bénéficient d'un traitement sécurisé.
 
 #### Logique de validation
 1. **Existence** : Vérification de la définition des variables

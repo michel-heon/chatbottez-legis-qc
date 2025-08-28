@@ -149,14 +149,20 @@ sparql --version
 
 2. **Configuration des clés Azure** dans `env/.env.playground.user`:
    ```bash
+   # ⚠️ IMPORTANT: Variables sensibles avec préfixe SECRET_
    SECRET_AZURE_OPENAI_API_KEY=<your-openai-api-key>
    AZURE_OPENAI_ENDPOINT=<your-openai-endpoint>
    AZURE_OPENAI_DEPLOYMENT_NAME=<your-deployment-name>
    AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=<your-embedding-deployment>
    SECRET_AZURE_SEARCH_KEY=<your-search-key>
    AZURE_SEARCH_ENDPOINT=<your-search-endpoint>
-   AZURE_SEARCH_INDEX_NAME=index-data-sample
+   AZURE_SEARCH_INDEX_NAME=legis-qc-index-full-01
    ```
+
+   **🔐 Convention de sécurité** :
+   - Variables sensibles : `SECRET_AZURE_OPENAI_API_KEY`, `SECRET_AZURE_SEARCH_KEY`
+   - Variables standard : `AZURE_SEARCH_INDEX_NAME` (nom d'index non sensible)
+   - Variables `SECRET_*` automatiquement masquées dans les logs
 
 3. **Validation de la configuration**
    ```bash

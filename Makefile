@@ -23,45 +23,47 @@ export ENV_CONFIG
 
 # Default target
 help:
-	@echo "🔍 Azure AI Search - Système de gestion d'index juridique"
-	@echo "=========================================================="
+	@echo "Azure AI Search - Système de gestion d'index juridique"
+	@echo "======================================================="
 	@echo ""
-	@echo "🚀 COMMANDES PRINCIPALES (pour débuter):"
+	@echo "COMMANDES PRINCIPALES (pour débuter):"
 	@echo ""
-	@echo "  📋 ÉTAPE 1 - Configuration initiale:"
+	@echo "  ÉTAPE 1 - Configuration initiale:"
 	@echo "    install                    - Installer les dépendances"
 	@echo "    env-setup                  - Configurer l'environnement (clés API)"
 	@echo "    env-sync                   - Synchroniser fichiers environnement"
 	@echo ""
-	@echo "  🏗️  ÉTAPE 2 - Créer et peupler l'index:"
-	@echo "    setup-complete             - ✨ Configuration complète (RECOMMANDÉ)"
+	@echo "  ÉTAPE 2 - Créer et peupler l'index:"
+	@echo "    setup-complete             - Configuration complète (RECOMMANDÉ)"
 	@echo "    setup-index-only           - Créer l'index uniquement"
 	@echo "    populate-content           - Ajouter du contenu à l'index existant"
 	@echo ""
-	@echo "  🔧 ÉTAPE 3 - Gestion courante:"
+	@echo "  ÉTAPE 3 - Gestion courante:"
 	@echo "    index-status               - Vérifier l'état de l'index"
 	@echo "    index-test                 - Tester les recherches"
 	@echo "    index-delete               - Supprimer l'index"
 	@echo "    reset-caches               - Reset des caches et configurations"
 	@echo ""
-	@echo "📊 GESTION D'INDEX:"
+	@echo "GESTION D'INDEX:"
 	@echo "  index-create               - Créer un nouvel index"
 	@echo "  index-populate             - Peupler avec des documents"
 	@echo "  index-reindex              - Recréer complètement l'index"
 	@echo "  index-config-list          - Lister les configurations"
 	@echo ""
-	@echo "🔍 DIAGNOSTIC ET VALIDATION:"
+	@echo "DIAGNOSTIC ET VALIDATION:"
 	@echo "  env-check                  - Vérifier la configuration"
 	@echo "  config-validate            - Valider Azure Search"
 	@echo "  diagnostic                 - Diagnostic complet du système"
+	@echo "  index-summary              - Afficher le sommaire des documents indexés et problèmes"
+	@echo "  index-warnings             - Analyser les avertissements d'indexation"
 	@echo ""
-	@echo "🛠️  DÉVELOPPEMENT:"
+	@echo "DÉVELOPPEMENT:"
 	@echo "  build                      - Compiler le projet TypeScript"
 	@echo "  clean                      - Nettoyer les fichiers temporaires"
 	@echo "  json-data-purge            - Purger les fichiers JSON d'embedding et traitement"
 	@echo "  dev                        - Démarrer le serveur de développement"
 	@echo ""
-	@echo "📝 EXEMPLES D'UTILISATION:"
+	@echo "EXEMPLES D'UTILISATION:"
 	@echo "  # Configuration complète pour un débutant:"
 	@echo "  make install"
 	@echo "  make env-setup"
@@ -71,22 +73,24 @@ help:
 	@echo "  make index-status          # Vérifier l'état"
 	@echo "  make populate-content      # Ajouter des documents"
 	@echo "  make index-test            # Tester les recherches"
+	@echo "  make index-summary         # Afficher le sommaire et identifier les problèmes"
+	@echo "  make index-warnings        # Analyser les avertissements"
 	@echo ""
 	@echo "  # Maintenance et nettoyage:"
 	@echo "  make json-data-purge                    # Purger les fichiers JSON"
 	@echo "  make json-data-purge DRY_RUN=true       # Simulation sans suppression"
 	@echo "  make json-data-purge ENV_CONFIG=local   # Purger l'environnement local"
 	@echo ""
-	@echo "⚙️  ENVIRONNEMENTS DISPONIBLES:"
+	@echo "ENVIRONNEMENTS DISPONIBLES:"
 	@echo "  ENV_CONFIG=playground      - Environnement de test (par défaut)"
 	@echo "  ENV_CONFIG=local           - Environnement local"
 	@echo "  ENV_CONFIG=dev             - Environnement de développement"
 	@echo ""
-	@echo "🎛️  OPTIONS DISPONIBLES:"
+	@echo "OPTIONS DISPONIBLES:"
 	@echo "  DRY_RUN=true               - Mode simulation (json-data-purge, index-delete)"
 	@echo "  FORCE=true                 - Forcer l'action sans confirmation (index-delete)"
 	@echo ""
-	@echo "� AIDE RAPIDE:"
+	@echo "AIDE RAPIDE:"
 	@echo "  Pour commencer rapidement: make setup-complete"
 	@echo "  Pour de l'aide: consultez ./docs/setup-guide.md"
 
@@ -106,26 +110,26 @@ NODE_ENV ?= development
 
 # Synchronisation automatique des fichiers d'environnement
 env-sync:
-	@echo "🔄 Synchronisation des fichiers d'environnement..."
+	@echo "Synchronisation des fichiers d'environnement..."
 	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
 	@chmod +x scripts/env-sync.sh
 	@./scripts/env-sync.sh "$(EFFECTIVE_ENV)"
 
 # Configuration complète automatique (recommandée pour débuter)
 setup-complete: install env-sync env-check build
-	@echo "🚀 Configuration complète du système Azure Search..."
-	@echo "📋 Cela va créer l'index et y ajouter du contenu"
+	@echo "Configuration complète du système Azure Search..."
+	@echo "Cela va créer l'index et y ajouter du contenu"
 	$(call check_env_config)
 	@chmod +x scripts/setup-index-pipeline.sh
 	@./scripts/setup-index-pipeline.sh "$(ENV_CONFIG)" "full"
 
 # Créer seulement l'index (sans contenu)
 setup-index-only: env-check build index-create
-	@echo "✅ Index créé. Utilisez 'make populate-content' pour ajouter du contenu."
+	@echo "Index créé. Utilisez 'make populate-content' pour ajouter du contenu."
 
 # Ajouter du contenu à un index existant
 populate-content: env-check build
-	@echo "📤 Ajout de contenu à l'index existant..."
+	@echo "Ajout de contenu à l'index existant..."
 	@chmod +x scripts/index-populate-from-ttl.sh
 	@./scripts/index-populate-from-ttl.sh "$(ENV_CONFIG)" "incremental"
 
@@ -134,25 +138,25 @@ env-setup: playground-env-setup
 
 # Reset des caches et fichiers temporaires
 reset-caches: clean
-	@echo "🧹 Reset complet des caches et configurations temporaires..."
-	@echo "📁 Nettoyage des caches Node.js..."
+	@echo "Reset complet des caches et configurations temporaires..."
+	@echo "Nettoyage des caches Node.js..."
 	@rm -rf node_modules/.cache 2>/dev/null || true
 	@rm -rf .nyc_output 2>/dev/null || true
 	@rm -rf coverage 2>/dev/null || true
-	@echo "🗃️ Nettoyage des fichiers temporaires..."
+	@echo "Nettoyage des fichiers temporaires..."
 	@rm -f *.log *.tmp 2>/dev/null || true
 	@rm -f diagnostic-*.log 2>/dev/null || true
 	@rm -f schema-*.json 2>/dev/null || true
-	@echo "🔄 Arrêt des processus Node.js en cours..."
+	@echo "Arrêt des processus Node.js en cours..."
 	@pkill -f "node.*index.ts" 2>/dev/null || true
 	@pkill -f "nodemon" 2>/dev/null || true
-	@echo "⚡ Synchronisation des fichiers de configuration..."
+	@echo "Synchronisation des fichiers de configuration..."
 	@if [ -f "env/.env.playground.user" ] && [ -f ".localConfigs.playground" ]; then \
 		AZURE_SEARCH_INDEX_NAME=$$(grep AZURE_SEARCH_INDEX_NAME env/.env.playground.user | cut -d'=' -f2); \
 		sed -i "s/AZURE_SEARCH_INDEX_NAME=.*/AZURE_SEARCH_INDEX_NAME=$$AZURE_SEARCH_INDEX_NAME/" .localConfigs.playground; \
-		echo "✅ Synchronisé .localConfigs.playground avec env/.env.playground.user"; \
+		echo "Synchronisé .localConfigs.playground avec env/.env.playground.user"; \
 	fi
-	@echo "✅ Reset terminé! Vous pouvez maintenant relancer l'application."
+	@echo "Reset terminé! Vous pouvez maintenant relancer l'application."
 
 # =====================================
 # Aliases de compatibilité (anciens noms)
@@ -166,35 +170,35 @@ enhanced-setup-v2: setup-complete
 
 # Créer un nouvel index
 index-create: env-check
-	@echo "🏗️ Création de l'index Azure Search..."
+	@echo "Création de l'index Azure Search..."
 	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
 	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
 		set -a && . env/.env.playground.user && set +a && \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.playground.user | cut -d'=' -f2); \
-		echo "📊 Création de l'index: $$AZURE_SEARCH_INDEX_NAME"; \
+		echo "Création de l'index: $$AZURE_SEARCH_INDEX_NAME"; \
 		node lib/src/indexers/ttlSchemaAnalyzer.js "$$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE" "schema-output.json"; \
 		node lib/src/indexers/indexCreatorFromTTL.js "$$SECRET_AZURE_SEARCH_KEY" "schema-output.json" "$$AZURE_SEARCH_INDEX_NAME"; \
 	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
 		set -a && . env/.env.local.user && set +a && \
 		SECRET_AZURE_SEARCH_KEY=$$(grep SECRET_AZURE_SEARCH_KEY env/.env.local.user | cut -d'=' -f2); \
-		echo "📊 Création de l'index: $$AZURE_SEARCH_INDEX_NAME"; \
+		echo "Création de l'index: $$AZURE_SEARCH_INDEX_NAME"; \
 		node lib/src/indexers/ttlSchemaAnalyzer.js "$$EXTERNAL_DATA_SOURCE_PATH/$$TTL_METADATA_FILE" "schema-output.json"; \
 		node lib/src/indexers/indexCreatorFromTTL.js "$$SECRET_AZURE_SEARCH_KEY" "schema-output.json" "$$AZURE_SEARCH_INDEX_NAME"; \
 	else \
-		echo "❌ Erreur: Fichier d'environnement non trouvé"; \
+		echo "Erreur: Fichier d'environnement non trouvé"; \
 		echo "Usage: make index-create [ENV_CONFIG=playground|local]"; \
 		exit 1; \
 	fi
 
 # Peupler l'index avec des documents
 index-populate: env-check build
-	@echo "📤 Ajout de documents à l'index..."
+	@echo "Ajout de documents à l'index..."
 	@chmod +x scripts/index-populate-from-ttl.sh
 	@./scripts/index-populate-from-ttl.sh "$(ENV_CONFIG)" "incremental"
 
 # Vérifier l'état de l'index
 index-status: env-check
-	@echo "🔍 Vérification de l'état de l'index..."
+	@echo "Vérification de l'état de l'index..."
 	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
 	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
 		set -a && . env/.env.playground.user && set +a && \
@@ -211,7 +215,7 @@ index-status: env-check
 
 # Tester les recherches dans l'index
 index-test: env-check
-	@echo "� Test des recherches dans l'index..."
+	@echo "Test des recherches dans l'index..."
 	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
 	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
 		set -a && . env/.env.playground.user && set +a && \
@@ -224,13 +228,13 @@ index-test: env-check
 		./scripts/index-test.sh "$$SECRET_AZURE_SEARCH_KEY"; \
 		node test-index-content.js; \
 	else \
-		echo "❌ Erreur: Configuration d'environnement non trouvée"; \
+		echo "Erreur: Configuration d'environnement non trouvée"; \
 		exit 1; \
 	fi
 
 # Supprimer l'index
 index-delete: env-check build
-	@echo "🗑️ Suppression de l'index Azure Search..."
+	@echo "Suppression de l'index Azure Search..."
 	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
 	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
 		set -a && . env/.env.playground.user && set +a && \
@@ -255,19 +259,19 @@ index-delete: env-check build
 
 # Recréer complètement l'index
 index-reindex: index-delete setup-complete
-	@echo "✅ Index recréé avec succès"
+	@echo "Index recréé avec succès"
 
 # Lister les configurations
 index-config-list:
-	@echo "📋 Configurations d'index disponibles:"
+	@echo "Configurations d'index disponibles:"
 	@if [ -f "env/.env.playground.user" ]; then \
-		echo "🌍 Playground:"; \
+		echo "Playground:"; \
 		set -a && . env/.env.playground.user && set +a && \
 		echo "   Index: $$AZURE_SEARCH_INDEX_NAME"; \
 		echo "   Endpoint: $$AZURE_SEARCH_ENDPOINT"; \
 	fi
 	@if [ -f "env/.env.local.user" ]; then \
-		echo "🏠 Local:"; \
+		echo "Local:"; \
 		set -a && . env/.env.local.user && set +a && \
 		echo "   Index: $$AZURE_SEARCH_INDEX_NAME"; \
 		echo "   Endpoint: $$AZURE_SEARCH_ENDPOINT"; \
@@ -347,6 +351,76 @@ playground-env-validate:
 	@echo "✅ Validation de l'environnement Playground..."
 	@./scripts/playground-env-validate.sh
 
+# Afficher le sommaire des résultats d'indexation et identifier les documents problématiques
+index-summary: env-check
+	@echo "📊 Sommaire des résultats d'indexation..."
+	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
+	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
+		set -a && . env/.env.playground.user && set +a && \
+		node tests/documents-error-analysis.js || true; \
+	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
+		set -a && . env/.env.local.user && set +a && \
+		node tests/documents-error-analysis.js || true; \
+	else \
+		echo "❌ Erreur: Configuration d'environnement non trouvée"; \
+		exit 1; \
+	fi
+
+# Analyser les warnings d'indexation en détail
+index-warnings: env-check
+	@echo "⚠️  Analyse des warnings d'indexation..."
+	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
+	@if [ "$(EFFECTIVE_ENV)" = "playground" ] && [ -f "env/.env.playground.user" ]; then \
+		set -a && . env/.env.playground.user && set +a && \
+		if [ -f "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" ]; then \
+			echo "📁 Analyse du fichier: $$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log"; \
+			echo ""; \
+			echo "🔍 Warnings détectés:"; \
+			cat "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" | while IFS= read -r line; do \
+				if echo "$$line" | grep -q "chunk embeddings failed"; then \
+					echo "   ⚠️  $$line"; \
+				elif echo "$$line" | grep -q "Content embedding failed"; then \
+					echo "   🚨 $$line"; \
+				else \
+					echo "   ℹ️  $$line"; \
+				fi; \
+			done; \
+			echo ""; \
+			echo "📊 Statistiques des warnings:"; \
+			echo "   Échecs de chunks: $$(grep -c "chunk embeddings failed" "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" 2>/dev/null || echo 0)"; \
+			echo "   Échecs d'embedding: $$(grep -c "Content embedding failed" "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" 2>/dev/null || echo 0)"; \
+			echo "   Total warnings: $$(wc -l < "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" 2>/dev/null || echo 0)"; \
+		else \
+			echo "✅ Aucun fichier de warnings trouvé - indexation probablement réussie sans problèmes"; \
+		fi \
+	elif [ "$(EFFECTIVE_ENV)" = "local" ] && [ -f "env/.env.local.user" ]; then \
+		set -a && . env/.env.local.user && set +a && \
+		if [ -f "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" ]; then \
+			echo "📁 Analyse du fichier: $$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log"; \
+			echo ""; \
+			echo "🔍 Warnings détectés:"; \
+			cat "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" | while IFS= read -r line; do \
+				if echo "$$line" | grep -q "chunk embeddings failed"; then \
+					echo "   ⚠️  $$line"; \
+				elif echo "$$line" | grep -q "Content embedding failed"; then \
+					echo "   🚨 $$line"; \
+				else \
+					echo "   ℹ️  $$line"; \
+				fi; \
+			done; \
+			echo ""; \
+			echo "📊 Statistiques des warnings:"; \
+			echo "   Échecs de chunks: $$(grep -c "chunk embeddings failed" "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" 2>/dev/null || echo 0)"; \
+			echo "   Échecs d'embedding: $$(grep -c "Content embedding failed" "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" 2>/dev/null || echo 0)"; \
+			echo "   Total warnings: $$(wc -l < "$$EXTERNAL_DATA_SOURCE_PATH/transform/processed/warnings.log" 2>/dev/null || echo 0)"; \
+		else \
+			echo "✅ Aucun fichier de warnings trouvé - indexation probablement réussie sans problèmes"; \
+		fi \
+	else \
+		echo "❌ Erreur: Configuration d'environnement non trouvée"; \
+		exit 1; \
+	fi
+
 # ================================================================
 # COMMANDES LEGACY (conservées pour compatibilité)
 # ================================================================
@@ -365,4 +439,4 @@ ttl-analyze:
 	@echo "📊 Analyse de la structure TTL..."
 	@./scripts/ttl-parser-utils.sh analyze
 
-.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze
+.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-summary index-warnings index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze

@@ -54,7 +54,8 @@ Créer le fichier `env/.env.playground.user` :
 ```bash
 # Azure AI Search
 AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net/
-SECRET_SECRET_AZURE_SEARCH_KEY=your_search_admin_key
+SECRET_AZURE_SEARCH_KEY=your_search_admin_key
+AZURE_SEARCH_INDEX_NAME=legis-qc-index-full-01
 
 # Azure OpenAI  
 AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com/
@@ -62,6 +63,11 @@ SECRET_AZURE_OPENAI_API_KEY=your_openai_api_key
 AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4-mini
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=text-embedding-ada-002
 ```
+
+> **🔐 IMPORTANT - Convention de sécurité** : 
+> - Variables sensibles : `SECRET_AZURE_OPENAI_API_KEY`, `SECRET_AZURE_SEARCH_KEY`
+> - Variables standard : `AZURE_SEARCH_INDEX_NAME` (nom d'index non sensible)
+> - Les variables `SECRET_*` sont automatiquement masquées dans les logs
 
 > **Note** : Remplacer `playground` par `local` selon l'environnement souhaité.
 
