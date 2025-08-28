@@ -18,6 +18,24 @@ Ce projet démontre la construction d'un chatbot sophistiqué capable de répond
 make install
 
 # 2. Configuration de l'environnement (clés API)
+make setup
+
+# 3. Démarrage du bot
+make run
+```
+
+### 🧪 Tests et Validation
+```bash
+# Test principal - validation correction priorisation légale
+node tests/simulate-fixed-search.js
+
+# Diagnostic des données
+node tests/debug-status.js
+```
+
+> **⚠️ Note Développeurs** : Avant de créer de nouveaux scripts de test, consultez `docs/DEVELOPMENT_GUIDE.md` pour la philosophie de réutilisabilité.
+
+### 📚 Documentation Complète
 make env-setup
 
 # 3. Configuration complète automatique
