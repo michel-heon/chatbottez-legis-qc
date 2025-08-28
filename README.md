@@ -9,6 +9,16 @@ Ce projet démontre la construction d'un chatbot sophistiqué capable de répond
 - **[Retrieval Augmented Generation (RAG)](https://python.langchain.com/docs/use_cases/question_answering/#what-is-rag)** - Génération augmentée par récupération
 - **[Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)** - Recherche hybride (textuelle + vectorielle)  
 - **[Teams AI Library](https://learn.microsoft.com/microsoftteams/platform/bots/how-to/teams%20conversational%20ai/teams-conversation-ai-overview)** - Framework Microsoft pour agents Teams
+- **🔍 SPARQL + Apache Jena** - Extraction ontologique robuste avec support tags `@fr`
+
+### 🚀 Architecture Enhanced avec SPARQL
+
+Le projet intègre **Apache Jena SPARQL** pour une extraction précise des métadonnées légales :
+
+- ✅ **Gestion des tags de langue** : Support natif des valeurs `@fr` dans les fichiers TTL
+- ✅ **Extraction ontologique robuste** : Requêtes SPARQL professionnelles vs parsing regex
+- ✅ **Intelligent legal sorting** : Priorité automatique A-3.001 (en vigueur) > A-3 (abrogée)
+- ✅ **Pipeline bidirectionnel** : SPARQL principal + fallback legacy parsing
 
 ## ⚡ Démarrage rapide
 
@@ -28,6 +38,12 @@ make run
 ```bash
 # Test principal - validation correction priorisation légale
 node tests/simulate-fixed-search.js
+
+# Test SPARQL - extraction métadonnées avec support @fr
+node tests/test-sparql-direct.js
+
+# Test pipeline enhanced complet
+node tests/test-enhanced-pipeline.js
 
 # Diagnostic des données
 node tests/debug-status.js
@@ -78,22 +94,52 @@ make diagnostic             # Diagnostic complet du système
 
 ### Guides principaux
 - 🎮 **[Guide Microsoft 365 Playground](./docs/playground-guide.md)** - Configuration et utilisation du Playground
-- 📝 **[Conventions de Nomenclature](./NAMING_CONVENTIONS.md)** - Règles simples et obligatoires
+- � **[Apache Jena Integration](./docs/apache-jena-integration.md)** - SPARQL et extraction ontologique
+- �📝 **[Conventions de Nomenclature](./NAMING_CONVENTIONS.md)** - Règles simples et obligatoires
 - 📊 **[Bilan du Projet](./PROJECT_SUMMARY.md)** - Vue d'ensemble complète et métriques
 - 🛠️ **[Guide d'installation](./docs/setup-guide.md)** - Configuration pas à pas
 - 🔍 **[Gestion Azure Search](./docs/azure-search-management.md)** - Guide complet d'indexation
 - 🔧 **[Référence des scripts](./docs/scripts-reference.md)** - Documentation technique
 - 📝 **[Changelog](./CHANGELOG.md)** - Historique des versions et migrations
 
-## Get started with Microsoft 365 Agents Playground
+## 🔧 Prérequis système
 
-> **Prerequisites**
->
-> To run the template in your local dev machine, you will need:
->
-> - [Node.js](https://nodejs.org/), supported versions: 18, 20, 22
-> - [Microsoft 365 Agents Toolkit Visual Studio Code Extension](https://aka.ms/teams-toolkit) version 5.0.0 and higher or [Microsoft 365 Agents Toolkit CLI](https://aka.ms/teamsfx-toolkit-cli)
-> - Prepare your own [Azure OpenAI](https://aka.ms/oai/access) resource and [Azure AI Search](https://azure.microsoft.com/en-us/products/ai-services/ai-search).
+### Dépendances obligatoires
+
+> **⚠️ Important** : Ce projet utilise **Apache Jena** pour l'extraction des métadonnées ontologiques avec support des tags de langue `@fr`.
+
+**Environnement de base :**
+- [Node.js](https://nodejs.org/) versions supportées : 18, 20, 22
+- [Microsoft 365 Agents Toolkit Visual Studio Code Extension](https://aka.ms/teams-toolkit) version 5.0.0+
+- [Microsoft 365 Agents Toolkit CLI](https://aka.ms/teamsfx-toolkit-cli)
+
+**Services Azure :**
+- [Azure OpenAI](https://aka.ms/oai/access) resource configurée
+- [Azure AI Search](https://azure.microsoft.com/en-us/products/ai-services/ai-search) configuré
+
+**⭐ Apache Jena (Obligatoire pour SPARQL)** :
+- [Apache Jena 5.x](https://jena.apache.org/download/) installé dans `/opt/jena`
+- Variable d'environnement `JENA_HOME=/opt/jena` 
+- `PATH` mis à jour pour inclure `$JENA_HOME/bin`
+
+### 🚀 Installation Apache Jena
+
+```bash
+# Installation automatique (recommandée)
+sudo wget https://archive.apache.org/dist/jena/binaries/apache-jena-5.5.0.tar.gz
+sudo tar -xzf apache-jena-5.5.0.tar.gz -C /opt/
+sudo ln -s /opt/apache-jena-5.5.0 /opt/jena
+
+# Configuration environnement
+echo 'export JENA_HOME=/opt/jena' >> ~/.bashrc
+echo 'export PATH=$JENA_HOME/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# Validation installation
+sparql --version
+```
+
+## Get started with Microsoft 365 Agents Playground
 
 ### 🔧 Configuration automatisée
 1. **Setup de l'environnement Playground**

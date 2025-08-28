@@ -13,6 +13,7 @@ interface IndexSchema {
     fields: any[];
     suggesters?: any[];
     vectorSearch?: any;
+    semantic?: any;
     corsOptions?: any;
 }
 
@@ -111,6 +112,12 @@ export class IndexCreatorFromTTL {
             // Add vector search configuration if present
             if (processedSchema.vectorSearch) {
                 (indexDefinition as any).vectorSearch = processedSchema.vectorSearch;
+            }
+
+            // Add semantic search configuration if present
+            if (processedSchema.semantic) {
+                (indexDefinition as any).semantic = processedSchema.semantic;
+                console.log('✅ Semantic search configuration added to index');
             }
             
             console.log(`📋 Index definition prepared with ${indexDefinition.fields.length} fields`);

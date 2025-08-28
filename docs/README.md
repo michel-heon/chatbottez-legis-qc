@@ -25,6 +25,7 @@ make dev
 
 ### 🔧 Référence technique
 - **[scripts-reference.md](./scripts-reference.md)** - Documentation technique détaillée des scripts
+- **[apache-jena-integration.md](./apache-jena-integration.md)** - Guide d'intégration Apache Jena pour SPARQL et traitement RDF/TTL
 - **[troubleshooting-ontology-driven.md](./troubleshooting-ontology-driven.md)** - Guide de dépannage pour l'architecture ontology-driven
 - **[troubleshooting-azure-search-vector-fields.md](./troubleshooting-azure-search-vector-fields.md)** - Résolution des problèmes de champs vectoriels Azure Search
 

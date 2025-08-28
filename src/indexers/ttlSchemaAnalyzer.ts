@@ -33,6 +33,7 @@ interface IndexSchema {
     fields: IndexField[];
     suggesters: any[];
     vectorSearch?: any;
+    semantic?: any;
     mapping: {
         ttlToIndex: Record<string, string>;
         pdfProcessing: {
@@ -128,6 +129,7 @@ export class TTLSchemaAnalyzer {
                 }
             ],
             vectorSearch: this.generateVectorSearchConfig(),
+            semantic: this.generateSemanticConfig(),
             mapping: {
                 ttlToIndex: this.generateTTLMapping(predicates),
                 pdfProcessing: {
@@ -418,6 +420,40 @@ export class TTLSchemaAnalyzer {
                 {
                     name: "default",
                     algorithmConfigurationName: "hnsw-algorithm"
+                }
+            ]
+        };
+    }
+
+    /**
+     * Generate semantic search configuration
+     */
+    private generateSemanticConfig(): any {
+        return {
+            configurations: [
+                {
+                    name: "default",
+                    prioritizedFields: {
+                        titleField: {
+                            fieldName: "title"
+                        },
+                        prioritizedContentFields: [
+                            {
+                                fieldName: "content"
+                            },
+                            {
+                                fieldName: "description"
+                            }
+                        ],
+                        prioritizedKeywordsFields: [
+                            {
+                                fieldName: "keywords"
+                            },
+                            {
+                                fieldName: "legalIdentifier"
+                            }
+                        ]
+                    }
                 }
             ]
         };

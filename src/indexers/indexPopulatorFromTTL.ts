@@ -6,7 +6,11 @@
 import { SearchClient, AzureKeyCredential } from "@azure/search-documents";
 import * as fs from 'fs';
 import * as path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import config from '../config';
+
+const execAsync = promisify(exec);
 
 interface DocumentManifest {
     legalIdentifier: string;
@@ -99,14 +103,21 @@ export class IndexPopulatorFromTTL {
         this.mode = mode;
         this.processedDir = processedDir;
         this.embeddingsDir = embeddingsDir;
-        // Load manifest dynamically from TTL instead of pre-generated file
-        this.manifest = this.loadManifestFromTTL();
+        // Manifest will be loaded asynchronously in populateIndex()
+        this.manifest = { documents: [], totalDocuments: 0 };
+    }
+
+    /**
+     * Initialize manifest from TTL (called at start of populateIndex)
+     */
+    private async initializeManifest(): Promise<void> {
+        this.manifest = await this.loadManifestFromTTL();
     }
     
     /**
      * Load files manifest from TTL file directly
      */
-    private loadManifestFromTTL(): FilesManifest {
+    private async loadManifestFromTTL(): Promise<FilesManifest> {
         console.log(`📖 Loading TTL metadata directly from source...`);
         
         // Get TTL file path from environment or config
@@ -123,7 +134,7 @@ export class IndexPopulatorFromTTL {
         }
         
         try {
-            const documents = this.parseTTLDocuments(ttlPath);
+            const documents = await this.parseTTLDocuments(ttlPath);
             const manifest: FilesManifest = {
                 documents: documents,
                 totalDocuments: documents.length
@@ -148,9 +159,74 @@ export class IndexPopulatorFromTTL {
     }
     
     /**
-     * Parse TTL file to extract document metadata
+     * Parse TTL file to extract document metadata using SPARQL
      */
-    private parseTTLDocuments(ttlPath: string): DocumentManifest[] {
+    private async parseTTLDocuments(ttlPath: string): Promise<DocumentManifest[]> {
+        console.log('🔍 Parsing TTL with SPARQL for @fr language tag support...');
+        
+        try {
+            // Use SPARQL for robust metadata extraction
+            const sparqlMetadata = await this.extractMetadataWithSPARQL(ttlPath);
+            const documents: DocumentManifest[] = [];
+            
+            for (const metadata of sparqlMetadata) {
+                const legalIdentifier = metadata.legalIdentifier;
+                if (!legalIdentifier) continue;
+                
+                // Check if PDF exists
+                const pdfPath = this.constructPDFPath(legalIdentifier);
+                
+                const doc: DocumentManifest = {
+                    legalIdentifier,
+                    title: metadata.title || `Document ${legalIdentifier}`,
+                    documentType: 'Loi',
+                    pdfPath,
+                    pdfFullPath: pdfPath,
+                    pdfExists: fs.existsSync(pdfPath),
+                    sourceUrl: metadata.sourceUrl || `https://www.legisquebec.gouv.qc.ca/fr/document/lc/${legalIdentifier}`,
+                    metadata: {
+                        ...metadata,
+                        // Ensure critical fields are properly set
+                        status: metadata.status,
+                        abrogatedBy: metadata.abrogatedBy,
+                        downloadStatus: metadata.downloadStatus,
+                        format: metadata.format,
+                        description: metadata.description,
+                        keywords: metadata.keywords,
+                        enrichedAt: metadata.enrichedAt,
+                        enrichmentMethod: metadata.enrichmentMethod
+                    }
+                };
+                
+                documents.push(doc);
+            }
+            
+            console.log(`✅ SPARQL parsing complete: ${documents.length} documents with proper metadata`);
+            
+            // Debug: Show A-3 and A-3.001 metadata
+            const a3001 = documents.find(d => d.legalIdentifier === 'A-3.001');
+            const a3 = documents.find(d => d.legalIdentifier === 'A-3');
+            
+            if (a3001) {
+                console.log(`🔍 A-3.001 metadata: status="${a3001.metadata.status}", title="${a3001.title}"`);
+            }
+            if (a3) {
+                console.log(`🔍 A-3 metadata: status="${a3.metadata.status}", abrogatedBy="${a3.metadata.abrogatedBy}"`);
+            }
+            
+            return documents;
+            
+        } catch (error) {
+            console.warn(`⚠️  SPARQL parsing failed, falling back to legacy parsing:`, error);
+            // Fallback to old parsing method if SPARQL fails
+            return this.parseTTLDocumentsLegacy(ttlPath);
+        }
+    }
+
+    /**
+     * Legacy TTL parsing method (fallback)
+     */
+    private parseTTLDocumentsLegacy(ttlPath: string): DocumentManifest[] {
         const ttlContent = fs.readFileSync(ttlPath, 'utf-8');
         const documents: DocumentManifest[] = [];
         
@@ -326,14 +402,134 @@ export class IndexPopulatorFromTTL {
     }
     
     /**
-     * Extract metadata field from TTL line
+     * Extract metadata field from TTL line - DEPRECATED
+     * Use SPARQL extraction instead for language tag support
      */
     private extractMetadataField(line: string, property: string, metadata: Record<string, any>, key: string): void {
         if (line.includes(property)) {
-            const match = line.match(/"([^"]+)"/);
+            // Enhanced pattern to handle @fr language tags
+            const match = line.match(/"([^"]+)"(@fr)?/);
             if (match) {
                 metadata[key] = match[1];
             }
+        }
+    }
+
+    /**
+     * SPARQL-based metadata extraction
+     * Properly handles @fr language tags and complex TTL structures
+     */
+    private async extractMetadataWithSPARQL(ttlPath: string): Promise<Record<string, any>[]> {
+        console.log('🔍 Using SPARQL for TTL metadata extraction...');
+        
+        const tempDir = '/tmp/indexer-sparql';
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+        }
+        
+        const queryFile = path.join(tempDir, 'extract-metadata.sparql');
+        const sparqlQuery = `
+PREFIX legis: <https://legisquebec.gouv.qc.ca/ontology/>
+PREFIX legal: <http://www.legalruleml.org/ns/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX schema: <https://schema.org/>
+
+SELECT ?legalIdentifier ?title ?status ?abrogatedBy ?downloadStatus ?format 
+       ?description ?keywords ?enrichedAt ?enrichmentMethod ?sourceUrl ?type
+WHERE {
+    ?doc a legal:LegalRule ;
+         dcterms:identifier ?legalIdentifier .
+    
+    # Extract all metadata with proper @fr language tag support
+    OPTIONAL { ?doc dcterms:title ?title }
+    OPTIONAL { ?doc legis:status ?status }
+    OPTIONAL { 
+        ?doc legis:abrogatedBy ?abrogatedByURI .
+        BIND(REPLACE(STR(?abrogatedByURI), ".*ontology/loi/", "") AS ?abrogatedBy)
+    }
+    OPTIONAL { ?doc legis:downloadStatus ?downloadStatus }
+    OPTIONAL { ?doc dcterms:format ?format }
+    OPTIONAL { ?doc schema:description ?description }
+    OPTIONAL { ?doc schema:keywords ?keywords }
+    OPTIONAL { ?doc legis:enrichedAt ?enrichedAt }
+    OPTIONAL { ?doc legis:enrichmentMethod ?enrichmentMethod }
+    OPTIONAL { ?doc dcterms:source ?sourceUrl }
+    OPTIONAL { ?doc a ?type }
+}
+ORDER BY ?legalIdentifier
+        `;
+        
+        fs.writeFileSync(queryFile, sparqlQuery);
+        
+        try {
+            const jenaPath = '/opt/jena';
+            const command = `cd "${jenaPath}/bin" && ./sparql --data="${ttlPath}" --query="${queryFile}" --results=JSON`;
+            
+            const { stdout, stderr } = await execAsync(command);
+            
+            if (stderr) {
+                console.warn('⚠️  SPARQL stderr:', stderr);
+            }
+            
+            const results = JSON.parse(stdout);
+            const documents = new Map();
+            
+            if (results.results && results.results.bindings) {
+                for (const binding of results.results.bindings) {
+                    const legalId = binding.legalIdentifier?.value;
+                    if (!legalId) continue;
+                    
+                    let doc = documents.get(legalId);
+                    if (!doc) {
+                        doc = { legalIdentifier: legalId };
+                        documents.set(legalId, doc);
+                    }
+                    
+                    // Extract all metadata fields
+                    if (binding.title?.value) doc.title = binding.title.value;
+                    if (binding.status?.value) doc.status = binding.status.value;
+                    if (binding.abrogatedBy?.value) doc.abrogatedBy = binding.abrogatedBy.value;
+                    if (binding.downloadStatus?.value) doc.downloadStatus = binding.downloadStatus.value;
+                    if (binding.format?.value) doc.format = binding.format.value;
+                    if (binding.description?.value) doc.description = binding.description.value;
+                    if (binding.enrichedAt?.value) doc.enrichedAt = binding.enrichedAt.value;
+                    if (binding.enrichmentMethod?.value) doc.enrichmentMethod = binding.enrichmentMethod.value;
+                    if (binding.sourceUrl?.value) doc.sourceUrl = binding.sourceUrl.value;
+                    
+                    // Handle multiple keywords
+                    if (binding.keywords?.value) {
+                        if (!doc.keywords) doc.keywords = [];
+                        if (!doc.keywords.includes(binding.keywords.value)) {
+                            doc.keywords.push(binding.keywords.value);
+                        }
+                    }
+                    
+                    // Handle multiple types
+                    if (binding.type?.value) {
+                        if (!doc.type) doc.type = [];
+                        const typeValue = binding.type.value.replace(/.*[#\/]/, '');
+                        if (!doc.type.includes(typeValue)) {
+                            doc.type.push(typeValue);
+                        }
+                    }
+                }
+            }
+            
+            const documentArray = Array.from(documents.values());
+            console.log(`✅ SPARQL extracted ${documentArray.length} documents with proper @fr support`);
+            
+            // Clean up temp files
+            try {
+                fs.rmSync(tempDir, { recursive: true, force: true });
+            } catch (e) {
+                console.warn('⚠️  Failed to cleanup SPARQL temp files:', e);
+            }
+            
+            return documentArray;
+            
+        } catch (error) {
+            console.error('❌ SPARQL extraction failed:', error);
+            throw error;
         }
     }
     
@@ -368,6 +564,10 @@ export class IndexPopulatorFromTTL {
      */
     async populateIndex(): Promise<void> {
         console.log(`📤 Starting index population in ${this.mode} mode...`);
+        
+        // Initialize manifest from TTL with SPARQL
+        console.log(`🔄 Initializing manifest from TTL with SPARQL support...`);
+        await this.initializeManifest();
         
         if (this.mode === 'full') {
             await this.clearIndex();
