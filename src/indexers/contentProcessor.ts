@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import pdf from 'pdf-parse';
 import { getEmbeddingVector } from './utils';
+import { ParallelEmbeddingProcessor } from './parallelEmbeddingProcessor';
 
 interface DocumentManifest {
     legalIdentifier: string;
@@ -62,6 +63,7 @@ export class ContentProcessor {
     private embeddingsDir: string;
     private manifest: FilesManifest;
     private force: boolean;
+    private embeddingProcessor: ParallelEmbeddingProcessor;
     
     constructor(
         manifestPath: string, 
@@ -69,7 +71,8 @@ export class ContentProcessor {
         batchSize: number = 10,
         processedDir: string = 'src/indexers/data/processed',
         embeddingsDir: string = 'src/indexers/data/embeddings',
-        force: boolean = false
+        force: boolean = false,
+        parallelEmbeddings: boolean = true
     ) {
         this.manifestPath = manifestPath;
         this.openaiApiKey = openaiApiKey;
@@ -78,6 +81,12 @@ export class ContentProcessor {
         this.embeddingsDir = embeddingsDir;
         this.force = force;
         this.manifest = this.loadManifest();
+        
+        // Initialisation du processeur d'embeddings parallèles
+        if (parallelEmbeddings) {
+            this.embeddingProcessor = ParallelEmbeddingProcessor.createOptimizedProcessor('playground');
+            console.log('🚀 Mode embeddings parallèles activé');
+        }
     }
     
     /**
@@ -320,15 +329,53 @@ export class ContentProcessor {
     }
     
     /**
-     * Generate embeddings for processed document
+     * Generate embeddings for processed document (optimized version)
      */
     private async generateEmbeddings(processedDoc: ProcessedDocument): Promise<EmbeddingData> {
+        try {
+            // Utilisation du processeur parallèle si disponible
+            if (this.embeddingProcessor) {
+                const result = await this.embeddingProcessor.generateDocumentEmbeddings(
+                    processedDoc.legalIdentifier,
+                    processedDoc.content,
+                    processedDoc.chunks
+                );
+
+                return {
+                    legalIdentifier: processedDoc.legalIdentifier,
+                    contentVector: result.contentVector,
+                    chunkVectors: result.chunkVectors,
+                    embeddingModel: 'text-embedding-ada-002',
+                    generatedAt: new Date().toISOString(),
+                    metadata: result.metadata
+                };
+            }
+
+            // Fallback vers l'ancienne méthode séquentielle
+            return await this.generateEmbeddingsSequential(processedDoc);
+            
+        } catch (error) {
+            return {
+                legalIdentifier: processedDoc.legalIdentifier,
+                contentVector: [],
+                chunkVectors: [],
+                embeddingModel: 'text-embedding-ada-002',
+                generatedAt: new Date().toISOString(),
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+    }
+
+    /**
+     * Ancienne méthode séquentielle (conservée pour compatibilité)
+     */
+    private async generateEmbeddingsSequential(processedDoc: ProcessedDocument): Promise<EmbeddingData> {
         try {
             // Generate embedding for full content (truncated if too long)
             const truncatedContent = processedDoc.content.substring(0, 8000); // OpenAI limit
             const contentVector = await getEmbeddingVector(truncatedContent);
             
-            // Generate embeddings for chunks
+            // Generate embeddings for chunks (séquentiel - ancien comportement)
             const chunkVectors: number[][] = [];
             let failedChunks = 0;
             
@@ -455,14 +502,25 @@ async function main() {
     const processedDir = process.argv[5] || 'src/indexers/data/processed';
     const embeddingsDir = process.argv[6] || 'src/indexers/data/embeddings';
     const force = process.argv[7] === 'true';
+    const parallelEmbeddings = process.argv[8] !== 'false'; // Activé par défaut
     
     if (!manifestPath || !openaiApiKey) {
-        console.error('Usage: node contentProcessor.js <manifest-path> <openai-api-key> [batch-size] [processed-dir] [embeddings-dir] [force]');
+        console.error('Usage: node contentProcessor.js <manifest-path> <openai-api-key> [batch-size] [processed-dir] [embeddings-dir] [force] [parallel-embeddings]');
+        console.error('parallel-embeddings: true (défaut) | false');
         process.exit(1);
     }
     
     try {
-        const processor = new ContentProcessor(manifestPath, openaiApiKey, batchSize, processedDir, embeddingsDir, force);
+        const processor = new ContentProcessor(
+            manifestPath, 
+            openaiApiKey, 
+            batchSize, 
+            processedDir, 
+            embeddingsDir, 
+            force,
+            parallelEmbeddings
+        );
+        
         await processor.processAllDocuments();
         
         const stats = processor.getProcessingStats();

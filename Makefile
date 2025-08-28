@@ -94,6 +94,9 @@ FORCE ?= false
 DRY_RUN ?= false
 ENVIRONMENT ?= playground
 NODE_ENV ?= development
+PARALLEL_EMBEDDINGS ?= true
+EMBEDDING_CONCURRENCY ?= 5
+EMBEDDING_BATCH_SIZE ?= 20
 
 # ================================================================
 # 🚀 COMMANDES PRINCIPALES SIMPLIFIÉES
@@ -430,4 +433,16 @@ ttl-analyze:
 	@echo "📊 Analyse de la structure TTL..."
 	@./scripts/ttl-parser-utils.sh analyze
 
-.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-summary index-warnings index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze
+# Test de performance des embeddings parallèles
+embedding-benchmark: env-check build
+	@echo "🚀 Benchmark des performances d'embedding..."
+	@node tests/benchmark-embedding-performance.js
+
+# Traitement optimisé avec embeddings parallèles
+content-process-optimized: env-check build
+	@echo "⚡ Traitement de contenu avec embeddings parallèles..."
+	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
+	@PARALLEL_EMBEDDINGS=true EMBEDDING_CONCURRENCY=$(EMBEDDING_CONCURRENCY) \
+		./scripts/content-process-batch.sh "$(EFFECTIVE_ENV)" "$(EMBEDDING_BATCH_SIZE)"
+
+.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-summary index-warnings index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze embedding-benchmark content-process-optimized embedding-benchmark content-process-optimized

@@ -1,9 +1,9 @@
 {
-  "name": "legis-qc-index-full-01",
+  "name": "legis-qc-index-full-02",
   "description": "Azure Search index dynamically generated from TTL metadata",
   "version": "2.0.0",
-  "generatedFrom": "legisquebec-metadata.ttl",
-  "generatedAt": "2025-08-28T10:12:28.360Z",
+  "generatedFrom": "legisquebec-metadata-small.ttl",
+  "generatedAt": "2025-08-28T19:26:15.953Z",
   "fields": [
     {
       "name": "id",

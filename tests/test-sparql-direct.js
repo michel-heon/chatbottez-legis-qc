@@ -77,7 +77,7 @@ async function testSPARQLDirect() {
         const command = `cd "${config.jenaPath}/bin" && ./sparql --data="${config.ttlPath}" --query="${queryFile}" --results=JSON`;
         
         console.log(`Command: ${command}`);
-        const { stdout, stderr } = await execAsync(command);
+        const { stdout, stderr } = await execAsync(command, { maxBuffer: 5 * 1024 * 1024 }); // 5MB buffer pour TTL étendu
         
         if (stderr) {
             console.warn('⚠️  SPARQL stderr:', stderr);

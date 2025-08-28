@@ -288,6 +288,59 @@ if (!process.env.SECRET_AZURE_SEARCH_KEY) {
 const maskedKey = process.env.SECRET_AZURE_SEARCH_KEY.replace(/.(?=.{4})/g, '*');
 ```
 
+## ⚡ Optimisation et Performance
+
+### Traitement Parallèle des Embeddings
+
+Le projet utilise `ParallelEmbeddingProcessor` pour des performances optimales :
+
+```typescript
+import { ParallelEmbeddingProcessor } from './parallelEmbeddingProcessor';
+
+// Configuration automatique par environnement
+const processor = ParallelEmbeddingProcessor.createOptimizedProcessor('playground');
+
+// Traitement avec métriques de performance
+const results = await processor.generateDocumentEmbeddings(
+    legalIdentifier,
+    content,
+    chunks
+);
+```
+
+### Configurations par Environnement
+
+```bash
+# Development - Conservative pour débug
+make content-process-optimized EMBEDDING_CONCURRENCY=3 EMBEDDING_BATCH_SIZE=10
+
+# Playground - Équilibré pour tests
+make content-process-optimized EMBEDDING_CONCURRENCY=5 EMBEDDING_BATCH_SIZE=20
+
+# Production - Optimisé pour performance
+make content-process-optimized EMBEDDING_CONCURRENCY=8 EMBEDDING_BATCH_SIZE=30
+```
+
+### Benchmark et Monitoring
+
+```bash
+# Test de performance
+make embedding-benchmark
+
+# Résultats attendus:
+# - 3.22x speedup vs traitement séquentiel
+# - 100% success rate sur ontologies étendues
+# - Support automatique SPARQL jusqu'à 5MB
+```
+
+### Gestion des Rate Limits Azure
+
+Le système inclut des protections automatiques :
+- Délais configurables entre requêtes (100-300ms)
+- Limitation de concurrence par environnement
+- Retry automatique avec backoff exponentiel
+- Troncature intelligente des textes longs
+
 ## 🚀 Déploiement et CI/CD
 
 ### Environnements cibles

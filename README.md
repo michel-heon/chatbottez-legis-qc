@@ -49,6 +49,25 @@ node tests/test-enhanced-pipeline.js
 node tests/debug-status.js
 ```
 
+### ⚡ Performance et Optimisation
+```bash
+# Benchmark des performances d'embedding parallèle
+make embedding-benchmark
+
+# Traitement optimisé avec embeddings parallèles
+make content-process-optimized EMBEDDING_CONCURRENCY=5 EMBEDDING_BATCH_SIZE=20
+
+# Configuration par environnement
+# Development: 3 concurrency, 300ms delay, 10 batch size
+# Playground: 5 concurrency, 200ms delay, 20 batch size  
+# Production: 8 concurrency, 100ms delay, 30 batch size
+```
+
+**🚀 Résultats de Performance :**
+- **3.22x speedup** avec traitement parallèle vs séquentiel
+- **100% success rate** sur 32 documents avec ontologie étendue
+- **Support automatique** des ontologies jusqu'à 5MB (vs 200KB limite par défaut)
+
 > **⚠️ Note Développeurs** : Avant de créer de nouveaux scripts de test, consultez `docs/DEVELOPMENT_GUIDE.md` pour la philosophie de réutilisabilité.
 
 ### 📚 Documentation Complète

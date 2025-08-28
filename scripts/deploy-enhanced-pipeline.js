@@ -73,7 +73,7 @@ WHERE {
         fs.writeFileSync(queryFile, testQuery);
         
         const command = `cd "${jenaPath}/bin" && ./sparql --data="${ttlPath}" --query="${queryFile}" --results=JSON`;
-        const { stdout } = await execAsync(command);
+        const { stdout } = await execAsync(command, { maxBuffer: 5 * 1024 * 1024 }); // 5MB buffer pour TTL étendu
         
         const results = JSON.parse(stdout);
         let a3001Valid = false;
