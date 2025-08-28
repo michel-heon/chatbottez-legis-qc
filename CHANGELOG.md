@@ -5,6 +5,31 @@ All notable changes to the Chatbot Legis QC project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.8.0-parallel-embeddings] - 2025-08-28 🚀 PARALLEL EMBEDDING PROCESSING
+
+### ⚡ Performance Improvements
+- **PARALLEL EMBEDDINGS**: Implémentation du traitement parallèle des embeddings avec `ParallelEmbeddingProcessor`
+- **CONCURRENCY CONTROL**: Limitation intelligente de la concurrence Azure OpenAI (5 simultanées)
+- **BATCH PROCESSING**: Organisation en batches optimisés (20 tâches par batch)
+- **RETRY LOGIC**: Logique de récupération sophistiquée avec backoff exponentiel
+- **RATE LIMITING**: Respect des limites Azure avec délais configurables (200ms)
+
+### 🔧 Technical Features
+- **TEXT TRUNCATION**: Limitation conservative à 4000 chars pour éviter les erreurs
+- **SIMPLIFIED TRACES**: Système de trace simplifié avec icônes essentielles uniquement
+- **ENVIRONMENT CONFIGS**: Configurations optimisées par environnement (dev/playground/prod)
+- **PERFORMANCE METRICS**: Métriques détaillées de performance et taux de succès
+
+### 🐛 Bug Fixes
+- **SPARQL BUFFER OVERFLOW**: Correction du débordement de buffer SPARQL avec maxBuffer: 5MB
+- **EXTENDED ONTOLOGY**: Support pour ontologies étendues (924 triples vs 233 originaux)
+- **ERROR RECOVERY**: Amélioration de la récupération d'erreurs d'embedding
+
+### 📊 Performance Results
+- **3.22x SPEEDUP**: Amélioration des performances d'embedding démontrée
+- **100% SUCCESS RATE**: Traitement réussi de 32/32 documents avec l'ontologie étendue
+- **PROFESSIONAL OUTPUT**: Traces simplifiées pour une meilleure lisibilité opérationnelle
+
 ## [v1.7.0-ui-diagnostic-tools] - 2025-08-28 ✨ OUTILS DIAGNOSTIC ET NETTOYAGE UI
 
 ### 🎨 UI/UX Improvements

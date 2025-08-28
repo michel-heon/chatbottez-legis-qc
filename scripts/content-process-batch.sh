@@ -37,13 +37,15 @@ done
 # Run content processing
 echo "🔧 Processing PDF content and generating embeddings..."
 FORCE_PARAM=${FORCE:-false}
+PARALLEL_EMBEDDINGS=${PARALLEL_EMBEDDINGS:-true}
 node lib/src/indexers/contentProcessor.js \
     "$MANIFEST_FILE" \
     "$SECRET_AZURE_OPENAI_API_KEY" \
     "$BATCH_SIZE" \
     "$PROCESSED_DIR" \
     "$EMBEDDINGS_DIR" \
-    "$FORCE_PARAM"
+    "$FORCE_PARAM" \
+    "$PARALLEL_EMBEDDINGS"
 
 if [ $? -eq 0 ]; then
     echo "✅ Content processing completed successfully"
