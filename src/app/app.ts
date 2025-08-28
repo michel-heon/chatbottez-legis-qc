@@ -35,6 +35,7 @@ planner.prompts.addDataSource(
     azureOpenAIApiKey: config.azureOpenAIKey!,
     azureOpenAIEndpoint: config.azureOpenAIEndpoint!,
     azureOpenAIEmbeddingDeploymentName: config.azureOpenAIEmbeddingDeploymentName!,
+    strictness: 2, // Strictness par défaut (1=permissif, 5=très strict)
   })
 );
 

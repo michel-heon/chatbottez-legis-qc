@@ -8,6 +8,16 @@
   "engines": {
     "node": "18 || 20 || 22"
   },
+  "systemDependencies": {
+    "apache-jena": {
+      "version": ">=5.0.0",
+      "required": true,
+      "purpose": "SPARQL ontological metadata extraction with @fr language tag support",
+      "installPath": "/opt/jena",
+      "binaries": ["sparql", "riot", "arq"],
+      "documentation": "docs/apache-jena-integration.md"
+    }
+  },
   "author": "Microsoft",
   "license": "MIT",
   "main": "./lib/src/index.js",
