@@ -224,6 +224,32 @@ export class TTLFilesDiscovery {
             }
         }
         
+        // Apply default status if no explicit status is found
+        // According to Quebec law principles, absence of status mention means "en vigueur"
+        if (!metadata.status && !metadata.abrogatedBy) {
+            metadata.status = 'en vigueur';
+            console.log(`🔧 TTLFilesDiscovery: Applied default status 'en vigueur' for document without explicit status`);
+        }
+        
+        // Fix incorrect AI enrichment errors - General correction logic
+        // The AI enrichment process sometimes incorrectly marks active codes as abrogated
+        // based on article references that don't indicate full law abrogation
+        if (metadata.enrichmentMethod === 'Azure OpenAI LLM Analysis') {
+            if (metadata.status === 'abrogée' && metadata.abrogatedBy) {
+                const abrogatedByRef = metadata.abrogatedBy.toString();
+                
+                // Check if abrogatedBy is an article reference (contains "c.", "a.", or similar patterns)
+                // rather than a reference to another full law code
+                if (abrogatedByRef.match(/\d+,\s*c\.\s*\d+|a\.\s*\d+|\d+,\s*\d+/)) {
+                    metadata.status = 'en vigueur';
+                    delete metadata.abrogatedBy; // Remove incorrect abrogatedBy reference
+                    metadata.correctionNote = 'Status corrected from AI enrichment error - article reference does not indicate law abrogation';
+                    const legalId = metadata.identifier || 'unknown';
+                    console.log(`🔧 TTLFilesDiscovery: Corrected AI enrichment error for ${legalId} - article reference '${abrogatedByRef}' doesn't indicate law abrogation`);
+                }
+            }
+        }
+        
         return metadata;
     }
     

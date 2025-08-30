@@ -15,6 +15,7 @@ const model = new OpenAIModel({
 
   useSystemMessages: true,
   logRequests: true,
+  azureApiVersion: '2024-02-15-preview',    // Version API fixe
 });
 const prompts = new PromptManager({
   promptsFolder: path.join(__dirname, "../prompts"),

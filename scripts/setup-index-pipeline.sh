@@ -7,12 +7,21 @@ set -e
 # Load environment
 ENV_CONFIG=${1:-${ENV_CONFIG:-playground}}
 MODE=${2:-full}  # full, incremental, schema-only
+
+# Export FORCE parameter for child scripts
+export FORCE="${FORCE:-false}"
+
 source "$(dirname "$0")/env-check.sh"
 
 echo "🚀 Setup Index Pipeline - TTL-Driven Architecture"
 echo "=================================================="
 echo "📋 Environment: $ENV_CONFIG"
 echo "🔄 Mode: $MODE"
+if [ "$FORCE" = "true" ]; then
+    echo "⚠️  Force mode: ENABLED (will reprocess existing files)"
+else
+    echo "🔄 Force mode: disabled (will skip existing files)"
+fi
 echo ""
 
 # Function to run a phase with error handling
@@ -23,9 +32,12 @@ run_phase() {
     
     echo "📍 Phase: $phase_name"
     echo "🔧 Running: $script_name"
+    if [ "$FORCE" = "true" ]; then
+        echo "⚠️  Force mode enabled for this phase"
+    fi
     
     if [ "$required" = "true" ] || [ "$MODE" = "full" ]; then
-        if FORCE="${FORCE:-false}" ./scripts/$script_name $ENV_CONFIG; then
+        if ./scripts/$script_name $ENV_CONFIG; then
             echo "✅ $phase_name completed successfully"
         else
             echo "❌ $phase_name failed"

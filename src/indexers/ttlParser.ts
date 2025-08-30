@@ -292,6 +292,26 @@ export class TTLMetadataParser {
                 const statuses = this.store.getObjects(doc, namedNode('https://legisquebec.gouv.qc.ca/ontology/status'), null);
                 if (statuses.length > 0) {
                     result.status = statuses[0].value;
+                } else {
+                    result.status = 'en vigueur'; // Default status for documents without explicit status
+                }
+                
+                // Fix incorrect AI enrichment errors - General correction logic
+                const enrichmentMethods = this.store.getObjects(doc, namedNode('https://legisquebec.gouv.qc.ca/ontology/enrichmentMethod'), null);
+                if (enrichmentMethods.length > 0 && enrichmentMethods[0].value === 'Azure OpenAI LLM Analysis') {
+                    if (result.status === 'abrogée') {
+                        // Check if there's an abrogatedBy reference that looks like an article reference
+                        const abrogatedByRefs = this.store.getObjects(doc, namedNode('https://legisquebec.gouv.qc.ca/ontology/abrogatedBy'), null);
+                        if (abrogatedByRefs.length > 0) {
+                            const abrogatedByRef = abrogatedByRefs[0].value;
+                            
+                            // Check if abrogatedBy is an article reference rather than a full law
+                            if (abrogatedByRef.match(/\d+,\s*c\.\s*\d+|a\.\s*\d+|\d+,\s*\d+/)) {
+                                result.status = 'en vigueur';
+                                console.log(`🔧 TTLParser (pattern matching): Corrected AI enrichment error for ${result.identifier} - article reference '${abrogatedByRef}' doesn't indicate law abrogation`);
+                            }
+                        }
+                    }
                 }
                 
                 // Get source URL
@@ -438,6 +458,12 @@ export class TTLMetadataParser {
             if (statuses.length > 0) {
                 metadata.status = statuses[0].value;
                 metadata.statusLang = (statuses[0] as any).language || 'fr';
+            } else {
+                // Default status for documents without explicit status
+                // In Quebec law, absence of status mention means "en vigueur" (in force)
+                metadata.status = 'en vigueur';
+                metadata.statusLang = 'fr';
+                console.log(`📋 Document ${metadata.legalIdentifier || metadata.uri} - statut par défaut: 'en vigueur'`);
             }
             
             // Get source URL
@@ -514,24 +540,45 @@ export class TTLMetadataParser {
      * Map SPARQL results to LegalMetadata objects
      */
     private mapResultsToMetadata(results: any[]): LegalMetadata[] {
-        return results.map(result => ({
-            uri: result.document || '',
-            legalIdentifier: result.identifier || '',
-            title: result.title || '',
-            titleLang: 'fr',
-            documentType: result.type || 'Loi',
-            status: result.status || '',
-            statusLang: 'fr',
-            sourceUrl: result.sourceUrl || '',
-            pdfPath: result.pdfPath || '',
-            pdfSource: result.pdfSource || '',
-            description: result.description || '',
-            descriptionLang: 'fr',
-            keywords: [],
-            enrichedAt: result.enrichedAt ? new Date(result.enrichedAt) : null,
-            enrichmentMethod: result.enrichmentMethod || '',
-            downloadStatus: result.downloadStatus || ''
-        }));
+        return results.map(result => {
+            let status = result.status || 'en vigueur'; // Default to 'en vigueur' if no status
+            const legalId = result.identifier || '';
+            
+            // Fix incorrect AI enrichment errors - General correction logic
+            if (result.enrichmentMethod === 'Azure OpenAI LLM Analysis') {
+                // If AI marked as abrogated but has abrogatedBy with article reference (not full law),
+                // it's likely an error - article references don't mean the whole law is abrogated
+                if (status === 'abrogée' && result.abrogatedBy) {
+                    const abrogatedByRef = result.abrogatedBy.toString();
+                    
+                    // Check if abrogatedBy is an article reference (contains "c.", "a.", or similar patterns)
+                    // rather than a reference to another full law code
+                    if (abrogatedByRef.match(/\d+,\s*c\.\s*\d+|a\.\s*\d+|\d+,\s*\d+/)) {
+                        status = 'en vigueur';
+                        console.log(`🔧 TTLParser: Corrected AI enrichment error for ${legalId} - article reference '${abrogatedByRef}' doesn't indicate law abrogation`);
+                    }
+                }
+            }
+            
+            return {
+                uri: result.document || '',
+                legalIdentifier: legalId,
+                title: result.title || '',
+                titleLang: 'fr',
+                documentType: result.type || 'Loi',
+                status: status,
+                statusLang: 'fr',
+                sourceUrl: result.sourceUrl || '',
+                pdfPath: result.pdfPath || '',
+                pdfSource: result.pdfSource || '',
+                description: result.description || '',
+                descriptionLang: 'fr',
+                keywords: [],
+                enrichedAt: result.enrichedAt ? new Date(result.enrichedAt) : null,
+                enrichmentMethod: result.enrichmentMethod || '',
+                downloadStatus: result.downloadStatus || ''
+            };
+        });
     }
     
     /**

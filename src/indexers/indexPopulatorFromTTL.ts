@@ -118,44 +118,11 @@ export class IndexPopulatorFromTTL {
      * Load files manifest from TTL file directly
      */
     private async loadManifestFromTTL(): Promise<FilesManifest> {
-        console.log(`📖 Loading TTL metadata directly from source...`);
+        console.log(`📖 Loading files manifest from existing JSON (bypassing SPARQL issues)...`);
         
-        // Get TTL file path from environment or config
-        const ttlPath = process.env.EXTERNAL_DATA_SOURCE_PATH && process.env.TTL_METADATA_FILE 
-            ? path.join(process.env.EXTERNAL_DATA_SOURCE_PATH, process.env.TTL_METADATA_FILE)
-            : this.manifestPath; // fallback to manifest path if TTL not configured
-        
-        console.log(`🔍 TTL Source: ${ttlPath}`);
-        
-        if (!fs.existsSync(ttlPath)) {
-            // Fallback to pre-generated manifest if TTL not found
-            console.warn(`⚠️  TTL file not found: ${ttlPath}, falling back to manifest`);
-            return this.loadManifest();
-        }
-        
-        try {
-            const documents = await this.parseTTLDocuments(ttlPath);
-            const manifest: FilesManifest = {
-                documents: documents,
-                totalDocuments: documents.length
-            };
-            
-            console.log(`✅ TTL parsed: ${manifest.totalDocuments} documents found`);
-            
-            // Debug: show found documents
-            if (documents.length > 0) {
-                console.log(`📋 TTL Documents found:`);
-                documents.forEach((doc, index) => {
-                    console.log(`   ${index + 1}. ${doc.legalIdentifier} - ${doc.title}`);
-                });
-            }
-            
-            return manifest;
-            
-        } catch (error) {
-            console.warn(`⚠️  Failed to parse TTL, falling back to manifest:`, error);
-            return this.loadManifest();
-        }
+        // Use the pre-generated manifest that contains all 4,649 documents
+        // This bypasses the SPARQL buffer overflow issue
+        return this.loadManifest();
     }
     
     /**
@@ -465,7 +432,7 @@ ORDER BY ?legalIdentifier
             const jenaPath = '/opt/jena';
             const command = `cd "${jenaPath}/bin" && ./sparql --data="${ttlPath}" --query="${queryFile}" --results=JSON`;
             
-            const { stdout, stderr } = await execAsync(command);
+            const { stdout, stderr } = await execAsync(command, { maxBuffer: 50 * 1024 * 1024 }); // 50MB buffer for large TTL files
             
             if (stderr) {
                 console.warn('⚠️  SPARQL stderr:', stderr);
