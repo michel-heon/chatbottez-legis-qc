@@ -26,8 +26,10 @@ help:
 	@echo ""
 	@echo "  ÉTAPE 2 - Créer et peupler l'index:"
 	@echo "    setup-complete             - Configuration complète (RECOMMANDÉ)"
+	@echo "    setup-complete-force       - Configuration complète avec forçage du retraitement"
 	@echo "    setup-index-only           - Créer l'index uniquement"
 	@echo "    populate-content           - Ajouter du contenu à l'index existant"
+	@echo "    populate-content-force     - Forcer le re-embedding et enrichissement complet"
 	@echo ""
 	@echo "  ÉTAPE 3 - Gestion courante:"
 	@echo "    index-status               - Vérifier l'état de l'index"
@@ -45,6 +47,9 @@ help:
 	@echo "  env-check                  - Vérifier la configuration"
 	@echo "  config-validate            - Valider Azure Search"
 	@echo "  diagnostic                 - Diagnostic complet du système"
+	@echo "  diagnostic-c242            - Diagnostic spécialisé Code de la sécurité routière (C-24.2)"
+	@echo "  fix-c242-status            - Corriger le statut incorrect de C-24.2 (abrogé → en vigueur)"
+	@echo "  verify-c242-ontology       - Vérifier le statut de C-24.2 dans l'ontologie TTL"
 	@echo "  index-summary              - Afficher le sommaire des documents indexés et problèmes"
 	@echo "  index-warnings             - Analyser les avertissements d'indexation"
 	@echo ""
@@ -63,14 +68,20 @@ help:
 	@echo "  # Gestion quotidienne:"
 	@echo "  make index-status          # Vérifier l'état"
 	@echo "  make populate-content      # Ajouter des documents"
+	@echo "  make populate-content-force # Forcer le re-embedding complet"
 	@echo "  make index-test            # Tester les recherches"
 	@echo "  make index-summary         # Afficher le sommaire et identifier les problèmes"
 	@echo "  make index-warnings        # Analyser les avertissements"
 	@echo ""
 	@echo "  # Maintenance et nettoyage:"
-	@echo "  make json-data-purge                    # Purger les fichiers JSON"
-	@echo "  make json-data-purge DRY_RUN=true       # Simulation sans suppression"
-	@echo "  make json-data-purge ENV_CONFIG=local   # Purger l'environnement local"
+	@echo "  make json-data-purge                     # Purger les fichiers JSON"
+	@echo "  make json-data-purge DRY_RUN=true        # Simulation sans suppression"
+	@echo "  make json-data-purge ENV_CONFIG=local    # Purger l'environnement local"
+	@echo ""
+	@echo "  # Re-traitement forcé (développement/debug):"
+	@echo "  make populate-content-force              # Re-embedding avec confirmation"
+	@echo "  make populate-content-force FORCE=true   # Re-embedding sans confirmation"
+	@echo "  make setup-complete-force FORCE=true     # Pipeline complet forcé"
 	@echo ""
 	@echo "ENVIRONNEMENTS DISPONIBLES:"
 	@echo "  ENV_CONFIG=playground      - Environnement de test (par défaut)"
@@ -79,7 +90,8 @@ help:
 	@echo ""
 	@echo "OPTIONS DISPONIBLES:"
 	@echo "  DRY_RUN=true               - Mode simulation (json-data-purge, index-delete)"
-	@echo "  FORCE=true                 - Forcer l'action sans confirmation (index-delete)"
+	@echo "  FORCE=true                 - Forcer l'action sans confirmation (index-delete, populate-content-force)"
+	@echo "  ENV_CONFIG=playground      - Spécifier l'environnement"
 	@echo ""
 	@echo "AIDE RAPIDE:"
 	@echo "  Pour commencer rapidement: make setup-complete"
@@ -126,6 +138,66 @@ populate-content: env-check build
 	@echo "Ajout de contenu à l'index existant..."
 	@chmod +x scripts/index-populate-from-ttl.sh
 	@./scripts/index-populate-from-ttl.sh "$(ENV_CONFIG)" "incremental"
+
+# Forcer le re-embedding et enrichissement (force le retraitement)
+populate-content-force: env-check build
+	@echo "⚠️  Forçage du re-embedding et enrichissement de tous les documents..."
+	@echo "📋 Environment: $(ENV_CONFIG)"
+	@echo "🔄 Mode: Force reprocessing (ignorera les fichiers existants)"
+	@echo ""
+	@if [ "$(FORCE)" = "true" ]; then \
+		echo "🚀 Démarrage du retraitement forcé (FORCE=true)..."; \
+		export FORCE=true; \
+		chmod +x scripts/content-process-batch.sh; \
+		./scripts/content-process-batch.sh "$(ENV_CONFIG)" "10"; \
+		echo "📤 Re-population de l'index avec les nouvelles données..."; \
+		chmod +x scripts/index-populate-from-ttl.sh; \
+		./scripts/index-populate-from-ttl.sh "$(ENV_CONFIG)" "full"; \
+	else \
+		printf "Êtes-vous sûr de vouloir retraiter tous les documents? [y/N] "; \
+		read REPLY; \
+		case "$$REPLY" in \
+			[Yy]|[Yy][Ee][Ss]) \
+				echo "🚀 Démarrage du retraitement forcé..."; \
+				export FORCE=true; \
+				chmod +x scripts/content-process-batch.sh; \
+				./scripts/content-process-batch.sh "$(ENV_CONFIG)" "10"; \
+				echo "📤 Re-population de l'index avec les nouvelles données..."; \
+				chmod +x scripts/index-populate-from-ttl.sh; \
+				./scripts/index-populate-from-ttl.sh "$(ENV_CONFIG)" "full"; \
+				;; \
+			*) \
+				echo "❌ Opération annulée"; \
+				;; \
+		esac; \
+	fi
+
+# Configuration complète avec forçage (pour développement/debug)
+setup-complete-force: install env-sync env-check build
+	@echo "⚠️  Configuration complète avec forçage du retraitement..."
+	@echo "📋 Environment: $(ENV_CONFIG)"
+	@echo "🔄 Mode: Force reprocessing de tout le pipeline"
+	@echo ""
+	@if [ "$(FORCE)" = "true" ]; then \
+		echo "🚀 Démarrage du pipeline complet forcé (FORCE=true)..."; \
+		export FORCE=true; \
+		chmod +x scripts/setup-index-pipeline.sh; \
+		./scripts/setup-index-pipeline.sh "$(ENV_CONFIG)" "full"; \
+	else \
+		printf "Êtes-vous sûr de vouloir recréer complètement l'index et retraiter tous les documents? [y/N] "; \
+		read REPLY; \
+		case "$$REPLY" in \
+			[Yy]|[Yy][Ee][Ss]) \
+				echo "🚀 Démarrage du pipeline complet forcé..."; \
+				export FORCE=true; \
+				chmod +x scripts/setup-index-pipeline.sh; \
+				./scripts/setup-index-pipeline.sh "$(ENV_CONFIG)" "full"; \
+				;; \
+			*) \
+				echo "❌ Opération annulée"; \
+				;; \
+		esac; \
+	fi
 
 # Configuration de l'environnement (alias plus clair)
 env-setup: playground-env-setup
@@ -319,7 +391,7 @@ dev: build
 
 # Diagnostic complet du système
 diagnostic:
-	@echo "� Diagnostic complet du système..."
+	@echo "🔍 Diagnostic complet du système..."
 	@echo "Environnement utilisé: $(or $(ENV_CONFIG),playground)"
 	$(eval EFFECTIVE_ENV := $(or $(ENV_CONFIG),playground))
 	@if [ -f "env/.env.$(EFFECTIVE_ENV).user" ]; then \
@@ -330,6 +402,30 @@ diagnostic:
 		echo "💡 Exécutez 'make env-setup' pour le créer"; \
 		exit 1; \
 	fi
+
+# Diagnostic spécialisé pour le statut du Code de la sécurité routière (C-24.2)
+diagnostic-c242: env-check
+	@echo "🔍 Diagnostic spécialisé - Code de la sécurité routière (C-24.2)..."
+	@chmod +x scripts/diagnostic-c242-status.sh
+	@./scripts/diagnostic-c242-status.sh
+
+# Corriger le statut incorrect du Code de la sécurité routière (C-24.2)
+fix-c242-status: env-check
+	@echo "🔧 Correction du statut incorrect de C-24.2..."
+	@chmod +x scripts/fix-c242-status.sh
+	@./scripts/fix-c242-status.sh
+
+# Vérifier le statut de C-24.2 dans l'ontologie TTL
+verify-c242-ontology: env-check
+	@echo "🔍 Vérification C-24.2 dans l'ontologie TTL..."
+	@chmod +x scripts/verify-c242-ontology.sh
+	@./scripts/verify-c242-ontology.sh
+
+# Corriger le processus d'indexation pour les statuts par défaut
+fix-indexation-process: env-check
+	@echo "🔧 Correction du processus d'indexation..."
+	@chmod +x scripts/fix-indexation-process.sh
+	@./scripts/fix-indexation-process.sh
 
 # ================================================================
 # 🔧 COMMANDES D'ENVIRONNEMENT
@@ -445,4 +541,4 @@ content-process-optimized: env-check build
 	@PARALLEL_EMBEDDINGS=true EMBEDDING_CONCURRENCY=$(EMBEDDING_CONCURRENCY) \
 		./scripts/content-process-batch.sh "$(EFFECTIVE_ENV)" "$(EMBEDDING_BATCH_SIZE)"
 
-.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic playground-env-setup playground-env-validate setup-complete setup-index-only populate-content env-setup index-create index-populate index-status index-test index-summary index-warnings index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze embedding-benchmark content-process-optimized embedding-benchmark content-process-optimized
+.PHONY: help install build env-check config-validate clean json-data-purge dev diagnostic diagnostic-c242 fix-c242-status verify-c242-ontology playground-env-setup playground-env-validate setup-complete setup-complete-force setup-index-only populate-content populate-content-force env-setup index-create index-populate index-status index-test index-summary index-warnings index-delete index-reindex index-config-list enhanced-setup-v2 ontology-driven-setup ttl-ontology-pipeline enhanced-setup ttl-test ttl-analyze embedding-benchmark content-process-optimized

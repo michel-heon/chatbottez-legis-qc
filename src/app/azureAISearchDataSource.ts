@@ -2,6 +2,10 @@ import { DataSource, Memory, OpenAIEmbeddings, RenderedPromptSection, Tokenizer 
 import { TurnContext } from "botbuilder";
 import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
 
+// Import our enhancement modules  
+const { enhanceSearchQuery, sortResultsByContext } = require('../../lib/searchEnhancer');
+const { enhanceSystemPrompt, generateContextualQuestions } = require('../../lib/promptEnhancer');
+
 /**
  * Defines the Document Interface based on TTL metadata.
  */
@@ -114,6 +118,13 @@ export class AzureAISearchDataSource implements DataSource {
         if(!query) {
             return { output: "", length: 0, tooLong: false };
         }
+
+        // Enhance the query based on context detection
+        const queryInfo = enhanceSearchQuery(query);
+        console.log(`📊 Azure Search - Requête: "${query}"`);
+        if (queryInfo.enhanced !== query) {
+            console.log(`🔍 Contexte détecté: ${queryInfo.context}`);
+        }
         
         const selectedFields = [
             "id",
@@ -128,10 +139,10 @@ export class AzureAISearchDataSource implements DataSource {
         ];
 
         // hybrid search
-        const queryVector: number[] = await this.getEmbeddingVector(query);
+        const queryVector: number[] = await this.getEmbeddingVector(queryInfo.enhanced);
         
         // Detect if user is asking for a specific legal identifier
-        const legalIdMatch = query.match(/\b([A-Z]-\d+(?:\.\d+)?)\b/);
+        const legalIdMatch = queryInfo.enhanced.match(/\b([A-Z]-\d+(?:\.\d+)?)\b/);
         
         // Get strictness from options (default: 3)
         const strictness = this.options.strictness || 3;
@@ -171,7 +182,7 @@ export class AzureAISearchDataSource implements DataSource {
             console.log(`🎯 Filtre spécifique appliqué: ${legalIdMatch[1]}`);
         }
         
-        const searchResults = await this.searchClient.search(query, searchOptions);
+        const searchResults = await this.searchClient.search(queryInfo.enhanced, searchOptions);
 
         if (!searchResults.results) {
             console.log('❌ Aucun résultat retourné par Azure Search');
@@ -204,37 +215,13 @@ export class AzureAISearchDataSource implements DataSource {
         // Apply strictness filtering
         const filteredResults = this.filterByStrictness(resultsArray, strictness);
         
-        // Sort results: prioritize "en vigueur" and null status over "abrogée"
-        const sortedResults = filteredResults.sort((a, b) => {
-            const statusA = a.document.legalStatus;
-            const statusB = b.document.legalStatus;
-            
-            // Priority order: "en vigueur" > null > "modifiée" > "abrogée"
-            const getPriority = (status: string) => {
-                if (status === "en vigueur") return 4;
-                if (status === null || status === "null") return 3;
-                if (status === "modifiée") return 2;
-                if (status === "abrogée") return 1;
-                return 0;
-            };
-            
-            const priorityA = getPriority(statusA);
-            const priorityB = getPriority(statusB);
-            
-            if (priorityA !== priorityB) {
-                return priorityB - priorityA; // Descending priority
-            }
-            
-            // If same status, sort by score (descending)
-            return (b.score || 0) - (a.score || 0);
-        });
+        // Sort results using our enhanced contextual sorting
+        const sortedResults = sortResultsByContext(filteredResults, queryInfo);
         
         const filteredCount = sortedResults.length;
         
         console.log(`🎯 Après filtrage strictness (${strictness}): ${filteredCount} documents conservés (${totalResults - filteredCount} filtrés)`);
-        console.log(`📊 Tri appliqué: lois en vigueur priorisées sur lois abrogées`);
-
-        if (filteredCount === 0) {
+        console.log(`📊 Tri appliqué: ${queryInfo.context === 'traffic_impairment' ? 'Code de la sécurité routière priorisé' : 'lois en vigueur priorisées sur lois abrogées'}`);        if (filteredCount === 0) {
             console.log(`⚠️  Strictness trop élevée (${strictness}) - aucun document suffisamment pertinent`);
             return { output: "AUCUNE_DONNEE_DISPONIBLE", length: 0, tooLong: false };
         }
@@ -287,6 +274,25 @@ Contenu: ${documentContent}
         
         console.log(`✅ Envoyé au LLM: ${processedCount} documents, ${usedTokens}/${maxTokens} tokens`);
 
+        // Add contextual enhancement to the documents
+        let contextualPrefix = "";
+        if (queryInfo.context === 'traffic_impairment') {
+            // Check if we have traffic safety documents  
+            const hasTrafficCode = sortedResults.some(result => 
+                result.document.legalIdentifier?.includes('C-24.2') || 
+                result.document.title?.toLowerCase().includes('sécurité routière'));
+                
+            if (!hasTrafficCode) {
+                contextualPrefix = "\n\nCONTEXTE IMPORTANT: Les documents ci-dessous concernent principalement les véhicules hors route (motoneiges, VTT, etc.). Pour les questions sur la conduite automobile sur route, le Code de la sécurité routière (C-24.2) serait plus approprié mais n'est pas disponible dans ces résultats.\n\n";
+                console.log('⚠️  ALERTE: Question sur conduite automobile mais seuls des documents véhicules hors route trouvés');
+            } else {
+                contextualPrefix = "\n\nCONTEXTE: Priorité aux documents du Code de la sécurité routière (C-24.2) pour les questions de conduite automobile.\n\n";
+                console.log('✅ Documents du Code de la sécurité routière trouvés');
+            }
+        }
+
+        const finalDoc = contextualPrefix + doc;
+
         // SÉCURITÉ : Si aucun document envoyé, forcer une réponse sécurisée
         if (processedCount === 0) {
             console.log('🚨 SÉCURITÉ: Aucun document envoyé - forçage réponse sécurisée');
@@ -297,7 +303,7 @@ Contenu: ${documentContent}
             };
         }
 
-        return { output: doc, length: usedTokens, tooLong: usedTokens > maxTokens };
+        return { output: finalDoc, length: usedTokens, tooLong: usedTokens > maxTokens };
     }
 
     /**
