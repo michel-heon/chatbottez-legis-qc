@@ -3,6 +3,7 @@ import { createIndexIfNotExists, delay, upsertDocuments, getEmbeddingVector } fr
 import { MyDocument } from "../app/azureAISearchDataSource";
 import path from "path";
 import * as fs from "fs";
+import config from "../config";
 
 const searchApiKey = process.argv[2];
 if (!searchApiKey) {
@@ -18,7 +19,7 @@ process.env.SECRET_AZURE_OPENAI_API_KEY = azureOpenAIKey;
  *  Main function that creates the index and upserts the documents.
  */
 export async function main() {
-    const index = "my-documents";
+    const index = config.azureSearchIndexName;
 
     if (
         !process.env.AZURE_SEARCH_ENDPOINT ||
@@ -56,4 +57,3 @@ export async function main() {
 }
 
 main();
-
