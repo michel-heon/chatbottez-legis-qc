@@ -1,7 +1,8 @@
 import { AzureKeyCredential, SearchIndexClient } from "@azure/search-documents";
 import { deleteIndex } from "./utils";
+import config from "../config";
 
-const index = "my-documents";
+const index = config.azureSearchIndexName;
 const searchApiKey = process.argv[2];
 if (!searchApiKey) {
   throw new Error("Missing input Azure AI Search Key");
