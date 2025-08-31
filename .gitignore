@@ -10,6 +10,16 @@ appPackage/build
 # dependencies
 node_modules/
 
+# Java Maven Build
+target/
+.classpath
+.project
+.settings/
+
+# IDE files
+*.iml
+.idea/
+
 # misc
 .env
 .deployment
