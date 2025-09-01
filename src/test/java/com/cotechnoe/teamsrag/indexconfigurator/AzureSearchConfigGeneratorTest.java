@@ -115,4 +115,23 @@ class AzureSearchConfigGeneratorTest {
             .isInstanceOf(AzureSearchConnectionException.class)
             .hasMessageContaining("Connection failed");
     }
+
+    @Test
+    @DisplayName("should have main method for CLI execution")
+    void shouldHaveMainMethodForCliExecution() {
+        // Given/When/Then
+        assertThatCode(() -> {
+            AzureSearchConfigGenerator.main(new String[]{"--help"});
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("should handle missing environment variables gracefully in main")
+    void shouldHandleMissingEnvironmentVariablesGracefullyInMain() {
+        // Given/When/Then - Should throw IllegalArgumentException for missing variables
+        assertThatThrownBy(() -> {
+            AzureSearchConfigGenerator.main(new String[]{});
+        }).isInstanceOf(IllegalArgumentException.class)
+          .hasMessageContaining("AZURE_SEARCH_ENDPOINT is required");
+    }
 }

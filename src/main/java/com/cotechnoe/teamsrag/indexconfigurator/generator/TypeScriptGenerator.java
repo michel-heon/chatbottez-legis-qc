@@ -64,8 +64,8 @@ public class TypeScriptGenerator {
             processedContent = isEnhancedMode ? 
                 updateGeneratedFields(content, schema) : 
                 replaceFieldsPlaceholder(content, schema);
-            // For app/azureAISearchDataSource.ts, output directly to output root
-            outputFile = outputDir.resolve("azureAISearchDataSource.ts");
+            // Keep the original relative path structure from template
+            // outputFile is already correctly set to outputDir.resolve(relativePath)
         } else if (fileName.equals("setup.ts")) {
             processedContent = isEnhancedMode ? 
                 updateGeneratedConfig(content, schema) : 

@@ -53,8 +53,8 @@ class MakefileIntegrationTest {
         String makefileContent = Files.readString(Path.of("Makefile"));
         
         // Then
-        assertThat(makefileContent).contains("azure-cli-validate");
-        assertThat(makefileContent).contains("AzureSearchConfigCLI");
+        assertThat(makefileContent).contains("azure-config-validate");
+        assertThat(makefileContent).contains("AzureSearchConfigGenerator");
         assertThat(makefileContent).contains("validate-only");
     }
 

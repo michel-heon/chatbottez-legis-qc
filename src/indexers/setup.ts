@@ -1,9 +1,9 @@
 import { AzureKeyCredential, SearchClient, SearchIndexClient } from "@azure/search-documents";
 import { createIndexIfNotExists, delay, upsertDocuments, getEmbeddingVector } from "./utils";
 import { MyDocument } from "../app/azureAISearchDataSource";
-import config from "../config";
 import path from "path";
 import * as fs from "fs";
+import config from "../config";
 
 const searchApiKey = process.argv[2];
 if (!searchApiKey) {
@@ -16,8 +16,7 @@ if (!azureOpenAIKey) {
 process.env.SECRET_AZURE_OPENAI_API_KEY = azureOpenAIKey;
 
 /**
- * Main function that creates the index and upserts the documents.
- * Generated for index: legis-qc-index-01
+ *  Main function that creates the index and upserts the documents.
  */
 export async function main() {
     const index = config.azureSearchIndexName;
@@ -32,10 +31,29 @@ export async function main() {
         );
     }
 
-    // Additional setup logic would go here
-    console.log(`Setting up index: ${index}`);
+    const searchApiEndpoint = process.env.AZURE_SEARCH_ENDPOINT!;
+    const credentials = new AzureKeyCredential(searchApiKey);
+
+    const searchIndexClient = new SearchIndexClient(searchApiEndpoint, credentials);
+    createIndexIfNotExists(searchIndexClient, index);
+    // Wait 5 seconds for the index to be created
+    await delay(5000);
+
+    const searchClient = new SearchClient<MyDocument>(searchApiEndpoint, index, credentials);
+
+    const filePath = path.join(__dirname, "./data");
+    const files = fs.readdirSync(filePath);
+    const data: MyDocument[] = [];
+    for (let i=1;i<=files.length;i++) {
+        const content = fs.readFileSync(path.join(filePath, files[i-1]), "utf-8");
+        data.push({
+            docId: i+"",
+            docTitle: files[i-1],
+            description: content,
+            descriptionVector: await getEmbeddingVector(content),
+        });
+    }
+    await upsertDocuments(searchClient, data);
 }
 
-if (require.main === module) {
-    main().catch(console.error);
-}
+main();
