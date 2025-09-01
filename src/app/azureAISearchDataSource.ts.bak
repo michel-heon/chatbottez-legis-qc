@@ -4,13 +4,12 @@ import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
 
 /**
  * Defines the Document Interface.
+ * Generated dynamically from Azure Search index schema.
  */
 export interface MyDocument {
     // GENERATED_FIELDS_START
-    docId?: string;
-    docTitle?: string | null;
-    description?: string | null;
-    descriptionVector?: number[] | null;
+    // Dynamic interface fields generated from Azure Search index
+    // This section will be replaced with actual field definitions
     // GENERATED_FIELDS_END
 }
 
@@ -104,28 +103,31 @@ export class AzureAISearchDataSource implements DataSource {
             return { output: "", length: 0, tooLong: false };
         }
         
+        // GENERATED_SELECT_FIELDS_START
+        // Dynamic selected fields based on Azure Search index
         const selectedFields = [
-            "docId",
-            "docTitle",
-            "description",
+            // GENERATED_SELECT_FIELDS_PLACEHOLDER
         ];
+        // GENERATED_SELECT_FIELDS_END
 
         // hybrid search
         const queryVector: number[] = await this.getEmbeddingVector(query);
         const searchResults = await this.searchClient.search(query, {
-            searchFields: ["docTitle", "description"],
+            // GENERATED_SEARCH_CONFIG_START
+            searchFields: [/* GENERATED_SEARCHABLE_FIELDS_PLACEHOLDER */],
             select: selectedFields as any,
             vectorSearchOptions: {
                 queries: [
                     {
                         kind: "vector",
-                        fields: ["descriptionVector"],
+                        fields: [/* GENERATED_VECTOR_FIELDS_PLACEHOLDER */],
                         kNearestNeighborsCount: 2,
                         // The query vector is the embedding of the user's input
                         vector: queryVector
                     }
                 ]
             },
+            // GENERATED_SEARCH_CONFIG_END
         });
 
         if (!searchResults.results) {
@@ -137,7 +139,10 @@ export class AzureAISearchDataSource implements DataSource {
         let usedTokens = 0;
         let doc = "";
         for await (const result of searchResults.results) {
-            const formattedResult = this.formatDocument(`${result.document.description}\n Citation title:${result.document.docTitle}.`);
+            // GENERATED_FORMAT_DOCUMENT_START
+            // Dynamic document formatting based on Azure Search index fields
+            const formattedResult = this.formatDocument("/* GENERATED_DOCUMENT_FORMAT_PLACEHOLDER */");
+            // GENERATED_FORMAT_DOCUMENT_END
             const tokens = tokenizer.encode(formattedResult).length;
 
             if (usedTokens + tokens > maxTokens) {

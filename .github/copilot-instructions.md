@@ -96,9 +96,9 @@ com.cotechnoe.teamsrag.indexconfigurator/
 
 ### Variables Playground
 ```bash
-AZURE_SEARCH_ENDPOINT=https://search-cotechnoe-ai.search.windows.net
+AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net
 SECRET_AZURE_SEARCH_KEY=***
-AZURE_SEARCH_INDEX_NAME=legis-qc-index-01
+AZURE_SEARCH_INDEX_NAME=your-index-name
 ```
 
 ## 🧪 Stratégie de Tests

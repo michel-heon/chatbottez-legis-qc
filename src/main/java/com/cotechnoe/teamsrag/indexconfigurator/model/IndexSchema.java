@@ -50,6 +50,14 @@ public class IndexSchema {
                 .toList();
     }
     
+    public int getFieldCount() {
+        return fields.size();
+    }
+    
+    public boolean hasKeyField() {
+        return fields.stream().anyMatch(FieldDefinition::isKey);
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

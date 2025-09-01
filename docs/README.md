@@ -1,16 +1,36 @@
-# 📚 Documentation - Chatbot Legis QC - Index Configurator
+# 📚 Documentation - Chatbot Legis QC - Index Configurator v2.1.0
 
-Bienvenue dans la documentation complète du projet **Chatbot Legis QC** - Un agent conversationnel Microsoft 365 Teams avec **utilitaire Java intégré** pour génération automatique de configuration TypeScript à partir d'Azure AI Search.
+Bienvenue dans la documentation complète du projet **Chatbot Legis QC** - Un agent conversationnel Microsoft 365 Teams avec **utilitaire Java de nouvelle génération** utilisant le SDK Azure Search officiel pour génération automatique de configuration TypeScript.
+
+## 🆕 Nouveautés version 2.1.0
+
+### 🚀 Intégration SDK Azure Search Java officiel
+- **SearchIndexClient** - Remplacement des appels REST API manuels
+- **AzureKeyCredential** - Authentification enterprise-grade
+- **Compatibilité API maximale** - Filtrage intelligent des champs
+
+### 🎯 Filtrage intelligent des champs
+- **isEssentialContentField()** - Sélection ultra-conservative (content, title uniquement)
+- **isContentField()** - Détection automatique des champs de contenu
+- **Gestion vectorielle** - Détection et traitement automatique des champs vectoriels
+
+### 🧪 Suite de tests étendue (67 tests)
+- **Tests d'intégration renforcés** avec Azure Search réel
+- **Validation SDK** - Tests spécialisés SearchIndexClient  
+- **Tests de compatibilité API** - Prévention erreurs de champs
 
 ## 🗂️ Organisation de la documentation
 
-### 📖 Guides utilisateur
-- **[azure-search-config-generator.md](./azure-search-config-generator.md)** - Guide complet de l'utilitaire Java de génération TypeScript
+### 📖 Guides utilisateur v2.1.0
+- **[azure-search-config-generator.md](./azure-search-config-generator.md)** - Guide complet de l'utilitaire Java avec SDK Azure Search
+- **[azure-search-sdk-migration.md](./azure-search-sdk-migration.md)** - 🆕 Migration vers SDK Azure Search Java officiel  
 - **[azure-search-management.md](./azure-search-management.md)** - Guide complet de gestion de l'index Azure AI Search
-- **[setup-guide.md](./setup-guide.md)** - Guide d'installation et configuration pas à pas
+- **[setup-guide.md](./setup-guide.md)** - Guide d'installation et configuration pas à pas v2.1.0
 
-### 🔧 Référence technique
+### 🔧 Référence technique v2.1.0
 - **[scripts-reference.md](./scripts-reference.md)** - Documentation technique détaillée des scripts
+- **[large-scale-validation-strategy.md](./large-scale-validation-strategy.md)** - Stratégie de validation à grande échelle
+- **[NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md)** - Conventions de nommage du projet
 
 ## 🚀 Démarrage rapide
 
@@ -38,16 +58,63 @@ make dev
 ## 🎯 Architecture du projet
 
 ```
-📁 Chatbot Legis QC - Index Configurator
-├── ☕ src/main/java/com/cotechnoe/teamsrag/indexconfigurator/  # Utilitaire Java
-│   ├── AzureSearchConfigGenerator.java      # CLI principal
-│   ├── azure/AzureSearchIndexReader.java    # Lecteur d'index
-│   ├── generator/TypeScriptGenerator.java   # Générateur unifié
-│   └── model/{IndexSchema,FieldDefinition}  # Modèles
-├── 🧪 src/test/java/.../indexconfigurator/  # Tests TDD complets
+## 🎯 Architecture du projet v2.1.0
+
+```
+📁 Chatbot Legis QC - Index Configurator v2.1.0
+├── ☕ src/main/java/com/cotechnoe/teamsrag/indexconfigurator/  # Utilitaire Java SDK
+│   ├── AzureSearchConfigGenerator.java      # CLI principal avec validation
+│   ├── azure/AzureSearchIndexReader.java    # SDK Azure Search officiel
+│   ├── generator/TypeScriptGenerator.java   # Générateur avec filtrage intelligent
+│   └── model/{IndexSchema,FieldDefinition}  # Modèles enrichis v2.1.0
+├── 🧪 src/test/java/.../indexconfigurator/  # Tests TDD 67 tests complets
+│   ├── AzureSearchConfigGeneratorTest.java  # Tests CLI
+│   ├── azure/AzureSearchIndexReaderTest.java # Tests SDK intégration
+│   └── generator/TypeScriptGeneratorTest.java # Tests génération
 ├── 🔧 scripts/                             # Scripts d'automatisation
 ├── 📚 docs/                                # Documentation (ce répertoire)
 ├── 🗃️ src/indexers/                        # Logique d'indexation Azure Search
+├── 🎯 src/app/azureAISearchDataSource.ts   # Configuration générée dynamiquement
+└── ⚙️ Maven dependencies                   # com.azure:azure-search-documents
+```
+
+### 🔧 Workflow de génération v2.1.0
+
+```mermaid
+graph TB
+    subgraph "Environnement Playground"
+        ENV[".env.playground.user"]
+        ENV --> |SECRET_AZURE_SEARCH_KEY| SDK[Azure Search SDK]
+        ENV --> |AZURE_SEARCH_ENDPOINT| SDK
+        ENV --> |AZURE_SEARCH_INDEX_NAME| SDK
+    end
+    
+    subgraph "SDK Azure Search Java"
+        CLIENT[SearchIndexClient]
+        CRED[AzureKeyCredential]
+        CLIENT --> |lit schéma| SCHEMA[IndexSchema]
+        CRED --> CLIENT
+    end
+    
+    subgraph "Filtrage Intelligent v2.1.0"
+        FILTER[isEssentialContentField]
+        CONTENT[isContentField] 
+        VECTOR[Détection vectorielle]
+        SCHEMA --> FILTER
+        SCHEMA --> CONTENT
+        SCHEMA --> VECTOR
+    end
+    
+    subgraph "Génération TypeScript"
+        GENERATOR[TypeScriptGenerator]
+        FILTER --> GENERATOR
+        CONTENT --> GENERATOR
+        VECTOR --> GENERATOR
+        GENERATOR --> DS[azureAISearchDataSource.ts]
+        GENERATOR --> SETUP[setup.ts]
+        GENERATOR --> UTILS[utils.ts]
+    end
+```
 ├── 🤖 src/app/                             # Logique applicative Teams Bot
 ├── 🏗️ infra/                              # Infrastructure Azure (Bicep)
 └── 📄 Makefile                            # Commandes de gestion automatisées

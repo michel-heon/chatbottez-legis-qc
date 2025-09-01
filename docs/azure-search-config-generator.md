@@ -1,10 +1,28 @@
-# Azure Search Configuration Generator
+# Azure Search Configuration Generator v2.1.0
 
 ## Vue d'ensemble
 
-L'utilitaire **Azure Search Configuration Generator** permet de lire automatiquement la structure d'un index Azure Search déployé et de générer les fichiers TypeScript correspondants pour le chatbot Legis QC. Cet outil suit les principes TDD (Test-Driven Development) et garantit une synchronisation parfaite entre l'index Azure Search et le code TypeScript.
+L'utilitaire **Azure Search Configuration Generator v2.1.0** utilise le **SDK Azure Search Java officiel** pour lire automatiquement la structure d'un index Azure Search déployé et générer les fichiers TypeScript correspondants pour le chatbot Legis QC. Cette nouvelle version intègre des fonctionnalités avancées de filtrage intelligent et de compatibilité API maximale.
 
-## Architecture
+## 🆕 Nouveautés v2.1.0
+
+### SDK Azure Search Java officiel
+- **SearchIndexClient** - Remplacement des appels REST manuels
+- **AzureKeyCredential** - Authentification enterprise-grade robuste
+- **SearchIndexClientBuilder** - Configuration fluide et type-safe
+
+### Filtrage intelligent des champs
+- **isEssentialContentField()** - Sélection ultra-conservative (content, title)
+- **isContentField()** - Détection automatique des champs de contenu
+- **Gestion vectorielle avancée** - Détection automatique avec exclusion intelligente
+- **Compatibilité API maximale** - Prévention des erreurs de champs unknown
+
+### Tests d'intégration renforcés
+- **67 tests complets** (59 unitaires + 8 d'intégration)
+- **Validation SDK** avec Azure Search réel
+- **Tests de compatibilité API** searchFields/selectedFields
+
+## Architecture v2.1.0
 
 ```mermaid
 graph TB
@@ -15,24 +33,40 @@ graph TB
         ENV --> |AZURE_SEARCH_INDEX_NAME| AZ
     end
     
-    subgraph "Utilitaire Java"
+    subgraph "SDK Azure Search Java v2.1.0"
         CLI[AzureSearchConfigGenerator]
         READER[AzureSearchIndexReader]
+        SDK[SearchIndexClient]
+        CRED[AzureKeyCredential]
         SCHEMA[IndexSchema]
-        GENERATOR[TypeScriptGenerator]
         
         CLI --> READER
-        READER --> |lit métadonnées| AZ
-        READER --> SCHEMA
-        SCHEMA --> GENERATOR
+        READER --> SDK
+        SDK --> |AzureKeyCredential| CRED
+        SDK --> |lit métadonnées| AZ
+        SDK --> SCHEMA
     end
     
-    subgraph "Fichiers générés"
+    subgraph "Filtrage Intelligent v2.1.0"
+        GENERATOR[TypeScriptGenerator]
+        ESSENTIAL[isEssentialContentField]
+        CONTENT[isContentField]
+        VECTOR[Détection vectorielle]
+        
+        SCHEMA --> GENERATOR
+        GENERATOR --> ESSENTIAL
+        GENERATOR --> CONTENT  
+        GENERATOR --> VECTOR
+    end
+    
+    subgraph "Fichiers générés optimisés"
         DS[azureAISearchDataSource.ts]
         SETUP[setup.ts]
         UTILS[utils.ts]
         
-        GENERATOR --> DS
+        ESSENTIAL --> |selectedFields| DS
+        CONTENT --> |searchFields| DS
+        VECTOR --> |vectorFields| DS
         GENERATOR --> SETUP
         GENERATOR --> UTILS
     end
@@ -46,26 +80,35 @@ graph TB
     end
 ```
 
-## Fonctionnalités
+## Fonctionnalités v2.1.0
 
-### ✅ Lecture automatique des métadonnées
-- Connexion sécurisée à Azure Search avec les clés du playground
-- Analyse complète du schéma d'index (champs, types, propriétés)
-- Détection automatique des champs clés, recherchables et vectoriels
-- Gestion robuste des erreurs (index inexistant, authentification, etc.)
+### ✅ Lecture automatique avec SDK Azure Search Java
+- **SearchIndexClient** - Connexion robuste avec SDK officiel Microsoft
+- **AzureKeyCredential** - Authentification sécurisée enterprise-grade
+- **Analyse complète du schéma** avec détection automatique des propriétés
+- **Gestion d'erreurs robuste** (index inexistant, authentification, timeout)
 
-### ✅ Génération TypeScript intelligente
-- **Interface TypeScript** typée selon le schéma réel
-- **Configuration AzureAISearchDataSource** optimisée
-- **Scripts de setup** adaptés aux champs détectés
-- **Fonctions utilitaires** spécialisées
+### ✅ Génération TypeScript avec filtrage intelligent
+- **Interface TypeScript** typée selon le schéma réel avec tous les champs
+- **Configuration AzureAISearchDataSource** optimisée pour compatibilité API
+- **selectedFields ultra-conservative** : content et title uniquement  
+- **searchFields intelligents** : détection automatique des champs de contenu
+- **Scripts de setup** adaptés aux champs détectés dynamiquement
+- **Fonctions utilitaires** spécialisées avec gestion vectorielle
+
+### ✅ Compatibilité API Azure Search maximisée
+- **Prévention erreurs "Unknown field"** avec filtrage isEssentialContentField()
+- **Exclusion champs problématiques** (chunk_id, parent_id dans searchFields/selectedFields)
+- **Gestion vectorielle séparée** - vectorFields distincts des champs de recherche
+- **Validation en temps réel** - Tests contre l'API Azure Search réelle
 
 ### ✅ Tests complets (67 tests)
-- **Tests unitaires** (59) : Logique métier pure avec mocks
-- **Tests d'intégration** (8) : Validation avec Azure Search réel
+- **Tests unitaires (59)** : Logique métier pure avec mocks et SDK
+- **Tests d'intégration (8)** : Validation avec Azure Search réel et API
+- **Tests de compatibilité** : searchFields, selectedFields, vectorFields
 - **Couverture complète** : Edge cases, validation, gestion d'erreurs
 
-## Structure du code
+## Structure du code v2.1.0
 
 ```mermaid
 classDiagram
@@ -75,6 +118,7 @@ classDiagram
         +generateConfig(indexName, outputDir) void
         -loadEnvironmentVariables() void
         -validateParameters(indexName, outputDir) void
+        -validateAzureConnection() void
     }
     
     class AzureSearchIndexReader {
@@ -85,6 +129,7 @@ classDiagram
         +readIndexSchema(indexName) IndexSchema
         -convertToFieldDefinition(azureField) FieldDefinition
         -validateConnection() void
+        -buildSearchIndexClient() SearchIndexClient
     }
     
     class IndexSchema {
@@ -95,9 +140,71 @@ classDiagram
         +getVectorFields() List~FieldDefinition~
         +getKeyField() Optional~FieldDefinition~
         +getSelectableFields() List~FieldDefinition~
+        +getEssentialContentFields() List~FieldDefinition~
     }
     
     class FieldDefinition {
+        -name: String
+        -type: String
+        -isKey: boolean
+        -isSearchable: boolean
+        -isFilterable: boolean
+        -isFacetable: boolean
+        -isSortable: boolean
+        -isVector: boolean
+        +shouldIncludeInInterface() boolean
+        +getTypeScriptType() String
+        +isEssentialContentField() boolean
+        +isContentField() boolean
+    }
+    
+    class TypeScriptGenerator {
+        -azureReader: AzureSearchIndexReader
+        +generateFromTemplates(sourceDir, outputDir, endpoint, indexName, apiKey) void
+        +generateCompleteConfiguration(schema, sourceDir, outputDir, enableBackup, verbose) void
+        -generateEssentialContentFields(schema) String
+        -generateContentFields(schema) String
+        -generateVectorFields(schema) String
+        -applyIntelligentFiltering(content, schema) String
+    }
+    
+    class SearchIndexClient {
+        <<Azure SDK>>
+        +getIndex(indexName) SearchIndex
+        +listIndexes() PagedIterable~SearchIndex~
+    }
+    
+    class AzureKeyCredential {
+        <<Azure SDK>>
+        +AzureKeyCredential(key) AzureKeyCredential
+    }
+    
+    AzureSearchConfigGenerator --> AzureSearchIndexReader
+    AzureSearchIndexReader --> SearchIndexClient
+    AzureSearchIndexReader --> AzureKeyCredential
+    AzureSearchIndexReader --> IndexSchema
+    IndexSchema --> FieldDefinition
+    TypeScriptGenerator --> AzureSearchIndexReader
+    TypeScriptGenerator --> IndexSchema
+```
+
+### 🆕 Nouvelles méthodes v2.1.0
+
+#### AzureSearchIndexReader
+- `buildSearchIndexClient()` - Construction du client SDK avec AzureKeyCredential
+- `convertSearchFieldToFieldDefinition()` - Conversion avec gestion vectorielle
+- `validateConnection()` - Tests de connectivité SDK
+
+#### TypeScriptGenerator  
+- `generateEssentialContentFields()` - Sélection ultra-conservative (content, title)
+- `generateContentFields()` - Détection intelligente champs de contenu
+- `isEssentialContentField()` - Filtrage pour compatibilité API maximale
+- `isContentField()` - Logique détection champs de contenu textuel
+
+#### FieldDefinition
+- `isVector()` - Détection automatique champs vectoriels
+- `shouldIncludeInInterface()` - Inclusion interface TypeScript
+- `getTypeScriptFieldDeclaration()` - Génération déclaration typée
         -name: String
         -type: String
         -key: boolean
@@ -138,13 +245,13 @@ L'utilitaire utilise les variables définies dans `env/.env.playground.user` :
 
 ```bash
 # Authentification Azure Search
-SECRET_AZURE_SEARCH_KEY=YDcIo6Do1dEXTwLXEcuXLCdEQMELiXn3Q7HDhwrxEAAzSeD3CIr6
-AZURE_SEARCH_ENDPOINT=https://search-cotechnoe-ai.search.windows.net
-AZURE_SEARCH_INDEX_NAME=legis-qc-index-01
+SECRET_AZURE_SEARCH_KEY=your_azure_search_key_here
+AZURE_SEARCH_ENDPOINT=https://your-search-service.search.windows.net
+AZURE_SEARCH_INDEX_NAME=your-index-name
 
 # Authentification Azure OpenAI (pour les embeddings)
-SECRET_AZURE_OPENAI_API_KEY=2ad1VT9CKCOgRAetxF9BCE03VfYrDIZ0L95KRB7IFaZFu4gW9nebJQQJ99BAACHYHv6XJ3w3AAABACOGsefB
-AZURE_OPENAI_ENDPOINT=https://openai-cotechnoe.openai.azure.com/
+SECRET_AZURE_OPENAI_API_KEY=your_openai_api_key_here
+AZURE_OPENAI_ENDPOINT=https://your-openai-service.openai.azure.com/
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=text-embedding-ada-002
 ```
 

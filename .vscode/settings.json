@@ -7,5 +7,6 @@
             ],
             "schema": {}
         }
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }

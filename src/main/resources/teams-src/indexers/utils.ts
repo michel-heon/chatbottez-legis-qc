@@ -45,45 +45,25 @@ export async function upsertDocuments(
 
 /**
  * Creates the index with the given name
+ * Generalized for any Azure Search index schema
  * @param {SearchIndexClient} client - The search index client
  * @param {string} name - The name of the index
  */
 export async function createIndexIfNotExists(client: SearchIndexClient, name: string): Promise<void> {
     const MyDocumentIndex: SearchIndex = {
         name,
+        // GENERATED_INDEX_FIELDS_START
+        // Dynamic index fields definition based on Azure Search schema
         fields: [
-            {
-                type: "Edm.String",
-                name: "docId",
-                key: true,
-                filterable: true,
-                sortable: true
-            },
-            {
-                type: "Edm.String",
-                name: "docTitle",
-                searchable: true,
-                filterable: true,
-                sortable: true
-            },
-            {
-                type: "Edm.String",
-                name: "description",
-                searchable: true,
-                analyzerName: KnownAnalyzerNames.EnLucene
-            },
-            {
-                type: "Collection(Edm.Single)",
-                name: "descriptionVector",
-                searchable: true,
-                vectorSearchDimensions: 1536,
-                vectorSearchProfileName: "my-vector-config"
-            },
+            // GENERATED_INDEX_FIELDS_PLACEHOLDER
         ],
+        // GENERATED_INDEX_FIELDS_END
         corsOptions: {
             // for browser tests
             allowedOrigins: ["*"]
         },
+        // GENERATED_VECTOR_CONFIG_START
+        // Dynamic vector search configuration based on Azure Search schema
         vectorSearch: {
             algorithms: [{ name: "vector-search-algorithm", kind: "hnsw" }],
             profiles: [
@@ -93,6 +73,7 @@ export async function createIndexIfNotExists(client: SearchIndexClient, name: st
                 }
             ]
         }
+        // GENERATED_VECTOR_CONFIG_END
     };
 
     await client.createOrUpdateIndex(MyDocumentIndex);
