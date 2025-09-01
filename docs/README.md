@@ -1,10 +1,11 @@
-# 📚 Documentation - Chatbot Legis QC
+# 📚 Documentation - Chatbot Legis QC - Index Configurator
 
-Bienvenue dans la documentation complète du projet **Chatbot Legis QC** - Un agent conversationnel Microsoft 365 Teams avec capacités RAG (Retrieval Augmented Generation) alimenté par Azure AI Search.
+Bienvenue dans la documentation complète du projet **Chatbot Legis QC** - Un agent conversationnel Microsoft 365 Teams avec **utilitaire Java intégré** pour génération automatique de configuration TypeScript à partir d'Azure AI Search.
 
 ## 🗂️ Organisation de la documentation
 
 ### 📖 Guides utilisateur
+- **[azure-search-config-generator.md](./azure-search-config-generator.md)** - Guide complet de l'utilitaire Java de génération TypeScript
 - **[azure-search-management.md](./azure-search-management.md)** - Guide complet de gestion de l'index Azure AI Search
 - **[setup-guide.md](./setup-guide.md)** - Guide d'installation et configuration pas à pas
 
@@ -15,16 +16,20 @@ Bienvenue dans la documentation complète du projet **Chatbot Legis QC** - Un ag
 
 ### Nouveaux utilisateurs
 1. 📋 Lire le [Guide d'installation](./setup-guide.md)
-2. 🛠️ Suivre la [Configuration Azure Search](./azure-search-management.md#configuration-requise)
-3. ⚡ Exécuter `make help` pour voir toutes les commandes disponibles
+2. ⚙️ Découvrir l'[Azure Search Config Generator](./azure-search-config-generator.md)
+3. 🛠️ Suivre la [Configuration Azure Search](./azure-search-management.md#configuration-requise)
+4. ⚡ Exécuter `make help` pour voir toutes les commandes disponibles
 
 ### Utilisateurs expérimentés
 ```bash
 # Configuration rapide
-make check-env && make validate-config
+make java-build && make check-env && make validate-config
 
-# Setup complet
-make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+# Génération automatique TypeScript depuis Azure Search
+make azure-config-generate
+
+# Setup complet avec génération
+make azure-config-workflow
 
 # Démarrage de l'application
 make dev
@@ -33,30 +38,37 @@ make dev
 ## 🎯 Architecture du projet
 
 ```
-📁 Chatbot Legis QC
-├── 🔧 scripts/           # Scripts d'automatisation
-├── 📚 docs/              # Documentation (ce répertoire)
-├── 🗃️ src/indexers/      # Logique d'indexation Azure Search
-├── 🤖 src/app/           # Logique applicative Teams Bot
-├── 🏗️ infra/            # Infrastructure Azure (Bicep)
-└── 📄 Makefile          # Commandes de gestion automatisées
+📁 Chatbot Legis QC - Index Configurator
+├── ☕ src/main/java/com/cotechnoe/teamsrag/indexconfigurator/  # Utilitaire Java
+│   ├── AzureSearchConfigGenerator.java      # CLI principal
+│   ├── azure/AzureSearchIndexReader.java    # Lecteur d'index
+│   ├── generator/TypeScriptGenerator.java   # Générateur unifié
+│   └── model/{IndexSchema,FieldDefinition}  # Modèles
+├── 🧪 src/test/java/.../indexconfigurator/  # Tests TDD complets
+├── 🔧 scripts/                             # Scripts d'automatisation
+├── 📚 docs/                                # Documentation (ce répertoire)
+├── 🗃️ src/indexers/                        # Logique d'indexation Azure Search
+├── 🤖 src/app/                             # Logique applicative Teams Bot
+├── 🏗️ infra/                              # Infrastructure Azure (Bicep)
+└── 📄 Makefile                            # Commandes de gestion automatisées
 ```
 
 ## 🛠️ Fonctionnalités principales
+
+### ⚙️ Génération TypeScript automatique
+- **Lecture dynamique** : Structure d'index Azure Search en temps réel
+- **Génération intelligente** : Mode simple (placeholders) et avancé (START/END)
+- **Préservation métier** : Logique existante protégée lors des mises à jour
+- **Validation** : Tests TDD complets et vérification de syntaxe TypeScript
 
 ### 🔍 Recherche hybride
 - **Recherche textuelle** : Correspondance exacte des mots-clés
 - **Recherche sémantique** : Similarité vectorielle via embeddings Azure OpenAI
 
-### 📊 Gestion automatisée
-- **Indexation** : Scripts automatisés pour la création et mise à jour
-- **Monitoring** : Vérification de l'état et des métriques
-- **Validation** : Tests de connectivité et configuration
-
-### 🚀 Déploiement
-- **Multi-environnements** : Local, Playground, Production
-- **Infrastructure as Code** : Templates Azure Bicep
-- **CI/CD Ready** : Scripts compatibles avec les pipelines
+### 🧪 Développement TDD
+- **31 tests JUnit 5** avec couverture complète
+- **Architecture SOLID** : Injection de dépendances, immutabilité
+- **Compatibilité Eclipse** : Développement intégré Maven
 
 ## 📋 Commandes essentielles
 
