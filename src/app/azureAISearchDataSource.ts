@@ -6,10 +6,14 @@ import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
  * Defines the Document Interface.
  */
 export interface MyDocument {
-    docId?: string;
-    docTitle?: string | null;
-    description?: string | null;
-    descriptionVector?: number[] | null;
+    // GENERATED_FIELDS_START
+    chunk_id?: string;
+    parent_id?: string;
+    content?: string;
+    title?: string;
+    url?: string;
+    filepath?: string;
+    // GENERATED_FIELDS_END
 }
 
 /**

@@ -108,13 +108,10 @@ public class AzureSearchConfigGenerator {
                 System.out.println("📁 Output: " + outputDir);
             }
             
-            // Generate configuration using correct API signatures
-            AzureSearchIndexReader reader = new AzureSearchIndexReader();
-            IndexSchema schema = reader.readIndexSchema(endpoint, indexName, apiKey);
-            
+            // 🚀 NEW: Use real-time Azure Search reading
             TypeScriptGenerator tsGenerator = new TypeScriptGenerator();
             Path sourceDir = Path.of("src/main/resources/teams-src");
-            tsGenerator.generateFromTemplates(sourceDir, Path.of(outputDir), schema);
+            tsGenerator.generateFromTemplates(sourceDir, Path.of(outputDir), endpoint, indexName, apiKey);
             
             if (isVerbose()) {
                 System.out.println("✅ Configuration generated successfully");
