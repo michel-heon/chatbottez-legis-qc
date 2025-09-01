@@ -179,6 +179,9 @@ public class TypeScriptGenerator {
                              schema.getSearchableFields().size() + " searchable fields");
         }
         
+        // Add warning header to all generated files
+        processedContent = addGeneratedFileWarning(processedContent, fileName, schema);
+        
         // Write processed content
         Files.createDirectories(outputFile.getParent());
         Files.writeString(outputFile, processedContent);
@@ -502,6 +505,91 @@ public class TypeScriptGenerator {
                     System.out.println("💾 Backup created: " + backupPath);
                 }
             }
+        }
+    }
+    
+    /**
+     * Adds warning header to generated files to inform developers not to edit manually.
+     */
+    private String addGeneratedFileWarning(String content, String fileName, IndexSchema schema) {
+        String warning = generateWarningHeader(fileName, schema);
+        
+        // If content already starts with our warning, don't add it again
+        if (content.trim().startsWith("/**")) {
+            // Check if it's our generated warning
+            if (content.contains("⚠️ ATTENTION - FICHIER GÉNÉRÉ AUTOMATIQUEMENT")) {
+                return content; // Already has our warning
+            }
+        }
+        
+        // Add warning at the beginning
+        return warning + "\n" + content;
+    }
+    
+    /**
+     * Generates the warning header based on file type.
+     */
+    private String generateWarningHeader(String fileName, IndexSchema schema) {
+        String timestamp = java.time.LocalDateTime.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        
+        String baseWarning = String.format(
+            "/**\n" +
+            " * ⚠️ ATTENTION - FICHIER GÉNÉRÉ AUTOMATIQUEMENT ⚠️\n" +
+            " * \n" +
+            " * 🚫 NE PAS ÉDITER CE FICHIER MANUELLEMENT\n" +
+            " * \n" +
+            " * Ce fichier est généré automatiquement à partir de l'index Azure Search.\n" +
+            " * Toute modification manuelle sera ÉCRASÉE lors de la prochaine génération.\n" +
+            " * \n" +
+            " * 🔄 Pour modifier ce fichier :\n" +
+            " * 1. Modifiez les templates dans : src/main/resources/teams-src/\n" +
+            " * 2. Ou modifiez la structure de l'index Azure Search : %s\n" +
+            " * 3. Puis exécutez : make azure-config-generate\n" +
+            " * \n" +
+            " * 📊 Généré depuis l'index : %s\n" +
+            " * 📅 Date de génération : %s\n" +
+            " * 📋 Nombre de champs : %d\n",
+            schema.getIndexName(),
+            schema.getIndexName(),
+            timestamp,
+            schema.getFields().size()
+        );
+        
+        // Add specific instructions based on file type
+        switch (fileName) {
+            case "azureAISearchDataSource.ts":
+                return baseWarning +
+                    " * \n" +
+                    " * 🎯 Ce fichier contient :\n" +
+                    " * - Interface TypeScript MyDocument avec tous les champs de l'index\n" +
+                    " * - Configuration du client Azure Search\n" +
+                    " * - Logique de recherche hybride (texte + vecteur)\n" +
+                    " * - Formatage des résultats de recherche\n" +
+                    " */\n";
+                    
+            case "setup.ts":
+                return baseWarning +
+                    " * \n" +
+                    " * 🎯 Ce fichier contient :\n" +
+                    " * - Script de configuration de l'index Azure Search\n" +
+                    " * - Définition des champs et leurs types\n" +
+                    " * - Configuration des analyseurs et des profils de scoring\n" +
+                    " * - Valeurs par défaut pour tous les champs de l'index\n" +
+                    " */\n";
+                    
+            case "utils.ts":
+                return baseWarning +
+                    " * \n" +
+                    " * 🎯 Ce fichier contient :\n" +
+                    " * - Fonctions utilitaires pour Azure Search\n" +
+                    " * - Configuration des champs de recherche\n" +
+                    " * - Helpers pour la manipulation des documents\n" +
+                    " * - Validation et transformation des données\n" +
+                    " */\n";
+                    
+            default:
+                return baseWarning + " */\n";
         }
     }
 }
