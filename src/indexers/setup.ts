@@ -21,7 +21,7 @@ process.env.SECRET_AZURE_OPENAI_API_KEY = azureOpenAIKey;
  */
 export async function main() {
     // GENERATED_INDEX_CONFIG_START
-    const index = "legis-qc-index-01";
+    const index = "legis-qc-index-full-03";
     // GENERATED_INDEX_CONFIG_END
 
     if (
@@ -52,12 +52,22 @@ export async function main() {
         // GENERATED_DOCUMENT_CREATE_START
         // Dynamic document creation based on Azure Search index schema
         data.push({
-                        chunk_id: i+"",
-            parent_id: content,
-            content: content,
+                        id: i+"",
+            format: content,
+            legalIdentifier: content,
+            sourceUrl: content,
             title: files[i-1],
-            url: content,
-            filepath: content,
+            abrogatedBy: content,
+            downloadStatus: content,
+            enrichedAt: new Date(),
+            enrichmentMethod: content,
+            legalStatus: content,
+            description: content,
+            isReplacedBy: false,
+            keywords: content,
+            documentType: content,
+            legalType: content,
+            content: content,
             contentVector: await getEmbeddingVector(content),
         });
         // GENERATED_DOCUMENT_CREATE_END

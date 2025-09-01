@@ -8,12 +8,22 @@ import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
  */
 export interface MyDocument {
     // GENERATED_FIELDS_START
-    chunk_id?: string;
-    parent_id?: string;
-    content?: string;
+    id?: string;
+    format?: string;
+    legalIdentifier?: string;
+    sourceUrl?: string;
     title?: string;
-    url?: string;
-    filepath?: string;
+    abrogatedBy?: string;
+    downloadStatus?: string;
+    enrichedAt?: any;
+    enrichmentMethod?: string;
+    legalStatus?: string;
+    description?: string;
+    isReplacedBy?: boolean;
+    keywords?: any;
+    documentType?: string;
+    legalType?: string;
+    content?: string;
     contentVector?: number[];
     // GENERATED_FIELDS_END
 }
@@ -111,8 +121,8 @@ export class AzureAISearchDataSource implements DataSource {
         // GENERATED_SELECT_FIELDS_START
         // Dynamic selected fields based on Azure Search index
         const selectedFields = [
-                        "content",
-            "title"
+                        "title",
+            "content"
         ];
         // GENERATED_SELECT_FIELDS_END
 
@@ -120,7 +130,7 @@ export class AzureAISearchDataSource implements DataSource {
         const queryVector: number[] = await this.getEmbeddingVector(query);
         const searchResults = await this.searchClient.search(query, {
             // GENERATED_SEARCH_CONFIG_START
-            searchFields: ["content", "title"],
+            searchFields: ["title", "description", "content"],
             select: selectedFields as any,
             vectorSearchOptions: {
                 queries: [
@@ -147,7 +157,7 @@ export class AzureAISearchDataSource implements DataSource {
         for await (const result of searchResults.results) {
             // GENERATED_FORMAT_DOCUMENT_START
             // Dynamic document formatting based on Azure Search index fields
-            const formattedResult = this.formatDocument(`${result.document.chunk_id}\n Citation: ${result.document.title}.`);
+            const formattedResult = this.formatDocument(`${result.document.legalIdentifier}\n Citation: ${result.document.title}.`);
             // GENERATED_FORMAT_DOCUMENT_END
             const tokens = tokenizer.encode(formattedResult).length;
 

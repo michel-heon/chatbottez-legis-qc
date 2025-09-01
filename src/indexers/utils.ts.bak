@@ -57,14 +57,83 @@ export async function createIndexIfNotExists(client: SearchIndexClient, name: st
         fields: [
                         {
                 type: "Edm.String",
-                name: "chunk_id",
+                name: "id",
                 key: true,
                 filterable: true,
                 sortable: true
             },
             {
                 type: "Edm.String",
-                name: "parent_id",
+                name: "format"
+            },
+            {
+                type: "Edm.String",
+                name: "legalIdentifier",
+                searchable: true,
+                filterable: true,
+                analyzerName: KnownAnalyzerNames.EnLucene
+            },
+            {
+                type: "Edm.String",
+                name: "sourceUrl"
+            },
+            {
+                type: "Edm.String",
+                name: "title",
+                searchable: true,
+                analyzerName: KnownAnalyzerNames.EnLucene
+            },
+            {
+                type: "Edm.String",
+                name: "abrogatedBy",
+                searchable: true,
+                analyzerName: KnownAnalyzerNames.EnLucene
+            },
+            {
+                type: "Edm.String",
+                name: "downloadStatus"
+            },
+            {
+                type: "Edm.DateTimeOffset",
+                name: "enrichedAt"
+            },
+            {
+                type: "Edm.String",
+                name: "enrichmentMethod"
+            },
+            {
+                type: "Edm.String",
+                name: "legalStatus",
+                searchable: true,
+                filterable: true,
+                analyzerName: KnownAnalyzerNames.EnLucene
+            },
+            {
+                type: "Edm.String",
+                name: "description",
+                searchable: true,
+                analyzerName: KnownAnalyzerNames.EnLucene
+            },
+            {
+                type: "Edm.Boolean",
+                name: "isReplacedBy"
+            },
+            {
+                type: "Collection(Edm.String)",
+                name: "keywords",
+                searchable: true,
+                filterable: true
+            },
+            {
+                type: "Edm.String",
+                name: "documentType",
+                searchable: true,
+                filterable: true,
+                analyzerName: KnownAnalyzerNames.EnLucene
+            },
+            {
+                type: "Edm.String",
+                name: "legalType",
                 searchable: true,
                 filterable: true,
                 analyzerName: KnownAnalyzerNames.EnLucene
@@ -74,21 +143,6 @@ export async function createIndexIfNotExists(client: SearchIndexClient, name: st
                 name: "content",
                 searchable: true,
                 analyzerName: KnownAnalyzerNames.EnLucene
-            },
-            {
-                type: "Edm.String",
-                name: "title",
-                searchable: true,
-                filterable: true,
-                analyzerName: KnownAnalyzerNames.EnLucene
-            },
-            {
-                type: "Edm.String",
-                name: "url"
-            },
-            {
-                type: "Edm.String",
-                name: "filepath"
             },
             {
                 type: "Collection(Edm.Single)",
