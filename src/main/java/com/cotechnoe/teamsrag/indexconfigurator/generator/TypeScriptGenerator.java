@@ -420,6 +420,10 @@ public class TypeScriptGenerator {
                     return "            " + field.getName() + ": i+\"\",";
                 } else if (field.isVector()) {
                     return "            " + field.getName() + ": await getEmbeddingVector(content),";
+                } else if (field.getType().equals("Edm.Boolean")) {
+                    return "            " + field.getName() + ": false,";
+                } else if (field.getType().equals("Edm.DateTimeOffset")) {
+                    return "            " + field.getName() + ": new Date(),";
                 } else if (field.getName().toLowerCase().contains("title") || field.getName().toLowerCase().contains("name")) {
                     return "            " + field.getName() + ": files[i-1],";
                 } else {
