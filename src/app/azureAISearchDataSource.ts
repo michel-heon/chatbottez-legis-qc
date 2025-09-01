@@ -105,7 +105,7 @@ export class AzureAISearchDataSource implements DataSource {
         const selectedFields = [
             "docId",
             "docTitle",
-            "description"
+            "description",
         ];
 
         // hybrid search
