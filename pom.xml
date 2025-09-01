@@ -60,6 +60,20 @@
             <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Azure Search Documents -->
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-search-documents</artifactId>
+            <version>11.6.4</version>
+        </dependency>
+        
+        <!-- Azure Core -->
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+            <version>1.49.1</version>
+        </dependency>
     </dependencies>
 
     <build>

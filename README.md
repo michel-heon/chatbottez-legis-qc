@@ -1,11 +1,12 @@
-# 🤖 Chatbot Legis QC
+# 🤖 Chatbot Legis QC - Index Configurator
 
-Agent conversationnel intelligent pour Microsoft 365 Teams avec capacités RAG (Retrieval Augmented Generation) alimenté par Azure AI Search.
+Agent conversationnel intelligent pour Microsoft 365 Teams avec génération automatique de configuration TypeScript à partir d'Azure AI Search.
 
 ## 🎯 Vue d'ensemble
 
-Ce projet démontre la construction d'un chatbot sophistiqué capable de répondre à des questions spécifiques basées sur des documents indexés, directement dans Microsoft Teams. Il utilise des techniques avancées comme :
+Ce projet démontre la construction d'un chatbot sophistiqué avec un **utilitaire Java intégré** qui génère automatiquement les fichiers TypeScript à partir de la structure réelle d'un index Azure AI Search. Les fonctionnalités principales incluent :
 
+- **[Azure Search Index Configurator](./docs/azure-search-config-generator.md)** - Utilitaire Java pour génération TypeScript automatique
 - **[Retrieval Augmented Generation (RAG)](https://python.langchain.com/docs/use_cases/question_answering/#what-is-rag)** - Génération augmentée par récupération
 - **[Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)** - Recherche hybride (textuelle + vectorielle)  
 - **[Teams AI Library](https://learn.microsoft.com/microsoftteams/platform/bots/how-to/teams%20conversational%20ai/teams-conversation-ai-overview)** - Framework Microsoft pour agents Teams
@@ -17,23 +18,54 @@ Ce projet démontre la construction d'un chatbot sophistiqué capable de répond
 # 1. Installation des dépendances
 make install
 
-# 2. Validation de l'environnement
-make check-env
+# 2. Compilation des composants Java
+make java-build
 
 # 3. Configuration de l'index Azure Search
-make setup-index AZURE_SEARCH_KEY=your_key AZURE_OPENAI_KEY=your_key
+make setup-index SECRET_AZURE_SEARCH_KEY=your_key SECRET_AZURE_OPENAI_KEY=your_key
 
-# 4. Démarrage de l'application
+# 4. Génération automatique de la configuration TypeScript
+make azure-config-generate
+
+# 5. Démarrage de l'application
 make dev
+```
+
+### 🔧 Génération TypeScript avancée
+```bash
+# Génération TypeScript avec préservation de la logique métier
+make azure-config-generate-enhanced
+
+# Workflow complet de génération et validation
+make azure-config-workflow
+
+# Tests TDD pour les générateurs
+make java-test-tdd
 ```
 
 ### 📋 Commandes disponibles
 ```bash
-make help                # Affiche toutes les commandes disponibles
-make validate-config     # Teste la connectivité Azure
-make index-status       # Vérifie l'état de l'index
-make reindex           # Reconstruit l'index complet
+make help                     # Affiche toutes les commandes disponibles
+make azure-config-info        # Informations sur le générateur
+make azure-config-validate    # Valide la configuration générée
+make java-test                # Tests unitaires Java
+make typescript-generate-complete  # Génération TypeScript complète
 ```
+
+## 🏗️ Architecture Java - Index Configurator
+
+Le projet inclut un utilitaire Java sophistiqué (`com.cotechnoe.teamsrag.indexconfigurator`) qui :
+
+- **Lit dynamiquement** la structure d'un index Azure Search
+- **Génère automatiquement** les fichiers TypeScript synchronisés
+- **Préserve la logique métier** existante lors des mises à jour
+- **Supporte deux modes** : simple (placeholders) et avancé (START/END markers)
+
+### Classes principales
+- `AzureSearchConfigGenerator` - CLI principal
+- `AzureSearchIndexReader` - Lecture d'index Azure
+- `TypeScriptGenerator` - Génération TypeScript unifiée
+- `IndexSchema` & `FieldDefinition` - Modèles de données
 
 ## 📚 Documentation complète
 
@@ -41,8 +73,24 @@ make reindex           # Reconstruit l'index complet
 
 ### Guides principaux
 - 🛠️ **[Guide d'installation](./docs/setup-guide.md)** - Configuration pas à pas
+- ⚙️ **[Azure Search Config Generator](./docs/azure-search-config-generator.md)** - Utilitaire Java de génération
 - 🔍 **[Gestion Azure Search](./docs/azure-search-management.md)** - Guide complet d'indexation
 - 🔧 **[Référence des scripts](./docs/scripts-reference.md)** - Documentation technique
+
+## 🧪 Développement TDD
+
+Le projet suit strictement les principes **Test-Driven Development** avec :
+- Tests JUnit 5 complets pour tous les composants
+- Couverture des cas limites et gestion d'erreurs
+- Architecture SOLID et injection de dépendances
+- Compatibilité Eclipse et Maven
+
+```bash
+# Cycle TDD complet
+make java-test-tdd           # Tests unitaires
+make azure-config-generate   # Génération
+make azure-config-validate   # Validation
+```
 
 ## Get started with the template
 

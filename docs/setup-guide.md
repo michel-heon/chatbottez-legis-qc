@@ -22,9 +22,9 @@ Guide détaillé pour configurer l'environnement de développement du **Chatbot 
 
 ### 1. Cloner le projet
 ```bash
-git clone git@github.com:michel-heon/chatbottez-legis-qc.git
-cd chatbottez-legis-qc
-git checkout dev/gpt-teams-rag
+git clone git@github.com:michel-heon/legis-qc.git
+cd legis-qc
+git checkout main
 ```
 
 ### 2. Installer les dépendances

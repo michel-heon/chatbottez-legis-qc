@@ -5,11 +5,15 @@ import { AzureKeyCredential, SearchClient } from "@azure/search-documents";
 /**
  * Defines the Document Interface.
  */
+
 export interface MyDocument {
-    docId?: string;
-    docTitle?: string | null;
-    description?: string | null;
-    descriptionVector?: number[] | null;
+    chunk_id?: string;
+    parent_id?: string | null;
+    content?: string | null;
+    title?: string | null;
+    url?: string | null;
+    filepath?: string | null;
+    contentVector?: number[] | null;
 }
 
 /**
@@ -101,23 +105,26 @@ export class AzureAISearchDataSource implements DataSource {
         if(!query) {
             return { output: "", length: 0, tooLong: false };
         }
-        
+
         const selectedFields = [
-            "docId",
-            "docTitle",
-            "description"
+                        "chunk_id",
+            "parent_id",
+            "content",
+            "title",
+            "url",
+            "filepath"
         ];
 
         // hybrid search
         const queryVector: number[] = await this.getEmbeddingVector(query);
         const searchResults = await this.searchClient.search(query, {
-            searchFields: ["docTitle", "description"],
+            searchFields: ["chunk_id", "parent_id", "content", "title", "contentVector"],
             select: selectedFields as any,
             vectorSearchOptions: {
                 queries: [
                     {
                         kind: "vector",
-                        fields: ["descriptionVector"],
+                        fields: ["contentVector"],
                         kNearestNeighborsCount: 2,
                         // The query vector is the embedding of the user's input
                         vector: queryVector
@@ -150,9 +157,9 @@ export class AzureAISearchDataSource implements DataSource {
     }
 
     /**
-     * Formats the result string 
-     * @param result 
-     * @returns 
+     * Formats the result string
+     * @param result
+     * @returns
      */
     private formatDocument(result: string): string {
         return `<context>${result}</context>`;
