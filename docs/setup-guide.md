@@ -1,16 +1,23 @@
-# 🛠️ Guide d'installation et configuration
+# 🛠️ Guide d'installation et configuration v2.1.0
 
-Guide détaillé pour configurer l'environnement de développement du **Chatbot Legis QC**.
+Guide détaillé pour configurer l'environnement de développement du **Chatbot Legis QC** avec les nouvelles fonctionnalités SDK Azure Search Java.
 
-## 📋 Prérequis système
+## 📋 Prérequis système v2.1.0
 
 ### Logiciels requis
-- **Node.js** 16.x ou supérieur
-- **npm** 8.x ou **yarn** 1.22.x
+- **Node.js** 18.x ou supérieur (LTS recommandé)
+- **npm** 9.x ou **yarn** 1.22.x
 - **Git** 2.x
 - **Make** (généralement préinstallé sur Linux/macOS)
+- **Java 17+** (pour l'utilitaire de génération TypeScript)
+- **Maven 3.8+** (pour la compilation des composants Java)
 - **curl** (pour les tests de connectivité)
 - **jq** (optionnel, pour le formatage JSON)
+
+### 🆕 Nouveaux prérequis v2.1.0
+- **Azure Search Documents SDK** - Intégré automatiquement via Maven
+- **JUnit 5** - Pour l'exécution des tests TDD
+- **Eclipse IDE** (optionnel, mais recommandé pour le développement Java)
 
 ### Services Azure requis
 - **Azure AI Search** (Standard ou supérieur recommandé)
@@ -18,19 +25,23 @@ Guide détaillé pour configurer l'environnement de développement du **Chatbot 
   - GPT-4 mini (ou similaire) pour la génération
   - text-embedding-ada-002 (ou text-embedding-3-small) pour les embeddings
 
-## 🔧 Installation pas à pas
+## 🔧 Installation pas à pas v2.1.0
 
 ### 1. Cloner le projet
 ```bash
 git clone git@github.com:michel-heon/legis-qc.git
 cd legis-qc
-git checkout main
+git checkout feature/java-etl-implementation
 ```
 
-### 2. Installer les dépendances
+### 2. Installer les dépendances complètes
 ```bash
+# Installation Node.js et dépendances Java
 make install
-# ou directement : npm install
+make java-build
+
+# Vérification de l'installation
+make java-test-quick
 ```
 
 ### 3. Configuration des services Azure
@@ -39,6 +50,7 @@ make install
 1. Créer un service Azure AI Search dans le portail Azure
 2. Noter l'endpoint : `https://your-service.search.windows.net/`
 3. Récupérer la clé d'administration dans "Clés"
+4. **[Nouveau v2.1.0]** Vérifier la compatibilité SDK : `make azure-config-validate`
 
 #### Azure OpenAI
 1. Créer un service Azure OpenAI
@@ -261,3 +273,62 @@ az cognitiveservices account show --name your-openai --resource-group your-rg
 - **Postman** : Tests API REST
 - **Azure Portal** : Interface graphique Azure
 - **VS Code** : Développement avec extensions Teams Toolkit
+
+## 🆕 Nouvelles commandes v2.1.0 avec SDK Azure Search
+
+### Workflow complet de génération
+```bash
+# 1. Compilation des composants Java avec SDK Azure Search
+make java-build
+
+# 2. Tests TDD complets (67 tests)
+make java-test-tdd
+
+# 3. Configuration automatique avec filtrage intelligent
+make azure-config-generate
+
+# 4. Validation de la compatibilité API
+make azure-config-validate
+
+# 5. Workflow complet avec tests d'intégration
+make azure-config-workflow
+```
+
+### Commandes de développement avancées
+```bash
+# Génération avec préservation de la logique métier
+make azure-config-generate-enhanced
+
+# Information sur le générateur SDK
+make azure-config-info
+
+# Tests spécialisés pour le SDK Azure Search
+make java-test-integration
+
+# Nettoyage et regénération complète
+make azure-config-clean && make azure-config-generate
+```
+
+### Validation et debugging
+```bash
+# Vérification de la connectivité Azure Search avec SDK
+make check-azure-connection
+
+# Test de compatibilité des champs générés
+make test-field-compatibility
+
+# Validation de la configuration TypeScript générée
+make typescript-validate
+```
+
+### 🔍 Diagnostics v2.1.0
+```bash
+# Informations détaillées sur l'index Azure Search
+make azure-index-info
+
+# Analyse des champs problématiques
+make azure-fields-analysis
+
+# Logs détaillés de génération
+make azure-config-generate-verbose
+```

@@ -89,12 +89,12 @@ public class FieldDefinition {
     
     /**
      * Returns true if this field should be included in TypeScript interface.
-     * Includes all fields except complex vector fields (but keeps key field for identification).
+     * Includes all fields including vector fields for complete schema representation.
      */
     public boolean shouldIncludeInInterface() {
-        // Include all fields except high-dimension vector fields
-        // Keep the key field (chunk_id) for document identification
-        return !isVector || dimensions <= 0;
+        // Include all fields in the TypeScript interface for complete type safety
+        // Vector fields are needed for document creation and updates
+        return true;
     }
     
     /**

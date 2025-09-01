@@ -1,7 +1,7 @@
 import { AzureKeyCredential, SearchClient, SearchIndexClient } from "@azure/search-documents";
 import { createIndexIfNotExists, delay, upsertDocuments, getEmbeddingVector } from "./utils";
 import { MyDocument } from "../app/azureAISearchDataSource";
-import path from "path";
+import * as path from "path";
 import * as fs from "fs";
 import config from "../config";
 
@@ -17,9 +17,12 @@ process.env.SECRET_AZURE_OPENAI_API_KEY = azureOpenAIKey;
 
 /**
  *  Main function that creates the index and upserts the documents.
+ *  Generalized for any Azure Search index schema.
  */
 export async function main() {
-    const index = config.azureSearchIndexName;
+    // GENERATED_INDEX_CONFIG_START
+    const index = "/* GENERATED_INDEX_NAME_PLACEHOLDER */";
+    // GENERATED_INDEX_CONFIG_END
 
     if (
         !process.env.AZURE_SEARCH_ENDPOINT ||
@@ -46,12 +49,12 @@ export async function main() {
     const data: MyDocument[] = [];
     for (let i=1;i<=files.length;i++) {
         const content = fs.readFileSync(path.join(filePath, files[i-1]), "utf-8");
+        // GENERATED_DOCUMENT_CREATE_START
+        // Dynamic document creation based on Azure Search index schema
         data.push({
-            docId: i+"",
-            docTitle: files[i-1],
-            description: content,
-            descriptionVector: await getEmbeddingVector(content),
+            // GENERATED_DOCUMENT_FIELDS_PLACEHOLDER
         });
+        // GENERATED_DOCUMENT_CREATE_END
     }
     await upsertDocuments(searchClient, data);
 }

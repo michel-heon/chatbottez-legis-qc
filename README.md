@@ -4,12 +4,18 @@ Agent conversationnel intelligent pour Microsoft 365 Teams avec génération aut
 
 ## 🎯 Vue d'ensemble
 
-Ce projet démontre la construction d'un chatbot sophistiqué avec un **utilitaire Java intégré** qui génère automatiquement les fichiers TypeScript à partir de la structure réelle d'un index Azure AI Search. Les fonctionnalités principales incluent :
+Ce projet démontre la construction d'un chatbot sophistiqué avec un **utilitaire Java intégré de nouvelle génération** qui génère automatiquement les fichiers TypeScript à partir de la structure réelle d'un index Azure AI Search. Les fonctionnalités principales incluent :
 
-- **[Azure Search Index Configurator](./docs/azure-search-config-generator.md)** - Utilitaire Java pour génération TypeScript automatique
+- **[Azure Search Index Configurator](./docs/azure-search-config-generator.md)** - Utilitaire Java avec SDK Azure Search officiel
 - **[Retrieval Augmented Generation (RAG)](https://python.langchain.com/docs/use_cases/question_answering/#what-is-rag)** - Génération augmentée par récupération
 - **[Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)** - Recherche hybride (textuelle + vectorielle)  
 - **[Teams AI Library](https://learn.microsoft.com/microsoftteams/platform/bots/how-to/teams%20conversational%20ai/teams-conversation-ai-overview)** - Framework Microsoft pour agents Teams
+
+### 🆕 Nouvelles fonctionnalités v2.1.0
+- **SDK Azure Search Java officiel** - Migration du REST API vers SearchIndexClient
+- **Filtrage intelligent des champs** - Compatibilité API maximale avec détection automatique
+- **Gestion ultra-conservative** - Sélection optimisée des champs essentiels uniquement
+- **Tests d'intégration renforcés** - Validation avec index Azure Search réel
 
 ## ⚡ Démarrage rapide
 
@@ -52,20 +58,27 @@ make java-test                # Tests unitaires Java
 make typescript-generate-complete  # Génération TypeScript complète
 ```
 
-## 🏗️ Architecture Java - Index Configurator
+## 🏗️ Architecture Java - Index Configurator v2.1.0
 
-Le projet inclut un utilitaire Java sophistiqué (`com.cotechnoe.teamsrag.indexconfigurator`) qui :
+Le projet inclut un utilitaire Java sophistiqué (`com.cotechnoe.teamsrag.indexconfigurator`) qui utilise le **SDK Azure Search Java officiel** pour :
 
-- **Lit dynamiquement** la structure d'un index Azure Search
-- **Génère automatiquement** les fichiers TypeScript synchronisés
+- **Lit dynamiquement** la structure d'un index Azure Search avec SearchIndexClient
+- **Génère automatiquement** les fichiers TypeScript synchronisés avec filtrage intelligent
 - **Préserve la logique métier** existante lors des mises à jour
 - **Supporte deux modes** : simple (placeholders) et avancé (START/END markers)
+- **Compatibilité API optimisée** : Sélection ultra-conservative des champs essentiels
 
-### Classes principales
-- `AzureSearchConfigGenerator` - CLI principal
-- `AzureSearchIndexReader` - Lecture d'index Azure
-- `TypeScriptGenerator` - Génération TypeScript unifiée
-- `IndexSchema` & `FieldDefinition` - Modèles de données
+### Classes principales v2.1.0
+- `AzureSearchConfigGenerator` - CLI principal avec validation renforcée
+- `AzureSearchIndexReader` - Lecture d'index avec SDK Azure Search officiel
+- `TypeScriptGenerator` - Génération TypeScript avec filtrage intelligent des champs
+- `IndexSchema` & `FieldDefinition` - Modèles enrichis pour compatibilité API maximale
+
+### Nouvelles fonctionnalités techniques
+- **SearchIndexClient** - Remplacement des appels REST API manuels
+- **AzureKeyCredential** - Authentification robuste et sécurisée
+- **Filtrage intelligent** - `isEssentialContentField()` et `isContentField()` pour éviter les erreurs API
+- **Détection automatique** - Champs vectoriels, clés et propriétés searchables
 
 ## 📚 Documentation complète
 
@@ -77,19 +90,27 @@ Le projet inclut un utilitaire Java sophistiqué (`com.cotechnoe.teamsrag.indexc
 - 🔍 **[Gestion Azure Search](./docs/azure-search-management.md)** - Guide complet d'indexation
 - 🔧 **[Référence des scripts](./docs/scripts-reference.md)** - Documentation technique
 
-## 🧪 Développement TDD
+## 🧪 Développement TDD v2.1.0
 
-Le projet suit strictement les principes **Test-Driven Development** avec :
-- Tests JUnit 5 complets pour tous les composants
-- Couverture des cas limites et gestion d'erreurs
-- Architecture SOLID et injection de dépendances
-- Compatibilité Eclipse et Maven
+Le projet suit strictement les principes **Test-Driven Development** avec **67 tests** complets :
+- **Tests JUnit 5** complets avec SDK Azure Search Java officiel
+- **Tests d'intégration** avec validation Azure Search réelle  
+- **Couverture des cas limites** et gestion d'erreurs robuste
+- **Architecture SOLID** et injection de dépendances
+- **Compatibilité Eclipse et Maven** avec validation continue
+
+### Suite de tests étendue
+- **Tests unitaires (59)** : Logique métier pure avec mocks
+- **Tests d'intégration (8)** : Validation avec Azure Search réel
+- **Tests de compatibilité API** : Filtrage champs et erreurs Azure Search
+- **Tests de performance** : Optimisations SDK et génération
 
 ```bash
-# Cycle TDD complet
-make java-test-tdd           # Tests unitaires
-make azure-config-generate   # Génération
-make azure-config-validate   # Validation
+# Cycle TDD complet v2.1.0
+make java-test-tdd           # Suite complète 67 tests
+make azure-config-generate   # Génération avec SDK officiel  
+make azure-config-validate   # Validation avec filtrage intelligent
+make azure-config-workflow   # Workflow complet avec tests d'intégration
 ```
 
 ## Get started with the template
