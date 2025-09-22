@@ -10,7 +10,7 @@ const model = new OpenAIModel({
     azureApiKey: config.azureOpenAIKey,
     azureDefaultDeployment: config.azureOpenAIDeploymentName,
     azureEndpoint: config.azureOpenAIEndpoint,
-    azureApiVersion: '2024-02-15-preview',
+    azureApiVersion: '2024-10-21',
     useSystemMessages: true,
     logRequests: true,
 });
