@@ -15,6 +15,10 @@ env/.env*
 !env/.env.template
 !env/README.md
 
+# Configuration avec clés API (sécurité)
+src/prompts/chat/config.json
+**/config.json
+
 .localConfigs.playground
 .localConfigs
 .notification.localstore.json
