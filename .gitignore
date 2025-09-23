@@ -4,6 +4,13 @@ env/.env.local
 env/.env.dev
 env/.env.playground
 
+# Tous les fichiers d'environnement (sécurité)
+env/.env.*
+env/.env*
+.env*
+*.env
+*.env.*
+
 .localConfigs.playground
 .localConfigs
 .notification.localstore.json
