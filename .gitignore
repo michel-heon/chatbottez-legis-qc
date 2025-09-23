@@ -11,6 +11,10 @@ env/.env*
 *.env
 *.env.*
 
+# EXCEPTION: Permettre les templates sécurisés
+!env/.env.template
+!env/README.md
+
 .localConfigs.playground
 .localConfigs
 .notification.localstore.json
