@@ -12,11 +12,15 @@
     "license": "MIT",
     "main": "./src/index.js",
     "scripts": {
-        "dev:teamsfx": "env-cmd --silent -f .localConfigs npm run dev",
-        "dev:teamsfx:testtool": "env-cmd --silent -f .localConfigs.playground npm run dev",
+        "dev:teamsfx": "node scripts/keyvault-preprocessor.js generate dev .localConfigs && env-cmd --silent -f .localConfigs npm run dev",
+        "dev:teamsfx:testtool": "node scripts/keyvault-preprocessor.js generate playground .localConfigs.playground && env-cmd --silent -f .localConfigs.playground npm run dev",
         "dev:teamsfx:launch-testtool": "env-cmd --silent -f env/.env.playground teamsapptester start",
         "dev": "nodemon --inspect=9239 --signal SIGINT ./src/index.js",
-        "start": "node ./src/index.js",
+        "start": "node scripts/keyvault-preprocessor.js start dev",
+        "start:prod": "node scripts/keyvault-preprocessor.js start prod",
+        "start:cotechnoe": "node scripts/keyvault-preprocessor.js start cotechnoe",
+        "env:resolve": "node scripts/keyvault-preprocessor.js resolve",
+        "env:generate": "node scripts/keyvault-preprocessor.js generate",
         "test": "echo \"Error: no test specified\" && exit 1",
         "watch": "nodemon --exec \"npm run start\""
     },
@@ -25,6 +29,8 @@
         "url": "https://github.com"
     },
     "dependencies": {
+        "@azure/identity": "^4.12.0",
+        "@azure/keyvault-secrets": "^4.10.0",
         "@microsoft/teams-ai": "^1.5.3",
         "botbuilder": "^4.23.1",
         "express": "^5.0.1"

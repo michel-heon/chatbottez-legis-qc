@@ -19,7 +19,7 @@ BLUE := \033[0;34m
 NC := \033[0m # No Color
 
 # Cibles par défaut
-.PHONY: help install status clean-env archive clean
+.PHONY: help install status clean-env archive clean clear-browser-cookies init-env list-env validate-env-config
 .DEFAULT_GOAL := help
 
 ##@ Aide
@@ -108,6 +108,15 @@ cotechnoe-deploy: ## Déploiement pour l'environnement cotechnoe
 	$(MAKE) full-deploy ENV=cotechnoe
 
 ##@ Gestion des environnements
+init-env: ## Initialise un nouvel environnement (usage: make init-env ENV=monenv)
+	@cd env && $(MAKE) init ENV=$(ENV)
+
+list-env: ## Liste tous les environnements disponibles
+	@cd env && $(MAKE) list
+
+validate-env-config: ## Valide la configuration d'un environnement (usage: make validate-env-config ENV=monenv)
+	@cd env && $(MAKE) validate ENV=$(ENV)
+
 clean-env: check-env ## Nettoie l'environnement spécifié (supprime les ressources)
 	@echo "$(RED)Attention: Cette action va supprimer toutes les ressources de l'environnement $(ENV)$(NC)"
 	@read -p "Êtes-vous sûr? [y/N] " confirm && [ "$${confirm:-N}" = "y" ]
@@ -266,6 +275,149 @@ clean: ## Nettoie les fichiers temporaires et l'archive
 	rm -rf appPackage/build || true
 	@echo "$(GREEN)Nettoyage terminé$(NC)"
 
+clear-browser-cookies: ## Purge les cookies et données de session de Chromium pour Teams/M365
+	@echo "$(YELLOW)Purge des cookies et données de session de Chromium...$(NC)"
+	@echo "$(BLUE)Fermeture de Chromium...$(NC)"
+	-@pkill -f "chromium" 2>/dev/null; true
+	@sleep 2
+	@echo "$(BLUE)Nettoyage des données Chromium Snap...$(NC)"
+	@rm -rf $$HOME/snap/chromium/common/.config/chromium/Default/Cookies* 2>/dev/null || true
+	@rm -rf $$HOME/snap/chromium/common/.config/chromium/Default/Local\ Storage 2>/dev/null || true
+	@rm -rf $$HOME/snap/chromium/common/.config/chromium/Default/Session\ Storage 2>/dev/null || true
+	@rm -rf $$HOME/snap/chromium/common/.config/chromium/Default/IndexedDB 2>/dev/null || true
+	@rm -rf $$HOME/snap/chromium/common/.config/chromium/Default/blob_storage 2>/dev/null || true
+	@echo "$(GREEN)Purge des cookies Chromium terminée. Redémarrez Chromium pour appliquer les changements.$(NC)"
+
+##@ Gestion des Key Vaults
+# Variables pour les Key Vaults
+KV_SHARED_DEV = kv-legis-shared-dev-ce
+KV_BOT_DEV = kv-legis-bot-dev-ce
+KV_SHARED_PROD = kv-legis-shared-prod-ce
+KV_BOT_PROD = kv-legis-bot-prod-ce
+KV_COTECHNOE = kv-cotechnoe-central
+
+keyvault-status: ## Affiche le statut de tous les Key Vaults
+	@echo "$(BLUE)Statut des Key Vaults:$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Key Vaults DEV:$(NC)"
+	@az keyvault list --query "[?contains(name,'legis') && contains(name,'dev')].{Name:name,ResourceGroup:resourceGroup,Location:location}" -o table 2>/dev/null || echo "$(RED)✗ Erreur d'accès aux Key Vaults DEV$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Key Vaults PROD:$(NC)"
+	@az keyvault list --query "[?contains(name,'legis') && contains(name,'prod')].{Name:name,ResourceGroup:resourceGroup,Location:location}" -o table 2>/dev/null || echo "$(RED)✗ Erreur d'accès aux Key Vaults PROD$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Key Vault CoTechnoe:$(NC)"
+	@az keyvault list --query "[?name=='$(KV_COTECHNOE)'].{Name:name,ResourceGroup:resourceGroup,Location:location}" -o table 2>/dev/null || echo "$(RED)✗ Erreur d'accès au Key Vault CoTechnoe$(NC)"
+
+keyvault-secrets: ## Liste les secrets dans les Key Vaults par environnement
+	@echo "$(BLUE)Secrets des Key Vaults par environnement:$(NC)"
+	@echo ""
+	@echo "$(YELLOW)=== ENVIRONNEMENT DEV ===$(NC)"
+	@echo "$(CYAN)Shared secrets ($(KV_SHARED_DEV)):$(NC)"
+	@az keyvault secret list --vault-name $(KV_SHARED_DEV) --query "[].name" -o tsv 2>/dev/null | sort | sed 's/^/  - /' || echo "$(RED)✗ Impossible d'accéder à $(KV_SHARED_DEV)$(NC)"
+	@echo "$(CYAN)Bot secrets ($(KV_BOT_DEV)):$(NC)"
+	@az keyvault secret list --vault-name $(KV_BOT_DEV) --query "[].name" -o tsv 2>/dev/null | sort | sed 's/^/  - /' || echo "$(RED)✗ Impossible d'accéder à $(KV_BOT_DEV)$(NC)"
+	@echo ""
+	@echo "$(YELLOW)=== ENVIRONNEMENT PROD ===$(NC)"
+	@echo "$(CYAN)Shared secrets ($(KV_SHARED_PROD)):$(NC)"
+	@az keyvault secret list --vault-name $(KV_SHARED_PROD) --query "[].name" -o tsv 2>/dev/null | sort | sed 's/^/  - /' || echo "$(RED)✗ Impossible d'accéder à $(KV_SHARED_PROD)$(NC)"
+	@echo "$(CYAN)Bot secrets ($(KV_BOT_PROD)):$(NC)"
+	@az keyvault secret list --vault-name $(KV_BOT_PROD) --query "[].name" -o tsv 2>/dev/null | sort | sed 's/^/  - /' || echo "$(RED)✗ Impossible d'accéder à $(KV_BOT_PROD)$(NC)"
+	@echo ""
+	@echo "$(YELLOW)=== ENVIRONNEMENT COTECHNOE ===$(NC)"
+	@echo "$(CYAN)All secrets ($(KV_COTECHNOE)):$(NC)"
+	@az keyvault secret list --vault-name $(KV_COTECHNOE) --query "[].name" -o tsv 2>/dev/null | sort | sed 's/^/  - /' || echo "$(RED)✗ Impossible d'accéder à $(KV_COTECHNOE)$(NC)"
+
+keyvault-validate: check-env ## Valide la résolution des secrets Key Vault pour l'environnement spécifié
+	@echo "$(BLUE)Validation des secrets Key Vault pour l'environnement $(ENV)...$(NC)"
+	@if [ ! -f "env/.env.$(ENV)" ]; then \
+		echo "$(RED)✗ Fichier env/.env.$(ENV) introuvable$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(YELLOW)Test de résolution des secrets avec le préprocesseur...$(NC)"
+	@node scripts/keyvault-preprocessor.js validate $(ENV) 2>&1 | while read line; do \
+		if echo "$$line" | grep -q "✓"; then \
+			echo "$(GREEN)$$line$(NC)"; \
+		elif echo "$$line" | grep -q "✗"; then \
+			echo "$(RED)$$line$(NC)"; \
+		elif echo "$$line" | grep -q "Résolution"; then \
+			echo "$(BLUE)$$line$(NC)"; \
+		else \
+			echo "$(YELLOW)$$line$(NC)"; \
+		fi; \
+	done
+
+keyvault-resolve: check-env ## Résout et génère les variables d'environnement depuis Key Vault
+	@echo "$(BLUE)Résolution des secrets Key Vault pour $(ENV)...$(NC)"
+	@if [ ! -f "env/.env.$(ENV)" ]; then \
+		echo "$(RED)✗ Fichier env/.env.$(ENV) introuvable$(NC)"; \
+		exit 1; \
+	fi
+	@node scripts/keyvault-preprocessor.js generate $(ENV)
+	@if [ -f ".env.resolved.$(ENV)" ]; then \
+		echo "$(GREEN)✓ Fichier .env.resolved.$(ENV) généré avec succès$(NC)"; \
+		echo "$(YELLOW)Variables résolues:$(NC)"; \
+		grep -c "=" ".env.resolved.$(ENV)" | sed 's/^/  /' && echo " variables"; \
+	else \
+		echo "$(RED)✗ Échec de la génération du fichier résolu$(NC)"; \
+		exit 1; \
+	fi
+
+keyvault-compare: ## Compare les secrets entre environnements
+	@echo "$(BLUE)Comparaison des secrets entre environnements:$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Secrets DEV vs PROD (partagés):$(NC)"
+	@DEV_SECRETS=$$(az keyvault secret list --vault-name $(KV_SHARED_DEV) --query "[].name" -o tsv 2>/dev/null | sort); \
+	 PROD_SECRETS=$$(az keyvault secret list --vault-name $(KV_SHARED_PROD) --query "[].name" -o tsv 2>/dev/null | sort); \
+	 echo "$(CYAN)Uniquement en DEV:$(NC)"; \
+	 echo "$$DEV_SECRETS" | grep -v -F -x "$$PROD_SECRETS" 2>/dev/null | sed 's/^/  - /' || echo "  $(GREEN)Aucun$(NC)"; \
+	 echo "$(CYAN)Uniquement en PROD:$(NC)"; \
+	 echo "$$PROD_SECRETS" | grep -v -F -x "$$DEV_SECRETS" 2>/dev/null | sed 's/^/  - /' || echo "  $(GREEN)Aucun$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Secrets DEV vs PROD (bot):$(NC)"
+	@DEV_BOT_SECRETS=$$(az keyvault secret list --vault-name $(KV_BOT_DEV) --query "[].name" -o tsv 2>/dev/null | sort); \
+	 PROD_BOT_SECRETS=$$(az keyvault secret list --vault-name $(KV_BOT_PROD) --query "[].name" -o tsv 2>/dev/null | sort); \
+	 echo "$(CYAN)Uniquement en DEV:$(NC)"; \
+	 echo "$$DEV_BOT_SECRETS" | grep -v -F -x "$$PROD_BOT_SECRETS" 2>/dev/null | sed 's/^/  - /' || echo "  $(GREEN)Aucun$(NC)"; \
+	 echo "$(CYAN)Uniquement en PROD:$(NC)"; \
+	 echo "$$PROD_BOT_SECRETS" | grep -v -F -x "$$DEV_BOT_SECRETS" 2>/dev/null | sed 's/^/  - /' || echo "  $(GREEN)Aucun$(NC)"
+
+keyvault-permissions: ## Vérifie les permissions sur les Key Vaults
+	@echo "$(BLUE)Vérification des permissions Key Vault:$(NC)"
+	@CURRENT_USER=$$(az account show --query user.name -o tsv 2>/dev/null); \
+	 echo "$(YELLOW)Utilisateur actuel: $$CURRENT_USER$(NC)"; \
+	 echo ""
+	@for vault in $(KV_SHARED_DEV) $(KV_BOT_DEV) $(KV_SHARED_PROD) $(KV_BOT_PROD) $(KV_COTECHNOE); do \
+		echo "$(CYAN)Permissions pour $$vault:$(NC)"; \
+		ACCESS=$$(az keyvault secret list --vault-name $$vault --query "length(@)" 2>/dev/null); \
+		if [ -n "$$ACCESS" ]; then \
+			echo "  $(GREEN)✓ Accès en lecture accordé$(NC)"; \
+		else \
+			echo "  $(RED)✗ Pas d'accès en lecture$(NC)"; \
+		fi; \
+		SET_TEST=$$(az keyvault secret set --vault-name $$vault --name "test-permission-$$$$" --value "test" 2>/dev/null && echo "OK" || echo "NOK"); \
+		if [ "$$SET_TEST" = "OK" ]; then \
+			echo "  $(GREEN)✓ Accès en écriture accordé$(NC)"; \
+			az keyvault secret delete --vault-name $$vault --name "test-permission-$$$$" >/dev/null 2>&1; \
+		else \
+			echo "  $(YELLOW)⚠ Pas d'accès en écriture (lecture seule)$(NC)"; \
+		fi; \
+		echo ""; \
+	done
+
+keyvault-backup: ## Sauvegarde tous les secrets des Key Vaults (format JSON)
+	@echo "$(BLUE)Sauvegarde des secrets Key Vault...$(NC)"
+	@mkdir -p backup/keyvault
+	@for vault in $(KV_SHARED_DEV) $(KV_BOT_DEV) $(KV_SHARED_PROD) $(KV_BOT_PROD) $(KV_COTECHNOE); do \
+		echo "$(YELLOW)Sauvegarde de $$vault...$(NC)"; \
+		az keyvault secret list --vault-name $$vault --include-managed true --query "[].{name:name,id:id}" -o json > backup/keyvault/$$vault-secrets-list.json 2>/dev/null || echo "$(RED)✗ Erreur lors de la sauvegarde de $$vault$(NC)"; \
+	done
+	@echo "$(GREEN)✓ Sauvegardes terminées dans backup/keyvault/$(NC)"
+
+keyvault-clean-resolved: ## Nettoie les fichiers .env.resolved.* temporaires
+	@echo "$(YELLOW)Nettoyage des fichiers .env.resolved...$(NC)"
+	@rm -f .env.resolved.*
+	@echo "$(GREEN)✓ Fichiers .env.resolved.* supprimés$(NC)"
+
 ##@ Exemples d'usage
 examples: ## Affiche des exemples d'usage
 	@echo "$(BLUE)Exemples d'usage:$(NC)"
@@ -285,3 +437,9 @@ examples: ## Affiche des exemples d'usage
 	@echo ""
 	@echo "$(YELLOW)5. Développement local:$(NC)"
 	@echo "   make dev-start"
+	@echo ""
+	@echo "$(YELLOW)6. Gestion des Key Vaults:$(NC)"
+	@echo "   make keyvault-status"
+	@echo "   make keyvault-secrets"
+	@echo "   make keyvault-validate ENV=dev"
+	@echo "   make keyvault-resolve ENV=cotechnoe"

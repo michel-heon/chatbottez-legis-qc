@@ -1,8 +1,31 @@
-# Scripts de Déploiement
+# Scripts de Déploiement et Gestion des Secrets
 
-Ce répertoire contient les scripts utilitaires pour le déploiement et la configuration du projet.
+Ce répertoire contient les scripts utilitaires pour le déploiement, la gestion des secrets et la configuration du projet.
 
 ## 📁 Fichiers disponibles
+
+### `keyvault-preprocessor.js` 🔐
+**Script principal pour la gestion sécurisée des secrets via Azure Key Vault.**
+
+**Usage:**
+```bash
+# Validation des environnements
+node scripts/keyvault-preprocessor.js validate dev
+node scripts/keyvault-preprocessor.js validate --all
+
+# Génération de fichiers .env résolus
+node scripts/keyvault-preprocessor.js generate cotechnoe
+
+# Démarrage direct avec résolution des secrets
+node scripts/keyvault-preprocessor.js start cotechnoe
+```
+
+**Fonctionnalités:**
+- Résolution automatique des références `@Microsoft.KeyVault(...)`
+- Support de tous les environnements (dev, local, cotechnoe, playground)
+- Traitement des fichiers `.env.{env}` et `.env.{env}.user`
+- Architecture 5 Key Vaults pour sécurisation par environnement
+- Cache des secrets pour optimiser les performances
 
 ### `config-cotechnoe.sh`
 Script interactif pour configurer les variables d'environnement pour l'organisation Cotechnoe.
