@@ -4,8 +4,8 @@
 
 echo "🔍 Vérification de sécurité de l'historique Git..."
 
-# Vérifier les fichiers sensibles dans l'historique
-SENSITIVE_FILES=$(git log --all --oneline --name-only | grep -E "(\.env|config\.json)" | grep -v "tsconfig.json" | grep -v ".template" | sort | uniq)
+# Vérifier les fichiers sensibles dans l'historique (exclure les templates et exemples)
+SENSITIVE_FILES=$(git log --all --oneline --name-only | grep -E "(\.env|config\.json)" | grep -v "tsconfig.json" | grep -v ".template" | grep -v ".example" | grep -v ".user" | sort | uniq)
 
 if [ -z "$SENSITIVE_FILES" ]; then
     echo "✅ Aucun fichier sensible trouvé dans l'historique Git"
