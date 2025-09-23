@@ -54,8 +54,8 @@ grep '"version"' appPackage/manifest.json
 # . Git workflow
 git status
 git add .
-git commit -m "feat: release v1.0.X - [DESCRIPTION]"
-git tag v1.0.X-teams-ai_[FEATURE]
+git commit -m "feat: release v[version-du-manifest]- [DESCRIPTION]"
+git tag v[version-du-manifest]-teams-ai_[FEATURE]
 git push origin refactor/arch-2-rag-chat --tags
 ```
 
@@ -74,7 +74,7 @@ make debug-logs ENV=cotechnoe
 ```
 
 ## Structure Version du Projet
-- **Source de vérité** : `appPackage/manifest.json` → `"version": "1.0.X"`
+- **Source de vérité** : `appPackage/manifest.json` → `"version": "[version-du-manifest]"`
 - **Auto-incrémentation** : `make increment-version` (Python script)
 - **Environnements** : local, playground, cotechnoe
 - **Azure Resources** : botf2c163.azurewebsites.net
@@ -106,12 +106,12 @@ cotechnoe  : Production Cotechnoe Inc. (admin@cotechnoe01.onmicrosoft.com)
 
 ## Exemple de Release Notes Template
 
-### Template : `docs/release/v1.0.X.md`
+### Template : `docs/release/v[version-du-manifest].md`
 ```markdown
-# Release v1.0.X - [TITRE_FONCTIONNEL]
+# Release v[version-du-manifest] - [TITRE_FONCTIONNEL]
 
 **Date** : $(date +%Y-%m-%d)  
-**Tag** : v1.0.X-{composant}_{feature}  
+**Tag** : v[version-du-manifest]-{composant}_{feature}  
 **Environnement** : cotechnoe  
 
 ## 🎯 Objectif
@@ -136,7 +136,7 @@ cotechnoe  : Production Cotechnoe Inc. (admin@cotechnoe01.onmicrosoft.com)
 - [ ] Validation juridique des réponses
 
 ## 📈 Métriques
-- Version manifest.json : 1.0.X
+- Version manifest.json : [version-du-manifest]
 - Status Azure App Service : ✅ Running
 - Teams Admin Portal : ✅ Published
 - Tests automatisés : [X/Y] passés
