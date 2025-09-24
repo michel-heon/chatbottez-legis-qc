@@ -1,0 +1,78 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.23",
+  "version": "1.1.1",
+  "id": "${{TEAMS_APP_ID}}",
+  "developer": {
+    "name": "Gouvernement du Québec",
+    "websiteUrl": "https://www.quebec.ca",
+    "privacyUrl": "https://www.quebec.ca/gouvernement/politiques-orientations/vitrine-numeriqc/accompagnement-ministeres-organismes/standards-gouvernementaux/protection-renseignements-personnels-confidentialite",
+    "termsOfUseUrl": "https://www.quebec.ca/gouvernement/politiques-orientations/vitrine-numeriqc/accompagnement-ministeres-organismes/standards-gouvernementaux/conditions-utilisation"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Légis QC${{APP_NAME_SUFFIX}}",
+    "full": "Chatbottez-Légis-QC – Conseiller Juridique Virtuel"
+  },
+  "description": {
+    "short": "Votre conseiller juridique virtuel pour le droit québécois.",
+    "full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec."
+  },
+  "accentColor": "#0F3B82",
+  "bots": [
+    {
+      "botId": "${{BOT_ID}}",
+      "scopes": [
+        "team",
+        "groupChat",
+        "personal"
+      ],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": [
+            "personal"
+          ],
+          "commands": [
+            {
+              "title": "Quelles lois sont disponibles?",
+              "description": "Voir les lois et règlements disponibles pour consultation."
+            },
+            {
+              "title": "Puis-je contester une décision?",
+              "description": "Obtenez les étapes à suivre pour contester une décision administrative ou judiciaire."
+            },
+            {
+              "title": "Quels sont mes droits au travail",
+              "description": "Renseignez-vous sur vos droits en tant que travailleur selon les normes du travail."
+            },
+            {
+              "title": "Protéger mes données persos",
+              "description": "Informations sur la protection des renseignements personnels au Québec."
+            },
+            {
+              "title": "Rédiger une mise en demeure",
+              "description": "Aide à la rédaction d'une mise en demeure conforme à la législation québécoise."
+            },
+            {
+              "title": "Mes droits comme consommateur?",
+              "description": "Connaître vos droits protégés par la Loi sur la protection du consommateur."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeExtensions": [],
+  "configurableTabs": [],
+  "staticTabs": [],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": []
+}
