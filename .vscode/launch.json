@@ -13,13 +13,26 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
+            "name": "Launch Remote in Teams (Firefox)",
+            "type": "firefox",
+            "request": "launch",
+            "url": "https://teams.microsoft.com/l/app/${{TEAMS_APP_ID}}?installAppPackage=true&webjoin=true&${account-hint}",
+            "presentation": {
+                "group": "2-Teams",
+                "order": 5
+            },
+            "internalConsoleOptions": "neverOpen",
+            "profileDir": "${workspaceFolder}/.vscode/firefox-debug-profile",
+            "keepProfileChanges": true
+        },
+        {
             "name": "Launch Remote in Teams (Chrome)",
             "type": "chrome",
             "request": "launch",
             "url": "https://teams.microsoft.com/l/app/${{TEAMS_APP_ID}}?installAppPackage=true&webjoin=true&${account-hint}",
             "presentation": {
                 "group": "2-Teams",
-                "order": 5
+                "order": 6
             },
             "internalConsoleOptions": "neverOpen"
         },
@@ -27,7 +40,7 @@
             "name": "Launch Agent (Edge)",
             "type": "msedge",
             "request": "launch",
-            "url": "https://teams.microsoft.com/l/app/${{local:TEAMS_APP_ID}}?installAppPackage=true&webjoin=true&${account-hint}",
+            "url": "https://teams.microsoft.com/v2/#/l/app/${env:TEAMS_APP_ID}?installAppPackage=true&webjoin=true&deeplinkId=906f208d-595f-4614-80f4-2d362e13c6df",
             "cascadeTerminateToConfigurations": [
                 "Attach to Local Service"
             ],
@@ -36,13 +49,32 @@
                 "hidden": true
             },
             "internalConsoleOptions": "neverOpen",
-            "perScriptSourcemaps": "yes"
+            "perScriptSourcemaps": "yes",
+            "envFile": "${workspaceFolder}/env/.env.local"
+        },
+        {
+            "name": "Launch Agent (Firefox)",
+            "type": "firefox",
+            "request": "launch",
+            "url": "https://teams.microsoft.com/v2/#/l/app/${env:TEAMS_APP_ID}?installAppPackage=true&webjoin=true&deeplinkId=906f208d-595f-4614-80f4-2d362e13c6df",
+            "cascadeTerminateToConfigurations": [
+                "Attach to Local Service"
+            ],
+            "presentation": {
+                "group": "all",
+                "hidden": true
+            },
+            "internalConsoleOptions": "neverOpen",
+            "perScriptSourcemaps": "yes",
+            "envFile": "${workspaceFolder}/env/.env.local",
+            "profileDir": "${workspaceFolder}/.vscode/firefox-debug-profile",
+            "keepProfileChanges": true
         },
         {
             "name": "Launch Agent (Chrome)",
             "type": "chrome",
             "request": "launch",
-            "url": "https://teams.microsoft.com/l/app/${{local:TEAMS_APP_ID}}?installAppPackage=true&webjoin=true&${account-hint}",
+            "url": "https://teams.microsoft.com/v2/#/l/app/${env:TEAMS_APP_ID}?installAppPackage=true&webjoin=true&deeplinkId=906f208d-595f-4614-80f4-2d362e13c6df",
             "cascadeTerminateToConfigurations": [
                 "Attach to Local Service"
             ],
@@ -51,7 +83,8 @@
                 "hidden": true
             },
             "internalConsoleOptions": "neverOpen",
-            "perScriptSourcemaps": "yes"
+            "perScriptSourcemaps": "yes",
+            "envFile": "${workspaceFolder}/env/.env.local"
         },
         {
             "name": "Attach to Local Service",
@@ -72,7 +105,7 @@
             "preLaunchTask": "Start Agent in Desktop Client (Remote)",
             "presentation": {
                 "group": "2-Teams",
-                "order": 6
+                "order": 7
             },
             "internalConsoleOptions": "neverOpen",
         }
@@ -105,6 +138,19 @@
             "stopAll": true
         },
         {
+            "name": "Debug in Teams (Firefox)",
+            "configurations": [
+                "Launch Agent (Firefox)",
+                "Attach to Local Service"
+            ],
+            "preLaunchTask": "Start Agent Locally",
+            "presentation": {
+                "group": "2-Teams",
+                "order": 3
+            },
+            "stopAll": true
+        },
+        {
             "name": "Debug in Teams (Desktop)",
             "configurations": [
                 "Attach to Local Service"
@@ -112,7 +158,7 @@
             "preLaunchTask": "Start Agent in Desktop Client",
             "presentation": {
                 "group": "2-Teams",
-                "order": 3
+                "order": 4
             },
             "stopAll": true
         },

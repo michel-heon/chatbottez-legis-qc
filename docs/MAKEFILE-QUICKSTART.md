@@ -14,8 +14,8 @@ make status
 # Aide complète
 make help
 
-# Exemples détaillés
-make examples
+# Liste exhaustive
+make help-detailed
 ```
 
 ## 📋 Environnements supportés

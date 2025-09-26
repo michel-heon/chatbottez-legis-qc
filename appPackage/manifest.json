@@ -1,25 +1,25 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json",
   "manifestVersion": "1.23",
-  "version": "1.1.1",
+  "version": "${{TEAMS_APP_VERSION}}",
   "id": "${{TEAMS_APP_ID}}",
   "developer": {
-    "name": "Gouvernement du Québec",
-    "websiteUrl": "https://www.quebec.ca",
-    "privacyUrl": "https://www.quebec.ca/gouvernement/politiques-orientations/vitrine-numeriqc/accompagnement-ministeres-organismes/standards-gouvernementaux/protection-renseignements-personnels-confidentialite",
-    "termsOfUseUrl": "https://www.quebec.ca/gouvernement/politiques-orientations/vitrine-numeriqc/accompagnement-ministeres-organismes/standards-gouvernementaux/conditions-utilisation"
+    "name": "Cotechnoe inc.",
+    "websiteUrl": "https://cotechnoe.com/app",
+    "privacyUrl": "https://example.com/privacy",
+    "termsOfUseUrl": "https://example.com/app-tos"
   },
   "icons": {
     "color": "color.png",
     "outline": "outline.png"
   },
   "name": {
-    "short": "Légis QC${{APP_NAME_SUFFIX}}",
-    "full": "Chatbottez-Légis-QC – Conseiller Juridique Virtuel"
+    "short": "Légis QC ${{TEAMSFX_ENV}} v${{TEAMS_APP_VERSION}}",
+    "full": "Chatbottez-Légis-QC v${{TEAMS_APP_VERSION}} ${{TEAMSFX_ENV}} – Conseiller Juridique Virtuel"
   },
   "description": {
     "short": "Votre conseiller juridique virtuel pour le droit québécois.",
-    "full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec."
+    "full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec. Les réponses de cette IA sont à titre informatif seulement et ne constitue pas un avis juridique. Pour toute situation particulière ou pour plus d'information, consultez un avocat."
   },
   "accentColor": "#0F3B82",
   "bots": [

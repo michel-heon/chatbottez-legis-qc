@@ -59,6 +59,27 @@ export interface AzureAISearchDataSourceOptions {
      * Azure AI Search endpoint.
      */
     azureAISearchEndpoint: string;
+
+    /**
+     * Strictness level for filtering search documents based on similarity scores.
+     * Range: 1-5 (1 = minimal filtering, 5 = aggressive filtering)
+     * Default: 3 (recommended by Microsoft)
+     */
+    strictness?: number;
+
+    /**
+     * Number of documents to retrieve from the search index.
+     * Range: 3-20
+     * Default: 10 (balance between context and performance)
+     */
+    retrievedDocuments?: number;
+
+    /**
+     * Whether to limit responses to your data content only.
+     * When true, the model will only use information from your indexed data.
+     * Default: true (recommended for RAG scenarios)
+     */
+    limitToDataContent?: boolean;
 }
 
 /**
@@ -81,12 +102,38 @@ export class AzureAISearchDataSource {
     private readonly searchClient: SearchClient<MyDocument>;
 
     /**
+     * Strictness level for filtering search results (1-5).
+     */
+    private readonly strictness: number;
+
+    /**
+     * Number of documents to retrieve (3-20).
+     */
+    private readonly retrievedDocuments: number;
+
+    /**
+     * Whether to limit responses to data content only.
+     */
+    private readonly limitToDataContent: boolean;
+
+    /**
      * Creates a new `AzureAISearchDataSource` instance.
      * @param {AzureAISearchDataSourceOptions} options Options for creating the data source.
      */
     public constructor(options: AzureAISearchDataSourceOptions) {
         this.name = options.name;
         this.options = options;
+        
+        // Apply Microsoft best practices defaults
+        this.strictness = Math.max(1, Math.min(5, options.strictness ?? 3));
+        this.retrievedDocuments = Math.max(3, Math.min(20, options.retrievedDocuments ?? 10));
+        this.limitToDataContent = options.limitToDataContent ?? true;
+        
+        debugLog('CONFIG', `🔧 AzureAISearchDataSource configuration:`);
+        debugLog('CONFIG', `   📊 Strictness: ${this.strictness} (1=minimal, 5=aggressive)`);
+        debugLog('CONFIG', `   📄 Retrieved documents: ${this.retrievedDocuments}`);
+        debugLog('CONFIG', `   🔒 Limit to data content: ${this.limitToDataContent}`);
+        
         this.searchClient = new SearchClient<MyDocument>(
             options.azureAISearchEndpoint,
             options.indexName,
@@ -110,6 +157,7 @@ export class AzureAISearchDataSource {
         
         debugLog('SEARCH', `🏗️ Using index: ${this.options.indexName}`);
         debugLog('SEARCH', `🌐 Endpoint: ${this.options.azureAISearchEndpoint}`);
+        debugLog('SEARCH', `🎯 Parameters - Strictness: ${this.strictness}, Documents: ${this.retrievedDocuments}`);
         
         const selectedFields = [
             "chunk_id",
@@ -119,22 +167,25 @@ export class AzureAISearchDataSource {
 
         debugLog('SEARCH', `📝 Selected fields: ${selectedFields.join(', ')}`);
         
-        // hybrid search
+        // Hybrid search with vector embeddings
         debugLog('SEARCH', `🧮 Generating embeddings for query...`);
         const queryVector: number[] = await this.getEmbeddingVector(query);
         debugLog('SEARCH', `✅ Embeddings generated, vector length: ${queryVector.length}`);
         
-        debugLog('SEARCH', `🚀 Executing hybrid search query...`);
+        // Calculate k-nearest neighbors based on strictness and document count
+        const kNearestNeighbors = Math.min(this.retrievedDocuments, Math.ceil(this.retrievedDocuments * (6 - this.strictness) / 5));
+        
+        debugLog('SEARCH', `🚀 Executing hybrid search query with k=${kNearestNeighbors}...`);
         const searchResults = await this.searchClient.search(query, {
             searchFields: ["title", "content"],
             select: selectedFields as any,
-            top: 10, // Limite à 10 résultats pour réduire la taille du contexte
+            top: this.retrievedDocuments,
             vectorSearchOptions: {
                 queries: [
                     {
                         kind: "vector",
                         fields: ["contentVector"],
-                        kNearestNeighborsCount: 5, // Réduit à 5 pour l'efficacité
+                        kNearestNeighborsCount: kNearestNeighbors,
                         // The query vector is the embedding of the user's input
                         vector: queryVector
                     }
@@ -146,16 +197,23 @@ export class AzureAISearchDataSource {
 
         if (!searchResults.results) {
             debugLog('SEARCH', `❌ No search results found`);
-            return "";
+            return this.limitToDataContent ? "Aucun document pertinent trouvé dans la base de connaissances." : "";
+        }
+
+        const filteredResults = await this.applyStrictnessFiltering(searchResults.results, query);
+        
+        if (filteredResults.length === 0) {
+            debugLog('SEARCH', `🚫 All results filtered out by strictness level ${this.strictness}`);
+            return this.limitToDataContent ? "Aucun document suffisamment pertinent trouvé pour répondre à votre question." : "";
         }
 
         let doc = "";
         let resultCount = 0;
-        debugLog('SEARCH', `📋 Processing search results...`);
+        debugLog('SEARCH', `📋 Processing ${filteredResults.length} filtered results...`);
         
-        for await (const result of searchResults.results) {
+        for (const result of filteredResults) {
             resultCount++;
-            debugLog('SEARCH', `📄 Result ${resultCount}: title="${result.document.title}", content_length=${result.document.content?.length || 0}`);
+            debugLog('SEARCH', `📄 Result ${resultCount}: title="${result.document.title}", content_length=${result.document.content?.length || 0}, score=${result.score}`);
             const formattedResult = this.formatDocument(result.document.content, result.document.title);
             doc += formattedResult;
         }
@@ -164,7 +222,7 @@ export class AzureAISearchDataSource {
         const estimatedTokens = Math.round(doc.length / 4);
         
         debugLog('SEARCH', `✅ Context building completed:`);
-        debugLog('SEARCH', `   📊 Total results: ${resultCount}`);
+        debugLog('SEARCH', `   📊 Filtered results: ${resultCount}/${this.retrievedDocuments}`);
         debugLog('SEARCH', `   📏 Context length: ${doc.length.toLocaleString()} characters`);
         debugLog('SEARCH', `   🎯 Estimated tokens: ~${estimatedTokens.toLocaleString()}`);
         
@@ -173,7 +231,7 @@ export class AzureAISearchDataSource {
             debugLog('SEARCH', `⚠️  WARNING: Context size (${estimatedTokens} tokens) may exceed model limits`);
         }
 
-        return doc
+        return doc;
     }
 
     /**
@@ -185,6 +243,63 @@ export class AzureAISearchDataSource {
      */
     private formatDocument(content: string, citation: string): string {
         return `<context source="${citation}">\n${content}\n</context>`;
+    }
+
+    /**
+     * Applies strictness filtering to search results based on similarity scores.
+     * Implements Microsoft's best practices for Azure OpenAI On Your Data.
+     * @param results The search results to filter
+     * @param query The original search query
+     * @returns Filtered results based on strictness level
+     * @private
+     */
+    private async applyStrictnessFiltering(results: any, query: string): Promise<any[]> {
+        const resultsArray = [];
+        for await (const result of results) {
+            resultsArray.push(result);
+        }
+
+        debugLog('STRICTNESS', `📊 Applying strictness level ${this.strictness} to ${resultsArray.length} results`);
+        
+        if (resultsArray.length === 0) {
+            return resultsArray;
+        }
+
+        // Calculate dynamic threshold based on strictness level
+        // Strictness 1: Very permissive (keep 95% of results)
+        // Strictness 3: Balanced (keep 70% of results) - Microsoft default
+        // Strictness 5: Very strict (keep 40% of results)
+        const keepPercentages = [0.95, 0.85, 0.70, 0.55, 0.40]; // Index 0-4 for strictness 1-5
+        const keepPercentage = keepPercentages[this.strictness - 1];
+        
+        // Calculate minimum score threshold
+        const scores = resultsArray
+            .map(r => r.score || 0)
+            .filter(score => score > 0)
+            .sort((a, b) => b - a); // Descending order
+        
+        let threshold = 0;
+        if (scores.length > 0) {
+            const keepCount = Math.max(1, Math.ceil(scores.length * keepPercentage));
+            threshold = scores[keepCount - 1] || 0;
+        }
+
+        debugLog('STRICTNESS', `🎯 Calculated threshold: ${threshold.toFixed(4)} (keeping ${keepPercentage * 100}% of results)`);
+
+        // Filter results based on threshold
+        const filteredResults = resultsArray.filter(result => {
+            const score = result.score || 0;
+            const keep = score >= threshold;
+            
+            if (!keep) {
+                debugLog('STRICTNESS', `🚫 Filtered out result with score ${score.toFixed(4)} (below threshold ${threshold.toFixed(4)})`);
+            }
+            
+            return keep;
+        });
+
+        debugLog('STRICTNESS', `✅ Strictness filtering completed: ${filteredResults.length}/${resultsArray.length} results kept`);
+        return filteredResults;
     }
     /**
      * Generate embeddings for the user's input.

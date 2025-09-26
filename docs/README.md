@@ -1,48 +1,70 @@
-# 📚 Documentation - ChatBotTez Légis QC
+# Overview of the Chat With Your Data (Using Azure AI Search) template
 
-Ce répertoire contient la documentation complète du projet, avec un focus particulier sur la gestion du Makefile pour le provisioning et le déploiement.
+This app template showcases how to build one of the most powerful applications enabled by LLM - sophisticated question-answering (Q&A) chat bots that can answer questions about specific source information right in the Microsoft Teams.
+This app template also demonstrates usage of techniques like: 
+- [Retrieval Augmented Generation](https://python.langchain.com/docs/use_cases/question_answering/#what-is-rag), or RAG.
+- [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
+- [Teams AI library V2](https://aka.ms/teams-ai-library-v2)
 
-## 📋 Index des documents
+## Get started with the template
 
-### 🚀 Makefile et Déploiement
+> **Prerequisites**
+>
+> To run the template in your local dev machine, you will need:
+>
+> - [Node.js](https://nodejs.org/), supported versions: 20, 22
+> - [Microsoft 365 Agents Toolkit Visual Studio Code Extension](https://aka.ms/teams-toolkit) version 5.0.0 and higher or [Microsoft 365 Agents Toolkit CLI](https://aka.ms/teamsfx-toolkit-cli)
+> - Prepare your own [Azure OpenAI](https://aka.ms/oai/access) resource and [Azure AI Search](https://azure.microsoft.com/en-us/products/ai-services/ai-search).
 
-1. **[MAKEFILE-QUICKSTART.md](./MAKEFILE-QUICKSTART.md)**
-   - Guide de démarrage rapide
-   - Commandes essentielles
-   - Workflows principaux
+> For local debugging using Microsoft 365 Agents Toolkit CLI, you need to do some extra steps described in [Set up your Microsoft 365 Agents Toolkit CLI for local debugging](https://aka.ms/teamsfx-cli-debugging).
 
-2. **[MAKEFILE.md](./MAKEFILE.md)**
-   - Documentation complète du Makefile
-   - Toutes les commandes détaillées
-   - Exemples d'usage complets
+1. First, select the Microsoft 365 Agents Toolkit icon on the left in the VS Code toolbar.
+1. In file *env/.env.playground.user*, fill in your Azure OpenAI key `SECRET_AZURE_OPENAI_API_KEY=<your-key>`, endpoint `AZURE_OPENAI_ENDPOINT=<your-endpoint>`, deployment name `AZURE_OPENAI_DEPLOYMENT_NAME=<your-deployment>`, and embedding deployment name `AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME=<your-embedding-deployment>`. And fill in your Azure AI search key `SECRET_AZURE_SEARCH_KEY=<your-ai-search-key>` and endpoint `AZURE_SEARCH_ENDPOINT=<your-ai-search-endpoint>`.
+1. Do `npm install` and `npm run indexer:create -- <your-ai-search-key> <your-azure-openai-api-key>` to create the my documents index. Once you're done using the sample it's good practice to delete the index. You can do so with the `npm run indexer:delete -- <your-ai-search-key>` command.
+1. Press F5 to start debugging which launches your app in Microsoft 365 Agents Playground using a web browser. Select `Debug in Microsoft 365 Agents Playground`.
+1. You can send any message to get a response from the agent.
 
-3. **[MAKEFILE-BEST-PRACTICES.md](./MAKEFILE-BEST-PRACTICES.md)**
-   - Bonnes pratiques de déploiement
-   - Dépannage et maintenance
-   - Conseils de sécurité
+**Congratulations**! You are running an application that can now interact with users in Microsoft 365 Agents Playground:
 
-## 🎯 Par cas d'usage
+![AI Search Bot](https://github.com/user-attachments/assets/464fe1b0-d8c6-4ecf-a410-8dde7d9ca9b3)
 
-### Premier déploiement
-→ Commencer par [MAKEFILE-QUICKSTART.md](./MAKEFILE-QUICKSTART.md)
+## What's included in the template
 
-### Développement quotidien
-→ Référencer [MAKEFILE.md](./MAKEFILE.md) section "Développement"
+| Folder       | Contents                                            |
+| - | - |
+| `.vscode`    | VSCode files for debugging                          |
+| `appPackage` | Templates for the application manifest        |
+| `env`        | Environment files                                   |
+| `infra`      | Templates for provisioning Azure resources          |
+| `src`        | The source code for the application                 |
 
-### Problèmes et maintenance
-→ Consulter [MAKEFILE-BEST-PRACTICES.md](./MAKEFILE-BEST-PRACTICES.md)
+The following files can be customized and demonstrate an example implementation to get you started.
 
-### Documentation complète
-→ Lire [MAKEFILE.md](./MAKEFILE.md) en entier
+| File                                 | Contents                                           |
+| - | - |
+|`src/index.ts`| Application entry point.|
+|`src/config.ts`| Defines the environment variables.|
+|`src/app/app.ts`| Main application code|
+|`src/app/azureAISearchDataSource.ts`| Defines the Azure AI search data source.|
+|`src/indexers/data/*.md`| Raw text data sources.|
+|`src/indexers/utils.ts`| Basic index tools. |
+|`src/indexers/setup.ts`| A script to create index and upload documents. |
+|`src/indexers/delete.ts`| A script to delete index and documents. |
 
-## 🔗 Ressources externes
+The following are Microsoft 365 Agents Toolkit specific project files. You can [visit a complete guide on Github](https://github.com/OfficeDev/TeamsFx/wiki/Teams-Toolkit-Visual-Studio-Code-v5-Guide#overview) to understand how Microsoft 365 Agents Toolkit works.
 
-- [Microsoft Teams Toolkit](https://docs.microsoft.com/en-us/microsoftteams/platform/toolkit/)
-- [Azure OpenAI Service](https://docs.microsoft.com/en-us/azure/cognitive-services/openai/)
-- [Bot Framework](https://docs.microsoft.com/en-us/azure/bot-service/)
+| File                                 | Contents                                           |
+| - | - |
+|`m365agents.yml`|This is the main Microsoft 365 Agents Toolkit project file. The project file defines two primary things:  Properties and configuration Stage definitions. |
+|`m365agents.local.yml`|This overrides `m365agents.yml` with actions that enable local execution and debugging.|
+|`m365agents.playground.yml`| This overrides `m365agents.yml` with actions that enable local execution and debugging in Microsoft 365 Agents Playground.|
 
----
+## Extend the template
 
-*Dernière mise à jour : Septembre 2025*  
-*Projet : ChatBotTez Légis QC*  
-*Organisation : Cotechnoe inc.*
+To extend the Basic AI Chatbot template with more AI capabilities, explore [Teams AI library V2 documentation](https://aka.ms/m365-agents-toolkit/teams-agent-extend-ai).
+
+## Additional information and references
+
+- [Microsoft 365 Agents Toolkit Documentations](https://docs.microsoft.com/microsoftteams/platform/toolkit/teams-toolkit-fundamentals)
+- [Microsoft 365 Agents Toolkit CLI](https://aka.ms/teamsfx-toolkit-cli)
+- [Microsoft 365 Agents Toolkit Samples](https://github.com/OfficeDev/TeamsFx-Samples)

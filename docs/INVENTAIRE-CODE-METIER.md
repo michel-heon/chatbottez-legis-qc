@@ -11,7 +11,10 @@
 ### 2. Configuration personnalisée
 - Configuration directe via variables d'environnement
 - `src/config.ts` - Configuration centralisée
-- `env/` - Fichiers d'environnement par déploiement
+- `env/` - Fichiers d'environnement par déploiement (+ `env/common.env` / `env/common.env.user` pour les variables communes et secrets)
+- `scripts/sync-shared-env.js` - Synchronisation automatique des variables partagées vers les fichiers `.env.{env}` et `.env.{env}.user`
+- `scripts/free-port.js` - Libère le port de debug Node (9239) avant chaque lancement local
+- `scripts/open-teams-firefox.sh` - Ouvre Teams avec l'URL locale dans Firefox quand la CLI ne supporte pas ce navigateur
 
 ### 3. Assets et branding
 - `appPackage/color.png` - Logo couleur
@@ -36,9 +39,7 @@
 
 ### Scripts package.json personnalisés
 ```json
-"dev:teamsfx": "env-cmd --silent -f env/.env.playground npm run dev",
-"start:cotechnoe": "env-cmd --silent -f env/.env.cotechnoe node lib/src/index.js",
-"build": "tsc"
+"dev:teamsfx:launch-testtool": "env-cmd --silent -f env/common.env -f env/.env.playground teamsapptester start"
 ```
 
 ### Variables environnement spécifiques

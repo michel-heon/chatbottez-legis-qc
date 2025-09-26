@@ -7,6 +7,10 @@ environmentFolderPath: ./env
 
 # Triggered when 'teamsapp provision' is executed
 provision:
+  - uses: cli/runNpmCommand
+    name: sync shared environment entries
+    with:
+      args: run env:sync
   # Creates an app
   - uses: teamsApp/create
     with:
@@ -94,6 +98,10 @@ deploy:
 
 # Triggered when 'teamsapp publish' is executed
 publish:
+  - uses: cli/runNpmCommand
+    name: sync shared environment entries
+    with:
+      args: run env:sync
   # Validate using manifest schema
   - uses: teamsApp/validateManifest
     with:

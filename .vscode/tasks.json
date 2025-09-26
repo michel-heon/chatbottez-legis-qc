@@ -5,8 +5,20 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Sync shared env secrets",
+            "type": "shell",
+            "command": "node scripts/sync-shared-env.js",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
             "label": "Start Agent (Sandbox)",
             "dependsOn": [
+                "Sync shared env secrets",
                 "Validate prerequisites (Sandbox)",
                 "Start local tunnel (Sandbox)",
                 "Provision (Sandbox)",
@@ -19,6 +31,7 @@
         {
             "label": "Start Agent in Microsoft 365 Agents Playground",
             "dependsOn": [
+                "Sync shared env secrets",
                 "Validate prerequisites (Microsoft 365 Agents Playground)",
                 "Deploy (Microsoft 365 Agents Playground)",
                 "Start application (Microsoft 365 Agents Playground)",
@@ -118,6 +131,7 @@
         {
             "label": "Start Agent Locally",
             "dependsOn": [
+                "Sync shared env secrets",
                 "Validate prerequisites",
                 "Start local tunnel",
                 "Provision",
@@ -237,6 +251,7 @@
             "type": "teamsfx",
             "command": "launch-desktop-client",
             "args": {
+                "env": "dev",
                 "url": "teams.microsoft.com/l/app/${{TEAMS_APP_ID}}?installAppPackage=true"
             }
         },

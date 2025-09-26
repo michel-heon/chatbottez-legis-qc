@@ -11,8 +11,8 @@ Le Makefile fourni automatise toutes les opérations courantes du projet, depuis
 ### 🆘 Aide et information
 
 ```bash
-make help          # Affiche toutes les commandes disponibles
-make examples       # Affiche des exemples d'usage détaillés
+make help          # Résumé de démarrage rapide
+make help-detailed # Liste exhaustive des cibles documentées
 make status         # Vérifie le statut de tous les environnements
 ```
 
@@ -56,6 +56,11 @@ make full-deploy ENV=cotechnoe # Séquence complète
 make dev-start      # Démarre l'application en mode développement
 make dev-playground # Lance l'environnement de test
 make test-tunnel    # Démarre le tunnel de développement local
+make preview-firefox # Ouvre la preview Teams dans Firefox via script dédié
+make preview PREVIEW_BROWSER=edge # Par défaut Chrome; changer pour edge si besoin
+make refresh-secrets ENV=local    # Régénère les secrets via provision
+make package-app ENV=local        # Construit appPackage.<ENV>.zip
+make install-app ENV=local        # Sideload du package (scope configurable via INSTALL_SCOPE)
 ```
 
 ### 📊 Monitoring et Debug
@@ -77,6 +82,9 @@ make reset-env ENV=cotechnoe  # Remet à zéro un environnement
 ```bash
 make archive        # Crée une archive tar.gz du projet
 make clean          # Nettoie les fichiers temporaires
+make clean-all      # Nettoyage approfondi (node_modules, devTools)
+make teams-clean    # Supprime les artefacts Teams générés
+make backup         # Sauvegarde rapide de env/ et appPackage/
 ```
 
 ## Workflows typiques
@@ -114,6 +122,15 @@ make local-deploy
 make dev-start
 ```
 
+### 3bis. Rafraîchir le secret local et relancer la preview
+
+```bash
+make refresh-secrets           # Régénère les secrets et met à jour env/.env.local*
+make package-app               # Construit l'archive Teams
+make install-app               # Sideload du package (scope Personal par défaut)
+make preview-firefox           # Ouvre Teams (Firefox) avec l'app locale (script open-teams-firefox)
+```
+
 ### 4. Diagnostic et dépannage
 
 ```bash
@@ -146,6 +163,8 @@ make provision ENV=playground TENANT_ID=mon-tenant-id
 ## Structure des fichiers
 
 Le Makefile s'attend à trouver :
+- `env/common.env` : Variables partagées (chargé automatiquement)
+- `env/common.env.user` : Secrets partagés locaux (chargé automatiquement si présent)
 - `env/.env.{ENV}` : Variables d'environnement
 - `env/.env.{ENV}.user` : Variables secrètes
 - `m365agents.{ENV}.yml` : Configuration Teams Toolkit

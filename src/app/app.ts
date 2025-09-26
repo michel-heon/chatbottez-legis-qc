@@ -9,6 +9,16 @@ import * as path from 'path';
 import config from "../config";
 import { AzureAISearchDataSource } from "./azureAISearchDataSource";
 
+// Azure AI Foundry parameters optimized for detailed legal responses
+const azureAIFoundryParams = {
+    max_tokens: 16000,       // Optimal pour réponses détaillées (64k caractères)
+    temperature: 0.1,        // Plus bas pour plus de précision et consistance
+    top_p: 0.9,             // Plus strict pour éviter la dérive
+    frequency_penalty: 0.1,  // Légère pénalité pour éviter les répétitions
+    presence_penalty: 0.05,  // Encourager la diversité des informations
+    past_messages: 15        // Plus de contexte conversationnel
+};
+
 // Debug helper function
 const debugLog = (tag: string, message: string) => {
   if (process.env.DEBUG === 'true') {
@@ -38,7 +48,6 @@ function loadInstructions(): string {
 
 // Load instructions once at startup
 const instructions = loadInstructions();
-
 
 const createTokenFactory = () => {
   return async (scope: string | string[], tenantId?: string): Promise<string> => {
@@ -88,16 +97,23 @@ app.on('message', async ({ send, activity }) => {
     
     // Clear conversation history
     storage.set(conversationKey, []);
-    debugLog('STORAGE', `�️ Cleared conversation history`);
+    debugLog('STORAGE', '🗑️ Cleared conversation history');
     
     await send('L\'historique de la conversation a été effacé.');
     debugLog('RESPONSE', `✅ Sent clear confirmation`);
     return;
   }
 
-  //Get conversation history
+  // Get conversation history
   const conversationKey = `${activity.conversation.id}/${activity.from.id}`;
-  const messages = storage.get(conversationKey) || [];
+  let messages = storage.get(conversationKey) || [];
+
+  // Apply Azure AI Foundry past_messages limit (11 messages)
+  if (messages.length > azureAIFoundryParams.past_messages) {
+    messages = messages.slice(-azureAIFoundryParams.past_messages);
+    storage.set(conversationKey, messages);
+    debugLog('STORAGE', `🔄 Applied past_messages limit: ${azureAIFoundryParams.past_messages}`);
+  }
 
   debugLog('APP', `📝 Conversation key: ${conversationKey}`);
 
@@ -154,7 +170,7 @@ app.on('message', async ({ send, activity }) => {
       });
 
       response = await prompt.send(activity.text);
-      debugLog('OPENAI', `✅ Received response from Azure OpenAI`);
+      debugLog('OPENAI', `✅ Received response from Azure OpenAI with Azure AI Foundry parameters`);
     } catch (error: any) {
       if (error.status === 429) {
         debugLog('OPENAI', `⏳ Rate limit hit - status 429`);

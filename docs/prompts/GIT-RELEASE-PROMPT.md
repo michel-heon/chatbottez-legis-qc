@@ -4,7 +4,7 @@
 ```
 Procédons avec une release Chatbottez-Légis-QC v[version-du-manifest] :
 
-1. Utilise la version dans manifest.json
+1. Utilise la version dans common.env
 2. Valide fonctionnement : make health-check 
 3. Crée release notes docs/release/v[version-du-manifest].md
 4. Valide Tests : npm test (si disponible) 

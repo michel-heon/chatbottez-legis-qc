@@ -4,6 +4,10 @@
 version: v1.9
 
 provision:
+  - uses: cli/runNpmCommand
+    name: sync shared environment entries
+    with:
+      args: run env:sync
   # Creates an app
   - uses: teamsApp/create
     with:
@@ -33,9 +37,9 @@ provision:
   - uses: botFramework/create
     with:
       botId: ${{BOT_ID}}
-      name: chatbottez-legis-qc-app-gen
+      name: chatbottez-legis-qc-v1.1
       messagingEndpoint: ${{BOT_ENDPOINT}}/api/messages
-      description: ""
+      description: "Bot juridique Québec - Environnement local"
       channels:
         - name: msteams
 
