@@ -14,11 +14,11 @@
     "outline": "outline.png"
   },
   "name": {
-    "short": "Légis QC ${{TEAMSFX_ENV}} v${{TEAMS_APP_VERSION}}",
+    "short": "Légis QC v${{TEAMS_APP_VERSION}}",
     "full": "Chatbottez-Légis-QC v${{TEAMS_APP_VERSION}} ${{TEAMSFX_ENV}} – Conseiller Juridique Virtuel"
   },
   "description": {
-    "short": "Votre conseiller juridique virtuel pour le droit québécois.",
+    "short": "Conseiller juridique virtuel pour le droit québécois v${{TEAMS_APP_VERSION}}.",
     "full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec. Les réponses de cette IA sont à titre informatif seulement et ne constitue pas un avis juridique. Pour toute situation particulière ou pour plus d'information, consultez un avocat."
   },
   "accentColor": "#0F3B82",
