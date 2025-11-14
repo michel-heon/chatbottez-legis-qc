@@ -20,11 +20,23 @@ convert_image: check_imagemagick
 	@convert $(INPUT) -resize 140X140 -gravity center -background white -extent 192x192 $(COLOR)
 	@echo "Fichier $(INPUT) converti avec succès."
 
-# Génère l'icône outline.png avec détection de contours
+# Génère l'icône outline.png conforme aux spécifications Microsoft Teams
+# Specs: 32x32px, UNIQUEMENT blanc pur (RGB 255,255,255), fond transparent (alpha=0), pas de padding
+# Process: crop 120x120 centre → rendre fond transparent → extraire alpha → seuil binaire → appliquer sur blanc
 generate_outline: check_imagemagick
-	@echo "Génération de $(OUTLINE) à partir de $(COLOR) avec détection de contours..."
-	@convert $(COLOR) -gravity center -crop 120x120+0+0 +repage -colorspace Gray -resize 32x32 -alpha set -fuzz 40% -transparent black  $(OUTLINE)
-	@echo "Fichier $(OUTLINE) généré avec succès."
+	@echo "Génération de $(OUTLINE) à partir de $(COLOR) conforme aux specs Microsoft..."
+	@convert $(COLOR) \
+	    -gravity center -crop 120x120+0+0 +repage \
+	    -fuzz 25% -transparent white \
+	    -fuzz 25% -transparent "#DAE6F0" \
+	    -alpha extract \
+	    -resize 32x32! -filter point \
+	    -threshold 50% \
+	    -write mpr:mask +delete \
+	    -size 32x32 xc:white \
+	    mpr:mask -compose CopyOpacity -composite \
+	    $(OUTLINE)
+	@echo "Fichier $(OUTLINE) généré avec succès (blanc pur RGB 255,255,255, fond transparent)."
 
 ancien:
 	@convert $(COLOR) \
