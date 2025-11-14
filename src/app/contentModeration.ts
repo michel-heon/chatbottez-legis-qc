@@ -86,7 +86,7 @@ export function getInappropriateContentMessage(): string {
  * Get welcome message for greetings
  */
 export function getWelcomeMessage(): string {
-  return `👋 **Bonjour! Je suis Légis QC, votre conseiller juridique virtuel.**
+  return `👋 **Bonjour! Je suis Légis Québec, votre conseiller juridique virtuel.**
 
 Je peux vous aider avec:
 ✅ Questions sur les lois et règlements du Québec

@@ -1,4 +1,4 @@
-# 🎯 Bonnes pratiques - Makefile ChatBotTez Légis QC
+# 🎯 Bonnes pratiques - Makefile ChatBotTez Légis Québec
 
 ## 🔒 Sécurité et Authentification
 

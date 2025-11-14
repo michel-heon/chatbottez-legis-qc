@@ -1,4 +1,4 @@
-# 🚀 Makefile - ChatBotTez Légis QC
+# 🚀 Makefile - ChatBotTez Légis Québec
 
 Ce Makefile simplifie la gestion du provisioning, déploiement et maintenance du bot Teams.
 

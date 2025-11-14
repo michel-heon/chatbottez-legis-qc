@@ -61,5 +61,13 @@ clean:
 	@rm -f gray_image.png edge_image.png negated_image.png resized_image.png
 	@echo "Fichiers intermédiaires supprimés."
 
-.PHONY: check_imagemagick generate_outline check_outline clean
+# Déploie les documents légaux sur cotechnoe.com
+deploy-docs:
+	@echo "Déploiement des documents légaux sur cotechnoe.com..."
+	@scp -i ~/.ssh/cotechnoe-srv.pem privacy.html terms.html michel@cotechnoe.com:~
+	@ssh -i ~/.ssh/cotechnoe-srv.pem michel@cotechnoe.com "sudo mv ~/privacy.html ~/terms.html /var/www/html/ && sudo chown www-data:www-data /var/www/html/privacy.html /var/www/html/terms.html"
+	@echo "Documents déployés avec succès!"
+	@echo "URLs: https://cotechnoe.com/privacy.html et https://cotechnoe.com/terms.html"
+
+.PHONY: check_imagemagick generate_outline check_outline clean deploy-docs
 

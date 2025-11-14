@@ -11,7 +11,7 @@ provision:
   - uses: teamsApp/create
     with:
       # app name
-      name: Légis QC
+      name: Légis Québec
     # Write the information of created resources into environment file for
     # the specified environment variable(s).
     writeToEnvironmentFile:

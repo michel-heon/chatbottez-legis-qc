@@ -32,7 +32,7 @@
 - **Issue:** #3
 - **Fichier:** `appPackage/manifest.json`
 - **Changements:**
-  - `name.short`: `Légis QC v${{TEAMS_APP_VERSION}}` → `Légis QC`
+  - `name.short`: `Légis Québec v${{TEAMS_APP_VERSION}}` → `Légis Québec`
   - `name.full`: Simplifié et standardisé
   - Supprimé les variables de version du nom
 
@@ -55,7 +55,7 @@
 #### 6. Cohérence nom du bot ✅
 - **Issue:** #15
 - **Fichier:** `src/app/instructions.txt`
-- **Changement:** `Chatbottez` → `Légis QC`
+- **Changement:** `Chatbottez` → `Légis Québec`
 
 ### 📝 MEDIUM PRIORITY - Completées (4/4)
 
@@ -88,7 +88,7 @@
 ### À faire manuellement dans Partner Center:
 
 1. **Mettre à jour le nom de l'app** (#3)
-   - Changer "GPT-Legis-Québec" → "Légis QC"
+   - Changer "GPT-Legis-Québec" → "Légis Québec"
 
 2. **Synchroniser la description** (#9)
    - Copier la description complète du manifest vers Partner Center

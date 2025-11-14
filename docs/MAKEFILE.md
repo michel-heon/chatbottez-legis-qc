@@ -1,6 +1,6 @@
-# Guide d'utilisation du Makefile - ChatBotTez Légis QC
+# Guide d'utilisation du Makefile - ChatBotTez Légis Québec
 
-Ce document explique comment utiliser le Makefile pour gérer le provisioning, le déploiement et la maintenance du bot Teams ChatBotTez Légis QC.
+Ce document explique comment utiliser le Makefile pour gérer le provisioning, le déploiement et la maintenance du bot Teams ChatBotTez Légis Québec.
 
 ## Vue d'ensemble
 

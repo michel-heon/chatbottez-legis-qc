@@ -2,6 +2,10 @@
 env/.env.*.user
 env/*.env.user
 env/.env.local
+.smtp.env
+.smtp.env.*
+.env.user-account
+.env.user-account.*
 .localConfigs
 .localConfigs.playground
 .notification.localstore.json
@@ -21,3 +25,6 @@ lib/
 
 # devTools
 devTools/
+users/.smtp.env
+users/.env.user-account
+users/venv/

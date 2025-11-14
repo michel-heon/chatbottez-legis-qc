@@ -1,5 +1,5 @@
 # Guide d'utilisation du Makefile
-## Légis QC - Chatbot juridique du Québec
+## Légis Québec - Chatbot juridique du Québec
 
 Ce guide présente les cibles importantes du Makefile modernisé pour travailler avec Microsoft 365 Agents Toolkit.
 

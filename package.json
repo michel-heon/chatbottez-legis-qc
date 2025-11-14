@@ -34,7 +34,9 @@
         "@microsoft/teams.ai": "^2.0.0",
         "@microsoft/teams.apps": "^2.0.0",
         "@microsoft/teams.common": "^2.0.0",
-        "@microsoft/teams.openai": "^2.0.0"
+        "@microsoft/teams.openai": "^2.0.0",
+        "pdf-parse": "^2.4.5",
+        "pdf2json": "^4.0.0"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

@@ -8,7 +8,7 @@ provision:
     name: sync shared environment entries
     with:
       args: run env:sync
-  # Creates an app
+  # Creates a NEW app for local development (different from published prod app)
   - uses: teamsApp/create
     with:
       # app name
