@@ -3,23 +3,26 @@
   "manifestVersion": "1.23",
   "version": "${{TEAMS_APP_VERSION}}",
   "id": "${{TEAMS_APP_ID}}",
+  "localizationInfo": {
+    "defaultLanguageTag": "fr-CA"
+  },
   "developer": {
     "name": "Cotechnoe inc.",
-    "websiteUrl": "https://cotechnoe.com/app",
-    "privacyUrl": "https://example.com/privacy",
-    "termsOfUseUrl": "https://example.com/app-tos"
+    "websiteUrl": "https://cotechnoe.com",
+    "privacyUrl": "https://cotechnoe.com/privacy",
+    "termsOfUseUrl": "https://cotechnoe.com/terms"
   },
   "icons": {
     "color": "color.png",
     "outline": "outline.png"
   },
   "name": {
-    "short": "Légis QC v${{TEAMS_APP_VERSION}}",
-    "full": "Chatbottez-Légis-QC v${{TEAMS_APP_VERSION}} ${{TEAMSFX_ENV}} – Conseiller Juridique Virtuel"
+    "short": "Légis QC",
+    "full": "Légis QC – Conseiller Juridique Virtuel pour le Québec"
   },
   "description": {
-    "short": "Conseiller juridique virtuel pour le droit québécois v${{TEAMS_APP_VERSION}}.",
-    "full": "Chatbottez-Légis-QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec. Les réponses de cette IA sont à titre informatif seulement et ne constitue pas un avis juridique. Pour toute situation particulière ou pour plus d'information, consultez un avocat."
+    "short": "Conseiller juridique IA pour le droit québécois (French only)",
+    "full": "⚠️ This app is only available in French / Cette application est disponible uniquement en français.\n\nLégis QC est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec.\n\n🚀 Démarrage rapide: https://cotechnoe.com/legisqc/get-started\n📧 Support: support@cotechnoe.com\n📚 Aide: https://cotechnoe.com/legisqc/help\n🚨 Signaler du contenu inapproprié: support@cotechnoe.com\n\n⚖️ Avertissement: Les réponses de cette IA sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière ou pour plus d'information, consultez un avocat."
   },
   "accentColor": "#0F3B82",
   "bots": [

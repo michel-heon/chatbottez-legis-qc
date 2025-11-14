@@ -8,6 +8,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import config from "../config";
 import { AzureAISearchDataSource } from "./azureAISearchDataSource";
+import {
+  moderateContent,
+  getWelcomeMessage,
+  getHelpMessage,
+  getInvalidCommandMessage
+} from "./contentModeration";
 
 // Azure AI Foundry parameters optimized for detailed legal responses
 const azureAIFoundryParams = {
@@ -87,10 +93,26 @@ const app = new App({
 app.on('message', async ({ send, activity }) => {
   debugLog('APP', `🚀 Processing message: "${activity.text}"`);
   
-  // Check for custom commands first
-  const message = activity.text?.trim().toLowerCase();
+  const userText = activity.text?.trim() || '';
+  const message = userText.toLowerCase();
   
-  // Handle "/clear" and "/reset" commands (unified)
+  // 1. Check for greetings (hi, hello, bonjour, salut)
+  if (/^(hi|hello|bonjour|salut|hey)$/i.test(message)) {
+    debugLog('COMMAND', '👋 Processing greeting command');
+    await send(getWelcomeMessage());
+    debugLog('RESPONSE', '✅ Sent welcome message');
+    return;
+  }
+  
+  // 2. Check for help commands
+  if (/^(help|aide|\/help|\/aide|\?)$/i.test(message)) {
+    debugLog('COMMAND', '❓ Processing help command');
+    await send(getHelpMessage());
+    debugLog('RESPONSE', '✅ Sent help message');
+    return;
+  }
+  
+  // 3. Handle "/clear" and "/reset" commands (unified)
   if (message === '/clear' || message === '/reset') {
     debugLog('COMMAND', `🧹 Processing clear command`);
     const conversationKey = `${activity.conversation.id}/${activity.from.id}`;
@@ -99,8 +121,17 @@ app.on('message', async ({ send, activity }) => {
     storage.set(conversationKey, []);
     debugLog('STORAGE', '🗑️ Cleared conversation history');
     
-    await send('L\'historique de la conversation a été effacé.');
+    await send('L\'historique de la conversation a été effacé. / Conversation history cleared.');
     debugLog('RESPONSE', `✅ Sent clear confirmation`);
+    return;
+  }
+  
+  // 4. Content moderation - check for inappropriate content
+  const moderationResult = moderateContent(userText);
+  if (moderationResult.isInappropriate) {
+    debugLog('MODERATION', `🚫 Blocked inappropriate content (category: ${moderationResult.category})`);
+    await send(moderationResult.message!);
+    debugLog('RESPONSE', '✅ Sent moderation rejection message');
     return;
   }
 
