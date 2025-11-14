@@ -61,13 +61,17 @@ clean:
 	@rm -f gray_image.png edge_image.png negated_image.png resized_image.png
 	@echo "Fichiers intermédiaires supprimés."
 
-# Déploie les documents légaux sur cotechnoe.com
+# Déploie les documents légaux et aide sur cotechnoe.com
 deploy-docs:
-	@echo "Déploiement des documents légaux sur cotechnoe.com..."
-	@scp -i ~/.ssh/cotechnoe-srv.pem privacy.html terms.html michel@cotechnoe.com:~
-	@ssh -i ~/.ssh/cotechnoe-srv.pem michel@cotechnoe.com "sudo mv ~/privacy.html ~/terms.html /var/www/html/ && sudo chown www-data:www-data /var/www/html/privacy.html /var/www/html/terms.html"
+	@echo "Déploiement des documents sur cotechnoe.com/legisqc/..."
+	@scp -i ~/.ssh/cotechnoe-srv.pem privacy.html terms.html get-started.html help.html michel@cotechnoe.com:~
+	@ssh -i ~/.ssh/cotechnoe-srv.pem michel@cotechnoe.com "sudo mkdir -p /var/www/html/legisqc && sudo mv ~/privacy.html ~/terms.html ~/get-started.html ~/help.html /var/www/html/legisqc/ && sudo chown -R www-data:www-data /var/www/html/legisqc/"
 	@echo "Documents déployés avec succès!"
-	@echo "URLs: https://cotechnoe.com/privacy.html et https://cotechnoe.com/terms.html"
+	@echo "URLs:"
+	@echo "  - https://cotechnoe.com/legisqc/privacy"
+	@echo "  - https://cotechnoe.com/legisqc/terms"
+	@echo "  - https://cotechnoe.com/legisqc/get-started"
+	@echo "  - https://cotechnoe.com/legisqc/help"
 
 .PHONY: check_imagemagick generate_outline check_outline clean deploy-docs
 

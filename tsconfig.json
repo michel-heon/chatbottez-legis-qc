@@ -10,5 +10,10 @@
     "incremental": true,
     "tsBuildInfoFile": "./lib/.tsbuildinfo",
     "esModuleInterop": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "chatbottez-gpt-4.1",
+    "lib"
+  ]
 }

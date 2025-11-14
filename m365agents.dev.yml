@@ -11,15 +11,15 @@ provision:
     name: sync shared environment entries
     with:
       args: run env:sync
-  # Creates an app (DISABLED: app already exists and is published in LobStore)
-  # - uses: teamsApp/create
-  #   with:
-  #     # app name
-  #     name: Légis Québec
-  #   # Write the information of created resources into environment file for
-  #   # the specified environment variable(s).
-  #   writeToEnvironmentFile:
-  #     teamsAppId: TEAMS_APP_ID
+  
+  # Creates a new Teams app for dev environment
+  - uses: teamsApp/create
+    with:
+      # App name for dev
+      name: Légis Québec-${{APP_NAME_SUFFIX}}
+    # Write the app ID to environment file
+    writeToEnvironmentFile:
+      teamsAppId: TEAMS_APP_ID
 
   - uses: arm/deploy # Deploy given ARM templates parallelly.
     with:
