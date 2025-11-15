@@ -4,6 +4,7 @@ import { LocalStorage } from "@microsoft/teams.common";
 import { OpenAIChatModel } from "@microsoft/teams.openai";
 import { MessageActivity, TokenCredentials } from '@microsoft/teams.api';
 import { ManagedIdentityCredential } from '@azure/identity';
+import { AzureOpenAI } from "openai";
 import * as fs from 'fs';
 import * as path from 'path';
 import config from "../config";
@@ -186,29 +187,97 @@ app.on('message', async ({ send, activity }) => {
       return;
     }
 
-    debugLog('APP', `🤖 Sending request to OpenAI model: ${config.azureOpenAIDeploymentName}`);
+    debugLog('APP', `🤖 Sending request to OpenAI model with streaming: ${config.azureOpenAIDeploymentName}`);
+    
+    // Send typing indicator for better UX
+    await send({ type: 'typing' });
+    
     let response;
     try {
-      const prompt = new ChatPrompt({
-        messages,
-        instructions: enhancedInstructions,
-        model: new OpenAIChatModel({
-          model: config.azureOpenAIDeploymentName,
-          apiKey: config.azureOpenAIKey,
-          endpoint: config.azureOpenAIEndpoint,
-          apiVersion: config.azureOpenAIDeploymentVersion || "2024-10-21"
-        })
+      // Initialize Azure OpenAI client for streaming
+      const client = new AzureOpenAI({
+        apiKey: config.azureOpenAIKey,
+        endpoint: config.azureOpenAIEndpoint,
+        apiVersion: config.azureOpenAIDeploymentVersion || "2024-10-21",
       });
 
-      response = await prompt.send(activity.text);
-      debugLog('OPENAI', `✅ Received response from Azure OpenAI with Azure AI Foundry parameters`);
+      // Build messages array for OpenAI API format
+      const openAIMessages: any[] = [
+        {
+          role: 'system',
+          content: enhancedInstructions
+        }
+      ];
+
+      // Add conversation history
+      messages.forEach((msg: any) => {
+        openAIMessages.push({
+          role: msg.role || 'user',
+          content: msg.content
+        });
+      });
+
+      // Add current user message
+      openAIMessages.push({
+        role: 'user',
+        content: activity.text
+      });
+
+      debugLog('OPENAI', `📤 Sending ${openAIMessages.length} messages to streaming API`);
+
+      // Create streaming completion
+      const stream = await client.chat.completions.create({
+        model: config.azureOpenAIDeploymentName,
+        messages: openAIMessages,
+        stream: true,
+        max_tokens: azureAIFoundryParams.max_tokens,
+        temperature: azureAIFoundryParams.temperature,
+        top_p: azureAIFoundryParams.top_p,
+        frequency_penalty: azureAIFoundryParams.frequency_penalty,
+        presence_penalty: azureAIFoundryParams.presence_penalty,
+      });
+
+      // Accumulate streaming response
+      let fullContent = '';
+      let lastUpdateTime = Date.now();
+      const UPDATE_INTERVAL = 500; // Update message every 500ms for smooth display
+
+      debugLog('OPENAI', `🌊 Starting to receive streaming chunks...`);
+
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content || '';
+        if (delta) {
+          fullContent += delta;
+          
+          // Update message periodically for progressive display
+          const now = Date.now();
+          if (now - lastUpdateTime >= UPDATE_INTERVAL) {
+            await send({ type: 'typing' }); // Keep typing indicator alive
+            lastUpdateTime = now;
+            debugLog('OPENAI', `📝 Accumulated ${fullContent.length} characters...`);
+          }
+        }
+      }
+
+      debugLog('OPENAI', `✅ Streaming complete. Total content: ${fullContent.length} characters`);
+
+      // Create response object compatible with existing code
+      response = {
+        content: fullContent,
+        role: 'assistant'
+      };
+
+      // Update conversation history with new messages
+      messages.push({ role: 'user', content: activity.text });
+      messages.push({ role: 'assistant', content: fullContent });
+
     } catch (error: any) {
       if (error.status === 429) {
         debugLog('OPENAI', `⏳ Rate limit hit - status 429`);
         await send('⏳ Limite de débit Azure OpenAI atteinte. Veuillez patienter une minute avant de réessayer. Les comptes gratuits ont des limites de jetons par minute.');
         return;
       } else {
-        debugLog('OPENAI', `❌ OpenAI error: ${error.message || error}`);
+        debugLog('OPENAI', `❌ OpenAI streaming error: ${error.message || error}`);
         throw error; // Re-throw other errors
       }
     }
@@ -277,7 +346,18 @@ app.on('message', async ({ send, activity }) => {
   } catch (error) {
     debugLog('ERROR', `❌ Error processing message: ${error}`);
     console.error('Error processing message:', error);
-    await send('Sorry, I encountered an error while processing your message.');
+    await send(`❌ Désolé, je n'ai pas pu traiter votre message.
+
+💡 **Que faire?**
+• Tapez "Aide" pour voir toutes les commandes disponibles
+• Reformulez votre question de manière plus spécifique
+• Contactez le support: support@cotechnoe.com
+
+---
+Sorry, I couldn't process your message.
+• Type "Help" to see all available commands
+• Rephrase your question more specifically
+• Contact support: support@cotechnoe.com`);
   }
 });
 
