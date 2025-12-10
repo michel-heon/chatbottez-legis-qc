@@ -28,3 +28,6 @@ devTools/
 users/.smtp.env
 users/.env.user-account
 users/venv/
+
+# ADR reference files (not part of this project)
+adr-other/
