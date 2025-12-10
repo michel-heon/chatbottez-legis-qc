@@ -1,0 +1,11 @@
+{
+  "schema_version": "v2.1",
+  "name_for_human": "Légis Québec",
+  "name_for_model": "legis_quebec",
+  "description_for_human": "Conseiller juridique IA pour le droit québécois (French only)",
+  "description_for_model": "Assistant juridique spécialisé dans les lois et règlements du Québec. Utilise une base de données vectorielle pour fournir des réponses précises basées sur les textes de loi officiels. Répond uniquement en français.",
+  "capabilities": {
+    "conversation": true,
+    "streaming": true
+  }
+}
