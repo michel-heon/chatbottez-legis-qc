@@ -40,6 +40,22 @@ Quelles autres options avons-nous évaluées et pourquoi les avons-nous rejetée
 |---|-------|--------|------|
 | [000](./000-processus-creation-adr.md) | Processus de Création et Gestion des ADR | ✅ Accepté | 2025-11-21 |
 | [001](./001-git-workflow-et-strategie-de-versioning.md) | Git Workflow et Stratégie de Versioning | ✅ Accepté | 2025-11-17 |
+| [002](./002-azure-ad-service-principal-creation-manuelle.md) | Création Manuelle du Service Principal Azure AD | ✅ Accepté | 2025-11-27 |
+| [003](./003-optimisation-recherche-vectorielle-rag.md) | Optimisation Recherche Vectorielle RAG | ✅ Accepté | 2025-11-26 |
+| [004](./004-format-reponse-markdown-citations.md) | Format Réponse Markdown avec Citations | ✅ Accepté | 2025-11-26 |
+| [005](./005-streaming-reponses-progressives.md) | Streaming des Réponses Progressives | ✅ Accepté | 2025-11-26 |
+| [006](./006-bonnes-pratiques-instructions-agent.md) | Bonnes Pratiques Instructions Agent | ✅ Accepté | 2025-11-27 |
+| [007](./007-deploiement-toolkit-cli.md) | Déploiement Microsoft 365 Agents Toolkit CLI | ✅ Accepté | 2025-11-27 |
+| [008](./008-nomenclature-versions-tags.md) | Nomenclature Versions et Tags Git | ✅ Accepté | 2025-12-08 |
+| [009](./009-gestion-noms-index-azure-search.md) | Gestion Noms Index Azure Search | ✅ Accepté | 2025-11-18 |
+| [010](./010-securite-secrets-git.md) | Sécurité des Secrets dans l'Historique Git | ✅ Accepté | 2025-11-18 |
+| [011](./011-configuration-centralisee.md) | Gestion Configuration Centralisée | 🔄 Proposé | 2025-11-21 |
+| [012](./012-pratiques-developpement-toolkit.md) | Développement avec Microsoft 365 Agents Toolkit | ✅ Accepté | 2025-02-02 |
+| [013](./013-systeme-logging-centralise.md) | Système de Logging Centralisé | ✅ Accepté | 2025-11-26 |
+| [014](./014-message-bienvenue-adaptive-card.md) | Message de Bienvenue avec Adaptive Card | ✅ Accepté | 2025-11-26 |
+| [015](./015-mapping-automatique-variables.md) | Mapping Automatique Variables Runtime | ✅ Accepté | 2025-12-04 |
+| [016](./016-utilisation-emojis-icones-documentation.md) | Utilisation Émojis et Icônes dans Documentation | 🔄 Proposé | 2025-11-21 |
+| [017](./017-nomenclature-scripts-bash.md) | Nomenclature Scripts Bash | ✅ Accepté | 2025-11-27 |
 
 ## Résumé des décisions clés
 
