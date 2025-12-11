@@ -40,6 +40,7 @@ Quelles autres options avons-nous évaluées et pourquoi les avons-nous rejetée
 |---|-------|--------|------|
 | [000](./000-processus-creation-adr.md) | Processus de Création et Gestion des ADR | ✅ Accepté | 2025-11-21 |
 | [001](./001-git-workflow-et-strategie-de-versioning.md) | Git Workflow et Stratégie de Versioning | ✅ Accepté | 2025-11-17 |
+| [002](./002-microsoft-365-agents-toolkit-toolchain.md) | Microsoft 365 Agents Toolkit comme Chaîne d'Outils | ✅ Accepté | 2025-12-11 |
 
 ## Résumé des décisions clés
 
@@ -60,6 +61,16 @@ Quelles autres options avons-nous évaluées et pourquoi les avons-nous rejetée
 **Décision** : Adoption d'un Git Flow adapté avec trois niveaux de branches (`main` → `dev` → `utilisateur/feature-name`) et semantic versioning avec suffixes d'environnement (`-alpha`, `-beta`, `-rc`).
 
 **Impact** : Séparation nette des phases de développement, traçabilité améliorée, possibilité de rollback facile, isolation complète par développeur.
+
+---
+
+### ADR-002 : Microsoft 365 Agents Toolkit comme Chaîne d'Outils
+
+**Problème** : Développer un Custom Engine Agent pour Microsoft 365 Copilot nécessite une chaîne d'outils complète pour le provisionning, déploiement, tests et debugging, alignée avec les bonnes pratiques Microsoft.
+
+**Décision** : Adoption de Microsoft 365 Agents Toolkit (extension VS Code) comme orchestrateur principal du cycle de vie de développement, avec Git Bash comme terminal standard et Microsoft 365 Agents Playground pour tests rapides.
+
+**Impact** : Alignement avec standards Microsoft 365, automatisation du provisionning/déploiement, tests rapides via Playground, reproductibilité entre développeurs, conformité pour certification.
 
 ---
 
