@@ -4,22 +4,22 @@
     "version": "1.0.0",
     "id": "${{TEAMS_APP_ID}}",
     "developer": {
-        "name": "My App, Inc.",
-        "websiteUrl": "https://www.example.com",
-        "privacyUrl": "https://www.example.com/privacy",
-        "termsOfUseUrl": "https://www.example.com/termofuse"
+        "name": "Cotechnoe",
+        "websiteUrl": "https://www.cotechnoe.net",
+        "privacyUrl": "https://chatbottez-legis-qc.cotechnoe.net/privacy.html",
+        "termsOfUseUrl": "https://chatbottez-legis-qc.cotechnoe.net/terms.html"
     },
     "icons": {
         "color": "color.png",
         "outline": "outline.png"
     },
     "name": {
-        "short": "engine-agent-template${{APP_NAME_SUFFIX}}",
-        "full": "full name for engine-agent-template"
+        "short": "Légis Québec${{APP_NAME_SUFFIX}}",
+        "full": "Légis Québec - Assistant juridique pour les lois du Québec"
     },
     "description": {
-        "short": "short description for engine-agent-template",
-        "full": "full description for engine-agent-template"
+        "short": "Assistant juridique spécialisé dans les lois du Québec",
+        "full": "Légis Québec est un assistant juridique intelligent spécialisé dans les lois et règlements du Québec, utilisant Azure AI Search pour fournir des réponses précises basées sur la documentation officielle."
     },
     "accentColor": "#FFFFFF",
     "copilotAgents": {
@@ -48,8 +48,16 @@
                     ],
                     "commands": [
                         {
-                            "title": "How can you help me?",
-                            "description": "How can you help me?"
+                            "title": "Comment peux-tu m'aider?",
+                            "description": "Découvrir les fonctionnalités de Légis Québec"
+                        },
+                        {
+                            "title": "Quelles lois sont disponibles?",
+                            "description": "Liste des lois du Québec disponibles dans la base"
+                        },
+                        {
+                            "title": "Explique-moi cette loi",
+                            "description": "Explication détaillée d'une loi spécifique"
                         }
                     ]
                 }
