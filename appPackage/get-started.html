@@ -2,10 +2,183 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=https://github.com/Cotechnoe/chatbottez-legis-quebec/blob/main/get-started.md">
-    <title>Démarrage rapide - Légis Québec</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue - Légis Québec</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #242424;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e1e1;
+        }
+        
+        .icon {
+            font-size: 48px;
+        }
+        
+        h1 {
+            color: #0078d4;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        .welcome-section {
+            margin-bottom: 30px;
+        }
+        
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #242424;
+        }
+        
+        .capabilities {
+            margin-bottom: 30px;
+        }
+        
+        .capabilities h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #242424;
+        }
+        
+        .capabilities ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .capabilities li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #424242;
+        }
+        
+        .capabilities li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: #0078d4;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .cta {
+            background: #f0f7ff;
+            border-left: 4px solid #0078d4;
+            padding: 15px 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        
+        .cta p {
+            margin: 0;
+            color: #242424;
+            font-weight: 500;
+        }
+        
+        .disclaimer {
+            background: #fff4e5;
+            border-left: 4px solid #ff8c00;
+            padding: 15px 20px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+        
+        .disclaimer-title {
+            font-weight: 600;
+            color: #cc7000;
+            margin-bottom: 8px;
+        }
+        
+        .disclaimer p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e1e1;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    <p>Redirection vers la documentation...</p>
+    <div class="container">
+        <div class="header">
+            <div class="icon">⚖️</div>
+            <div>
+                <h1>Légis Québec</h1>
+                <div class="subtitle">Créé par Cotechnoe</div>
+            </div>
+        </div>
+        
+        <div class="welcome-section">
+            <div class="greeting">
+                Bonjour! Je suis Légis Québec, votre conseiller juridique virtuel.
+            </div>
+            
+            <div class="capabilities">
+                <h2>Je peux vous aider avec:</h2>
+                <ul>
+                    <li>Questions sur les lois et règlements du Québec</li>
+                    <li>Droits au travail</li>
+                    <li>Protection du consommateur</li>
+                    <li>Vie privée et données personnelles</li>
+                    <li>Procédures juridiques</li>
+                </ul>
+            </div>
+            
+            <div class="cta">
+                <p>Tapez "Aide" ou "Help" pour voir toutes mes commandes.</p>
+            </div>
+        </div>
+        
+        <div class="disclaimer">
+            <div class="disclaimer-title">AVERTISSEMENT</div>
+            <p>Mes réponses sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière, consultez un avocat.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Pour plus d'informations, visitez <a href="https://www.cotechnoe.net" target="_blank">www.cotechnoe.net</a></p>
+        </div>
+    </div>
 </body>
 </html>

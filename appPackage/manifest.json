@@ -58,6 +58,14 @@
                         {
                             "title": "Explique-moi cette loi",
                             "description": "Explication détaillée d'une loi spécifique"
+                        },
+                        {
+                            "title": "Mes droits au travail",
+                            "description": "Information sur les normes du travail au Québec"
+                        },
+                        {
+                            "title": "Protection du consommateur",
+                            "description": "Droits et recours des consommateurs"
                         }
                     ]
                 }

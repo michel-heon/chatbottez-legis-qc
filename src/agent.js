@@ -12,6 +12,7 @@ const {
   getHelpMessage,
   getInvalidCommandMessage
 } = require("./app/contentModeration");
+const { detectLegalCommand } = require("./app/legalCommands");
 
 // Azure AI Foundry parameters optimized for detailed legal responses
 const azureAIFoundryParams = {
@@ -29,6 +30,25 @@ const debugLog = (tag, message) => {
     console.log(`[${tag}] ${message}`);
   }
 };
+
+/**
+ * Load and return the welcome adaptive card
+ * @returns {object} Adaptive card attachment for welcome message
+ */
+function getWelcomeCard() {
+  try {
+    const welcomeCardPath = path.join(__dirname, '../appPackage/welcome-card.json');
+    const welcomeCardJson = JSON.parse(fs.readFileSync(welcomeCardPath, 'utf8'));
+    return {
+      contentType: 'application/vnd.microsoft.card.adaptive',
+      content: welcomeCardJson
+    };
+  } catch (error) {
+    debugLog('ERROR', `Failed to load welcome card: ${error.message}`);
+    // Fallback to text message
+    return null;
+  }
+}
 
 /**
  * Transform blob storage URL to legisquebec.gouv.qc.ca URL
@@ -150,15 +170,19 @@ const agentApp = new AgentApplication({
   storage,
 });
 
-// Welcome message for new members
-agentApp.onConversationUpdate("membersAdded", async (context) => {
-  debugLog('WELCOME', 'New member joined conversation');
-  await context.sendActivity(getWelcomeMessage());
-});
+// Note: Welcome message via conversationUpdate disabled to avoid errors
+// Microsoft 365 Copilot uses prompt starters instead (defined in manifest.json)
+// Users can also type "bonjour", "hi", "hello" to get the welcome message
 
 // Handle incoming messages - MUST BE AFTER ANY OTHER MESSAGE HANDLERS
 agentApp.onActivity(ActivityTypes.Message, async (context) => {
   console.log('[MESSAGE RECEIVED]', context.activity.text);
+  console.log('[CONTEXT]', JSON.stringify({
+    conversationId: context.activity.conversation?.id,
+    userId: context.activity.from?.id,
+    channelId: context.activity.channelId,
+    serviceUrl: context.activity.serviceUrl
+  }, null, 2));
   debugLog('APP', `Processing message: "${context.activity.text}"`);
 
   const userText = context.activity.text?.trim() || '';
@@ -167,6 +191,7 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
   // 1. Check for greetings (hi, hello, bonjour, salut)
   if (/^(hi|hello|bonjour|salut|hey)$/i.test(message)) {
     debugLog('COMMAND', 'Processing greeting command');
+    // Send simple text welcome message (adaptive cards may cause errors in M365 Copilot)
     await context.sendActivity(getWelcomeMessage());
     debugLog('RESPONSE', 'Sent welcome message');
     return;
@@ -180,21 +205,22 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
     return;
   }
 
-  // 3. Handle "/clear" and "/reset" commands (unified)
-  if (message === '/clear' || message === '/reset') {
-    debugLog('COMMAND', `Processing clear command`);
-    const conversationKey = `${context.activity.conversation.id}/${context.activity.from.id}`;
-
-    // Clear conversation history
-    await storage.delete(conversationKey);
-    debugLog('STORAGE', 'Cleared conversation history');
-
-    await context.sendActivity('L\'historique de la conversation a été effacé. / Conversation history cleared.');
-    debugLog('RESPONSE', `Sent clear confirmation`);
-    return;
+  // 3. Check for specialized legal commands (6 custom juridical commands)
+  const legalCommand = detectLegalCommand(userText);
+  if (legalCommand) {
+    debugLog('COMMAND', `Detected legal command: ${legalCommand.name}`);
+    
+    // Send welcome message for this specific legal topic
+    await context.sendActivity(legalCommand.welcomeMessage);
+    debugLog('RESPONSE', `Sent legal command welcome message for: ${legalCommand.name}`);
+    
+    // The enhanced instructions will be used in the normal RAG flow below
+    // by modifying the instructions before sending to OpenAI
+    // We'll set a flag to indicate a legal command was detected
+    context.activity.legalCommandContext = legalCommand;
   }
 
-  // 4. Content moderation - check for inappropriate content
+  // 5. Content moderation - check for inappropriate content
   const moderationResult = moderateContent(userText);
   if (moderationResult.isInappropriate) {
     debugLog('MODERATION', `Blocked inappropriate content (category: ${moderationResult.category})`);
@@ -253,6 +279,13 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
 
     // Build enhanced instructions that include context if available
     let enhancedInstructions = instructions;
+    
+    // If a legal command was detected, add specialized instructions
+    if (context.activity.legalCommandContext) {
+      debugLog('APP', `Applying specialized legal command instructions: ${context.activity.legalCommandContext.name}`);
+      enhancedInstructions += `\n\n${context.activity.legalCommandContext.enhancedInstructions}`;
+    }
+    
     if (finalContextData) {
       enhancedInstructions += `\n\nAdditional Context:\n<context>\n${finalContextData}\n</context>`;
     }

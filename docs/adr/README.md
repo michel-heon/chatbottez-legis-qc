@@ -56,6 +56,9 @@ Quelles autres options avons-nous évaluées et pourquoi les avons-nous rejetée
 | [015](./015-mapping-automatique-variables.md) | Mapping Automatique Variables Runtime | ✅ Accepté | 2025-12-04 |
 | [016](./016-utilisation-emojis-icones-documentation.md) | Utilisation Émojis et Icônes dans Documentation | 🔄 Proposé | 2025-11-21 |
 | [017](./017-nomenclature-scripts-bash.md) | Nomenclature Scripts Bash | ✅ Accepté | 2025-11-27 |
+| [018](./018-git-bash-vscode-premier-caractere-tronque.md) | Git Bash VSCode Premier Caractère Tronqué | ✅ Accepté | 2025-11-27 |
+| [019](./019-microsoft-365-agents-toolkit-bonnes-pratiques.md) | Microsoft 365 Agents Toolkit Bonnes Pratiques | ✅ Accepté | 2025-12-10 |
+| [020](./020-validation-guidelines-microsoft-365-copilot.md) | Guidelines de Validation Microsoft 365 Copilot | ✅ Accepté | 2025-12-12 |
 
 ## Résumé des décisions clés
 
@@ -163,4 +166,4 @@ Pour questions sur les ADR ou propositions de nouvelles décisions architectural
 
 ---
 
-*Dernière mise à jour : 2025-12-10*
+*Dernière mise à jour : 2025-12-12*
