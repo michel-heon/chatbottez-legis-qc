@@ -32,6 +32,30 @@ const debugLog = (tag, message) => {
 };
 
 /**
+ * Start a periodic typing indicator that keeps showing "Bot is typing..." 
+ * until stopped. Returns a stop function.
+ * @param {object} context - Bot context
+ * @param {number} intervalMs - Interval in milliseconds (default 2000ms = 2s)
+ * @returns {Function} Stop function to clear the interval
+ */
+function startTypingIndicator(context, intervalMs = 2000) {
+  const intervalId = setInterval(async () => {
+    try {
+      await context.sendActivity({ type: ActivityTypes.Typing });
+      debugLog('UX', 'Periodic typing indicator sent');
+    } catch (error) {
+      debugLog('UX', `Error sending typing indicator: ${error.message}`);
+    }
+  }, intervalMs);
+
+  // Return stop function
+  return () => {
+    clearInterval(intervalId);
+    debugLog('UX', 'Stopped periodic typing indicator');
+  };
+}
+
+/**
  * Load and return the welcome adaptive card
  * @returns {object} Adaptive card attachment for welcome message
  */
@@ -51,34 +75,44 @@ function getWelcomeCard() {
 }
 
 /**
- * Transform blob storage URL to legisquebec.gouv.qc.ca URL
+ * Transform blob storage URL to public accessible URL
  * @param {string} blobUrl - URL from Azure blob storage
  * @param {string} title - Document title to extract code
- * @returns {string|null} Transformed URL pointing to legisquebec.gouv.qc.ca, or null if pattern not recognized
+ * @returns {string} Transformed URL or original blob URL as fallback
  */
 function transformToLegisQuebecUrl(blobUrl, title) {
   try {
-    // Extract code from title - supports multiple formats:
-    // - "S-2.2_loi-sur-la-santé-publique.pdf" -> "S-2.2"
-    // - "CCQ-1991_code-civil-du-québec.pdf" -> "CCQ-1991"
-    // - "P-42_loi-sur-la-protection-sanitaire.pdf" -> "P-42"
-    // Pattern: One or more letters, optional dash, digits, optional decimal parts
-    const codeMatch = title.match(/^([A-Z]+-?\d+(?:\.\d+)?(?:\.\d+)?)/);
+    // Pattern 1: Lois et règlements - "S-2.2_loi-sur...", "CCQ-1991_code..."
+    // Extract code from title - letters + optional dash + digits + optional decimals
+    const loiCodeMatch = title.match(/^([A-Z]+-?\d+(?:\.\d+)?(?:\.\d+)?)/);
     
-    if (codeMatch) {
-      const code = codeMatch[1];
+    if (loiCodeMatch) {
+      const code = loiCodeMatch[1];
       // Build legisquebec URL: https://www.legisquebec.gouv.qc.ca/fr/document/lc/{code}
       const legisUrl = `https://www.legisquebec.gouv.qc.ca/fr/document/lc/${code}`;
-      debugLog('FORMAT', `[URL_TRANSFORM] ${title} -> ${legisUrl}`);
+      debugLog('FORMAT', `[URL_TRANSFORM] Loi/Règlement: ${title} -> ${legisUrl}`);
       return legisUrl;
     }
     
-    // Return null if pattern doesn't match (no link will be shown)
-    debugLog('FORMAT', `[URL_TRANSFORM] No code found in title "${title}", no link will be displayed`);
-    return null;
+    // Pattern 2: Décisions de tribunaux - "2002qccrt33.pdf", "2024qcca123.pdf"
+    // Format: YYYY + tribunal (qccrt, qcca, qccs, qccq, etc.) + numéro
+    const jugementMatch = title.match(/^(\d{4})(qc[a-z]{2,4})(\d+)/i);
+    
+    if (jugementMatch) {
+      const [, annee, tribunal, numero] = jugementMatch;
+      // Build CanLII URL: https://www.canlii.org/fr/qc/{tribunal}/{annee}/{annee}{tribunal}{numero}.html
+      const canliiUrl = `https://www.canlii.org/fr/qc/${tribunal.toLowerCase()}/${annee}/${annee}${tribunal.toLowerCase()}${numero}.html`;
+      debugLog('FORMAT', `[URL_TRANSFORM] Jugement: ${title} -> ${canliiUrl}`);
+      return canliiUrl;
+    }
+    
+    // Fallback: Return original blob URL if no pattern matches
+    // This ensures all documents have a clickable link
+    debugLog('FORMAT', `[URL_TRANSFORM] No pattern matched for "${title}", using blob URL: ${blobUrl}`);
+    return blobUrl;
   } catch (error) {
-    debugLog('FORMAT', `[URL_TRANSFORM] Error transforming URL: ${error.message}`);
-    return null;
+    debugLog('FORMAT', `[URL_TRANSFORM] Error transforming URL: ${error.message}, using blob URL`);
+    return blobUrl;
   }
 }
 
@@ -214,6 +248,10 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
     await context.sendActivity(legalCommand.welcomeMessage);
     debugLog('RESPONSE', `Sent legal command welcome message for: ${legalCommand.name}`);
     
+    // Start periodic typing indicator to show bot is working on RAG + OpenAI
+    const stopTyping = startTypingIndicator(context, 2000);
+    context.activity.stopTypingIndicator = stopTyping; // Store stop function for later cleanup
+    
     // The enhanced instructions will be used in the normal RAG flow below
     // by modifying the instructions before sending to OpenAI
     // We'll set a flag to indicate a legal command was detected
@@ -250,6 +288,15 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
   }
 
   debugLog('APP', `Conversation key: ${conversationKey}`);
+
+  // Start periodic typing indicator for ALL RAG queries (not just legal commands)
+  // This ensures user sees "Bot is typing..." during entire RAG + OpenAI processing
+  let stopTyping = context.activity.stopTypingIndicator; // Reuse if already started (legal command)
+  
+  if (!stopTyping) {
+    stopTyping = startTypingIndicator(context, 2000);
+    context.activity.stopTypingIndicator = stopTyping;
+  }
 
   try {
     // Get relevant context from the data source
@@ -377,6 +424,11 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
     messages.push({ role: 'user', content: context.activity.text });
     messages.push({ role: 'assistant', content: fullContent });
 
+    // Stop periodic typing indicator before sending final response
+    if (context.activity.stopTypingIndicator) {
+      context.activity.stopTypingIndicator();
+    }
+
     // Send response with AI label and feedback loop (Microsoft 365 Agents best practice)
     await context.sendActivity({
       type: ActivityTypes.Message,
@@ -402,6 +454,11 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
     debugLog('STORAGE', 'Saved conversation history');
 
   } catch (error) {
+    // Stop periodic typing indicator in case of error
+    if (context.activity.stopTypingIndicator) {
+      context.activity.stopTypingIndicator();
+    }
+
     if (error.status === 429) {
       debugLog('OPENAI', `Rate limit hit - status 429`);
       await context.sendActivity('[LIMITE ATTEINTE] Limite de débit Azure OpenAI atteinte. Veuillez patienter une minute avant de réessayer. Les comptes gratuits ont des limites de jetons par minute.');
