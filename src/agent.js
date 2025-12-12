@@ -3,6 +3,8 @@ const { AgentApplication, MemoryStorage } = require("@microsoft/agents-hosting")
 const { AzureOpenAI } = require("openai");
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 
 const config = require("./config");
 const { AzureAISearchDataSource } = require("./app/azureAISearchDataSource");
@@ -30,6 +32,189 @@ const debugLog = (tag, message) => {
     console.log(`[${tag}] ${message}`);
   }
 };
+
+// Cache for URL validation results (avoid repeated HTTP calls)
+const urlValidationCache = new Map();
+
+// Cache for LLM URL resolution (avoid repeated LLM calls)
+const llmUrlCache = new Map();
+
+/**
+ * Validate if a URL is accessible (returns 200-399)
+ * @param {string} url - URL to validate
+ * @returns {Promise<boolean>} True if URL is accessible
+ */
+async function validateUrl(url) {
+  // Check cache first
+  if (urlValidationCache.has(url)) {
+    return urlValidationCache.get(url);
+  }
+
+  return new Promise((resolve) => {
+    const urlObj = new URL(url);
+    const lib = urlObj.protocol === 'https:' ? https : http;
+    
+    const options = {
+      method: 'HEAD',
+      timeout: 3000, // 3s timeout
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; LegisQuebecBot/1.0)'
+      }
+    };
+
+    const req = lib.request(url, options, (res) => {
+      const isValid = res.statusCode >= 200 && res.statusCode < 400;
+      urlValidationCache.set(url, isValid);
+      debugLog('URL_VALIDATE', `${url} -> ${res.statusCode} (${isValid ? 'VALID' : 'INVALID'})`);
+      resolve(isValid);
+    });
+
+    req.on('error', (err) => {
+      debugLog('URL_VALIDATE', `${url} -> ERROR: ${err.message}`);
+      urlValidationCache.set(url, false);
+      resolve(false);
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      debugLog('URL_VALIDATE', `${url} -> TIMEOUT`);
+      urlValidationCache.set(url, false);
+      resolve(false);
+    });
+
+    req.end();
+  });
+}
+
+/**
+ * Extract a human-readable title from document content using LLM.
+ * Converts filenames like "2025qcca157.pdf" to readable titles.
+ * Results are cached to avoid repeated LLM calls.
+ * @param {string} filename - Document filename
+ * @param {string} content - Document content excerpt (first ~500 chars)
+ * @returns {Promise<string>} - Human-readable title or original filename
+ */
+async function extractReadableTitle(filename, content) {
+  // Check cache first
+  const cacheKey = `title_${filename}`;
+  if (llmUrlCache.has(cacheKey)) {
+    const cached = llmUrlCache.get(cacheKey);
+    debugLog('FORMAT', `[TITLE_CACHE] Using cached title for ${filename}`);
+    return cached;
+  }
+
+  try {
+    const client = new AzureOpenAI({
+      apiKey: config.azureOpenAIApiKey,
+      endpoint: config.azureOpenAIEndpoint,
+      apiVersion: '2024-04-01-preview',
+    });
+
+    const prompt = `Extrait le titre du document juridique suivant. Réponds UNIQUEMENT avec le titre, sans explication.
+
+Nom de fichier: ${filename}
+
+Contenu (début): ${content.substring(0, 500)}
+
+Titre du document:`;
+
+    const response = await client.chat.completions.create({
+      model: config.azureOpenAIDeploymentName,
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 100,
+      temperature: 0.1,
+    });
+
+    const extractedTitle = response.choices[0]?.message?.content?.trim();
+    
+    if (extractedTitle && extractedTitle.length > 10 && extractedTitle.length < 200) {
+      // Cache the result
+      llmUrlCache.set(cacheKey, extractedTitle);
+      debugLog('FORMAT', `[TITLE_EXTRACT] ${filename} -> "${extractedTitle}"`);
+      return extractedTitle;
+    }
+  } catch (error) {
+    debugLog('FORMAT', `[TITLE_EXTRACT] Error extracting title: ${error.message}`);
+  }
+
+  // Fallback: return filename without extension
+  return filename.replace(/\.pdf$/i, '');
+}
+
+/**
+ * Ask LLM to find the correct public URL for a legal document
+ * @param {string} title - Document title
+ * @param {string} failedUrl - The URL that failed validation
+ * @returns {Promise<string|null>} Correct URL or null if not found
+ */
+async function findUrlWithLLM(title, failedUrl) {
+  // Check cache first
+  const cacheKey = `${title}`;
+  if (llmUrlCache.has(cacheKey)) {
+    return llmUrlCache.get(cacheKey);
+  }
+
+  try {
+    debugLog('LLM_URL', `Asking LLM to find URL for: "${title}" (failed: ${failedUrl})`);
+    
+    const client = new AzureOpenAI({
+      apiKey: config.azureOpenAIKey,
+      endpoint: config.azureOpenAIEndpoint,
+      apiVersion: config.azureOpenAIDeploymentVersion || "2024-10-21",
+    });
+
+    const response = await client.chat.completions.create({
+      model: config.azureOpenAIDeploymentName,
+      messages: [
+        {
+          role: 'system',
+          content: `Tu es un expert des ressources juridiques québécoises. Ta tâche est de trouver l'URL publique correcte pour un document juridique.
+
+Sources principales:
+- Lois et règlements: https://www.legisquebec.gouv.qc.ca/fr/document/lc/{CODE}
+- Jugements tribunaux QC: https://www.canlii.org/fr/qc/{tribunal}/{année}/{référence}.html
+- Chartes: https://www.legisquebec.gouv.qc.ca/fr/document/lc/{CODE}
+
+Réponds UNIQUEMENT avec l'URL complète (https://...) ou "INCONNU" si tu ne peux pas déterminer l'URL avec certitude.`
+        },
+        {
+          role: 'user',
+          content: `Trouve l'URL publique pour ce document: "${title}"
+
+L'URL automatique "${failedUrl}" ne fonctionne pas (404). Quelle est la bonne URL?
+
+Réponds UNIQUEMENT avec l'URL complète ou "INCONNU".`
+        }
+      ],
+      temperature: 0.1,
+      max_tokens: 200,
+    });
+
+    const llmUrl = response.choices[0]?.message?.content?.trim();
+    
+    if (llmUrl && llmUrl !== 'INCONNU' && llmUrl.startsWith('http')) {
+      debugLog('LLM_URL', `LLM found URL: ${llmUrl}`);
+      
+      // Validate LLM's suggested URL
+      const isValid = await validateUrl(llmUrl);
+      if (isValid) {
+        llmUrlCache.set(cacheKey, llmUrl);
+        return llmUrl;
+      } else {
+        debugLog('LLM_URL', `LLM URL validation failed: ${llmUrl}`);
+      }
+    }
+    
+    debugLog('LLM_URL', `LLM could not find valid URL for: "${title}"`);
+    llmUrlCache.set(cacheKey, null);
+    return null;
+    
+  } catch (error) {
+    debugLog('LLM_URL', `Error calling LLM: ${error.message}`);
+    llmUrlCache.set(cacheKey, null);
+    return null;
+  }
+}
 
 /**
  * Start a periodic typing indicator that keeps showing "Bot is typing..." 
@@ -75,13 +260,16 @@ function getWelcomeCard() {
 }
 
 /**
- * Transform blob storage URL to public accessible URL
+ * Transform blob storage URL to public accessible URL with validation
  * @param {string} blobUrl - URL from Azure blob storage
  * @param {string} title - Document title to extract code
- * @returns {string} Transformed URL or original blob URL as fallback
+ * @returns {Promise<string>} Transformed URL, LLM-found URL, or original blob URL as fallback
  */
-function transformToLegisQuebecUrl(blobUrl, title) {
+async function transformToLegisQuebecUrl(blobUrl, title) {
   try {
+    let candidateUrl = null;
+    let urlSource = null;
+    
     // Pattern 1: Lois et règlements - "S-2.2_loi-sur...", "CCQ-1991_code..."
     // Extract code from title - letters + optional dash + digits + optional decimals
     const loiCodeMatch = title.match(/^([A-Z]+-?\d+(?:\.\d+)?(?:\.\d+)?)/);
@@ -89,30 +277,56 @@ function transformToLegisQuebecUrl(blobUrl, title) {
     if (loiCodeMatch) {
       const code = loiCodeMatch[1];
       // Build legisquebec URL: https://www.legisquebec.gouv.qc.ca/fr/document/lc/{code}
-      const legisUrl = `https://www.legisquebec.gouv.qc.ca/fr/document/lc/${code}`;
-      debugLog('FORMAT', `[URL_TRANSFORM] Loi/Règlement: ${title} -> ${legisUrl}`);
-      return legisUrl;
+      candidateUrl = `https://www.legisquebec.gouv.qc.ca/fr/document/lc/${code}`;
+      urlSource = 'Loi/Règlement';
     }
     
-    // Pattern 2: Décisions de tribunaux - "2002qccrt33.pdf", "2024qcca123.pdf"
-    // Format: YYYY + tribunal (qccrt, qcca, qccs, qccq, etc.) + numéro
-    const jugementMatch = title.match(/^(\d{4})(qc[a-z]{2,4})(\d+)/i);
-    
-    if (jugementMatch) {
-      const [, annee, tribunal, numero] = jugementMatch;
-      // Build CanLII URL: https://www.canlii.org/fr/qc/{tribunal}/{annee}/{annee}{tribunal}{numero}.html
-      const canliiUrl = `https://www.canlii.org/fr/qc/${tribunal.toLowerCase()}/${annee}/${annee}${tribunal.toLowerCase()}${numero}.html`;
-      debugLog('FORMAT', `[URL_TRANSFORM] Jugement: ${title} -> ${canliiUrl}`);
-      return canliiUrl;
+    // Pattern 2: Décisions de tribunaux - "2002qccrt33.pdf", "2024qcca123.pdf", "2025qccdchim5.pdf"
+    // Format: YYYY + tribunal (qcca, qccs, qccrt, qccq, qccdchim, qctdp, etc.) + numéro
+    // Tribunaux reconnus: qcca (Cour d'appel), qccs (Cour supérieure), qccq (Cour du Québec),
+    //                     qccrt (CRT), qccdchim (Comité de déontologie des chiropraticiens),
+    //                     qctdp (Tribunal des droits de la personne), etc.
+    if (!candidateUrl) {
+      const jugementMatch = title.match(/^(\d{4})(qc[a-z]{2,10})(\d+)/i);
+      
+      if (jugementMatch) {
+        const [, annee, tribunal, numero] = jugementMatch;
+        const tribunalLower = tribunal.toLowerCase();
+        // Build CanLII URL: https://www.canlii.org/fr/qc/{tribunal}/{annee}/{annee}{tribunal}{numero}.html
+        candidateUrl = `https://www.canlii.org/fr/qc/${tribunalLower}/${annee}/${annee}${tribunalLower}${numero}.html`;
+        urlSource = 'Jugement';
+      }
     }
     
-    // Fallback: Return original blob URL if no pattern matches
-    // This ensures all documents have a clickable link
-    debugLog('FORMAT', `[URL_TRANSFORM] No pattern matched for "${title}", using blob URL: ${blobUrl}`);
-    return blobUrl;
+    // If we found a candidate URL, validate it
+    if (candidateUrl) {
+      debugLog('FORMAT', `[URL_TRANSFORM] ${urlSource}: ${title} -> ${candidateUrl} (validating...)`);
+      
+      const isValid = await validateUrl(candidateUrl);
+      
+      if (isValid) {
+        debugLog('FORMAT', `[URL_TRANSFORM] ✓ URL validated: ${candidateUrl}`);
+        return candidateUrl;
+      } else {
+        debugLog('FORMAT', `[URL_TRANSFORM] ✗ URL validation failed: ${candidateUrl}, trying LLM...`);
+        
+        // Try LLM to find correct URL
+        const llmUrl = await findUrlWithLLM(title, candidateUrl);
+        
+        if (llmUrl) {
+          debugLog('FORMAT', `[URL_TRANSFORM] ✓ LLM found valid URL: ${llmUrl}`);
+          return llmUrl;
+        }
+      }
+    }
+    
+    // No valid URL found - return null to hide link
+    debugLog('FORMAT', `[URL_TRANSFORM] No valid URL found for "${title}", no link will be displayed`);
+    return null;
+    
   } catch (error) {
-    debugLog('FORMAT', `[URL_TRANSFORM] Error transforming URL: ${error.message}, using blob URL`);
-    return blobUrl;
+    debugLog('FORMAT', `[URL_TRANSFORM] Error transforming URL: ${error.message}`);
+    return null;
   }
 }
 
@@ -147,9 +361,9 @@ const instructions = loadInstructions();
  * Adds structure, markdown formatting, and citations in standard format.
  * @param {string} content - The AI-generated response content (should NOT include notice légale)
  * @param {Array} citations - Array of citation objects from Azure AI Search
- * @returns {string} Formatted response with citations and notice légale at the end
+ * @returns {Promise<string>} Formatted response with citations and notice légale at the end
  */
-function formatBotResponse(content, citations = []) {
+async function formatBotResponse(content, citations = []) {
   let formatted = content;
 
   // Deduplicate citations by title (keep highest score)
@@ -175,16 +389,22 @@ function formatBotResponse(content, citations = []) {
     for (let i = 0; i < citationLimit; i++) {
       const citation = uniqueCitations[i];
       const citationNum = i + 1;
-      formatted += `${citationNum}. **${citation.title || 'Document'}**`;
       
-      if (citation.url) {
-        // Transform blob storage URL to legisquebec.gouv.qc.ca URL
-        const legisUrl = transformToLegisQuebecUrl(citation.url, citation.title);
-        
-        // Only add link if URL transformation succeeded
-        if (legisUrl) {
-          formatted += ` ([Voir le document](${legisUrl}))`;
-        }
+      // Extract readable title from document content (if title is a filename)
+      let displayTitle = citation.title || 'Document';
+      if (displayTitle.endsWith('.pdf') && citation.content) {
+        displayTitle = await extractReadableTitle(citation.title, citation.content);
+      }
+      
+      formatted += `${citationNum}. **${displayTitle}**`;
+      
+      // Always try to generate public URL from title (never use blob storage URLs)
+      // This will attempt to transform to legisquebec.gouv.qc.ca or canlii.org
+      const legisUrl = await transformToLegisQuebecUrl(null, citation.title);
+      
+      // Only add link if URL transformation succeeded
+      if (legisUrl) {
+        formatted += ` ([Voir le document](${legisUrl}))`;
       }
       
       formatted += '\n';
@@ -415,8 +635,8 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
 
     debugLog('OPENAI', `Streaming complete. Total content: ${fullContent.length} characters`);
 
-    // Format response with Microsoft Teams best practices
-    const formattedResponse = formatBotResponse(fullContent, citations);
+    // Format response with Microsoft Teams best practices (async: validates URLs with LLM fallback)
+    const formattedResponse = await formatBotResponse(fullContent, citations);
     
     debugLog('FORMAT', `Formatted response for Teams display`);
 
