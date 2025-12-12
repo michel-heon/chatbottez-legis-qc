@@ -564,9 +564,10 @@ agentApp.onActivity(ActivityTypes.Message, async (context) => {
   // 1. Check for greetings (hi, hello, bonjour, salut)
   if (/^(hi|hello|bonjour|salut|hey)$/i.test(message)) {
     debugLog('COMMAND', 'Processing greeting command');
-    // Send simple text welcome message (adaptive cards may cause errors in M365 Copilot)
+    
+    // Send welcome message as plain Markdown text (Teams compatible)
     await context.sendActivity(getWelcomeMessage());
-    debugLog('RESPONSE', 'Sent welcome message');
+    debugLog('RESPONSE', 'Sent welcome message (Markdown text)');
     return;
   }
 

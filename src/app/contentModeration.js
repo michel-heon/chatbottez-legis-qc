@@ -118,15 +118,16 @@ export function getWelcomeMessage() {
   return `Bonjour! Je suis Légis Québec, votre conseiller juridique virtuel.
 
 Je peux vous aider avec:
-• Questions sur les lois et règlements du Québec
-• Droits au travail
-• Protection du consommateur
-• Vie privée et données personnelles
-• Procédures juridiques
+
+- Questions sur les lois et règlements du Québec
+- Droits au travail
+- Protection du consommateur
+- Vie privée et données personnelles
+- Procédures juridiques
 
 Tapez "Aide" ou "Help" pour voir toutes mes commandes.
 
-AVERTISSEMENT: Mes réponses sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière, consultez un avocat.`;
+**AVERTISSEMENT:** Mes réponses sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière, consultez un avocat.`;
 }
 
 /**
@@ -136,63 +137,62 @@ AVERTISSEMENT: Mes réponses sont à titre informatif seulement et ne constituen
 export function getHelpMessage() {
   return `**Commandes disponibles / Available Commands**
 
-COMMANDES JURIDIQUES SPECIALISEES / SPECIALIZED LEGAL COMMANDS
----------------------------------------------------------------
+**COMMANDES JURIDIQUES SPECIALISEES / SPECIALIZED LEGAL COMMANDS**
+
 Ces commandes activent des contextes spécialisés pour des réponses optimisées:
 
-1. DROITS AU TRAVAIL
-   - "Mes droits au travail"
-   - "Normes du travail"
-   - Couvre: salaire, congés, congédiement, CNESST
+**1. DROITS AU TRAVAIL**
+- "Mes droits au travail"
+- "Normes du travail"
+- Couvre: salaire, congés, congédiement, CNESST
 
-2. PROTECTION DU CONSOMMATEUR
-   - "Protection du consommateur"
-   - "Droits des consommateurs"
-   - Couvre: garanties, contrats, recours, OPC
+**2. PROTECTION DU CONSOMMATEUR**
+- "Protection du consommateur"
+- "Droits des consommateurs"
+- Couvre: garanties, contrats, recours, OPC
 
-3. DONNEES PERSONNELLES
-   - "Protéger mes données personnelles"
-   - "Vie privée et confidentialité"
-   - Couvre: Loi 25, consentement, CAI
+**3. DONNEES PERSONNELLES**
+- "Protéger mes données personnelles"
+- "Vie privée et confidentialité"
+- Couvre: Loi 25, consentement, CAI
 
-4. MISE EN DEMEURE
-   - "Rédiger une mise en demeure"
-   - "Comment écrire une mise en demeure"
-   - Couvre: structure, contenu, procédures
+**4. MISE EN DEMEURE**
+- "Rédiger une mise en demeure"
+- "Comment écrire une mise en demeure"
+- Couvre: structure, contenu, procédures
 
-5. CONTESTER UNE DECISION
-   - "Contester une décision"
-   - "Faire appel d'une décision"
-   - Couvre: recours, délais, tribunaux
+**5. CONTESTER UNE DECISION**
+- "Contester une décision"
+- "Faire appel d'une décision"
+- Couvre: recours, délais, tribunaux
 
-6. DEPOSER UNE PLAINTE
-   - "Comment déposer une plainte"
-   - "Porter plainte"
-   - Couvre: organismes, procédures, délais
+**6. DEPOSER UNE PLAINTE**
+- "Comment déposer une plainte"
+- "Porter plainte"
+- Couvre: organismes, procédures, délais
 
-RECHERCHE GENERALE / GENERAL SEARCH
-------------------------------------
+**RECHERCHE GENERALE / GENERAL SEARCH**
+
 - Posez toute question sur les lois du Québec
 - "Quelles lois sont disponibles?"
 - "Cherche dans le Code civil"
 
-AUTRES COMMANDES / OTHER COMMANDS
-----------------------------------
-- "/clear" ou "/reset" - Effacer l'historique
-- "/help" ou "/aide" - Afficher cette aide
+**AUTRES COMMANDES / OTHER COMMANDS**
 
-CONTACT & SUPPORT
------------------
-Email: support@cotechnoe.com
-Documentation: https://cotechnoe.com/legisqc/help
+- "Help" ou "Aide" - Afficher cette aide
+- "Bonjour" - Message de bienvenue
 
-AVERTISSEMENT LEGAL
--------------------
-Les réponses sont à titre informatif seulement et ne constituent pas un avis juridique.
-Pour toute situation particulière, consultez un avocat.
+**CONTACT & SUPPORT**
 
-Legal information is for general purposes only and does not constitute legal advice.
-Consult a lawyer for specific situations.`;
+Email: [support@cotechnoe.com](mailto:support@cotechnoe.com)
+
+Documentation: [https://cotechnoe.com/legisqc/help](https://cotechnoe.com/legisqc/help)
+
+**AVERTISSEMENT LEGAL**
+
+Les réponses sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière, consultez un avocat.
+
+Legal information is for general purposes only and does not constitute legal advice. Consult a lawyer for specific situations.`;
 }
 
 /**
