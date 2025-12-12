@@ -6,6 +6,10 @@ const path = require('path');
 const https = require('https');
 const http = require('http');
 
+// Configuration: Disable URL validation to avoid server overload
+// See docs/known-bugs/url-validation-disabled.md
+const ENABLE_URL_VALIDATION = false;
+
 const config = require("./config");
 const { AzureAISearchDataSource } = require("./app/azureAISearchDataSource");
 const {
@@ -87,19 +91,20 @@ async function validateUrl(url) {
 }
 
 /**
- * Extract a human-readable title from document content using LLM.
- * Converts filenames like "2025qcca157.pdf" to readable titles.
+ * Extract a legal citation from document content using LLM.
+ * Converts filenames like "2025qcca157.pdf" to standardized legal citations.
+ * Examples: "St-Jean c. Mercier, 2002 CSC 15", "C-12, art. 10", "L.R.Q., c. C-12"
  * Results are cached to avoid repeated LLM calls.
  * @param {string} filename - Document filename
  * @param {string} content - Document content excerpt (first ~500 chars)
- * @returns {Promise<string>} - Human-readable title or original filename
+ * @returns {Promise<string>} - Legal citation or original filename
  */
 async function extractReadableTitle(filename, content) {
   // Check cache first
-  const cacheKey = `title_${filename}`;
+  const cacheKey = `citation_${filename}`;
   if (llmUrlCache.has(cacheKey)) {
     const cached = llmUrlCache.get(cacheKey);
-    debugLog('FORMAT', `[TITLE_CACHE] Using cached title for ${filename}`);
+    debugLog('FORMAT', `[CITATION_CACHE] Using cached citation for ${filename}`);
     return cached;
   }
 
@@ -110,31 +115,37 @@ async function extractReadableTitle(filename, content) {
       apiVersion: '2024-04-01-preview',
     });
 
-    const prompt = `Extrait le titre du document juridique suivant. Réponds UNIQUEMENT avec le titre, sans explication.
+    const prompt = `Extrait la référence juridique standardisée du document suivant. Réponds UNIQUEMENT avec la référence, sans explication.
 
 Nom de fichier: ${filename}
 
 Contenu (début): ${content.substring(0, 500)}
 
-Titre du document:`;
+Format attendu selon le type de document:
+- Jugements: "Partie c. Partie, Année TRIBUNAL Numéro" (ex: "St-Jean c. Mercier, 2002 CSC 15")
+- Lois: "Nom de la loi, Code (abrégé)" (ex: "Charte des droits et libertés de la personne, L.R.Q., c. C-12")
+- Règlements: "Nom du règlement, Code" (ex: "Règlement sur X, R.R.Q., c. Y-1, r. 1")
+- Articles: Ajoute ", art. X" si l'article est identifiable
+
+Référence juridique:`;
 
     const response = await client.chat.completions.create({
       model: config.azureOpenAIDeploymentName,
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 100,
+      max_tokens: 150,
       temperature: 0.1,
     });
 
-    const extractedTitle = response.choices[0]?.message?.content?.trim();
+    const extractedCitation = response.choices[0]?.message?.content?.trim();
     
-    if (extractedTitle && extractedTitle.length > 10 && extractedTitle.length < 200) {
+    if (extractedCitation && extractedCitation.length > 5 && extractedCitation.length < 300) {
       // Cache the result
-      llmUrlCache.set(cacheKey, extractedTitle);
-      debugLog('FORMAT', `[TITLE_EXTRACT] ${filename} -> "${extractedTitle}"`);
-      return extractedTitle;
+      llmUrlCache.set(cacheKey, extractedCitation);
+      debugLog('FORMAT', `[CITATION_EXTRACT] ${filename} -> "${extractedCitation}"`);
+      return extractedCitation;
     }
   } catch (error) {
-    debugLog('FORMAT', `[TITLE_EXTRACT] Error extracting title: ${error.message}`);
+    debugLog('FORMAT', `[CITATION_EXTRACT] Error extracting citation: ${error.message}`);
   }
 
   // Fallback: return filename without extension
@@ -281,43 +292,23 @@ async function transformToLegisQuebecUrl(blobUrl, title) {
       urlSource = 'Loi/Règlement';
     }
     
-    // Pattern 2: Décisions de tribunaux - "2002qccrt33.pdf", "2024qcca123.pdf", "2025qccdchim5.pdf"
-    // Format: YYYY + tribunal (qcca, qccs, qccrt, qccq, qccdchim, qctdp, etc.) + numéro
-    // Tribunaux reconnus: qcca (Cour d'appel), qccs (Cour supérieure), qccq (Cour du Québec),
-    //                     qccrt (CRT), qccdchim (Comité de déontologie des chiropraticiens),
-    //                     qctdp (Tribunal des droits de la personne), etc.
+    // Pattern 2: Décisions de tribunaux - DISABLED
+    // CanLII links are not displayed (only legisquebec.gouv.qc.ca allowed)
+    // Judgments will show title without link
     if (!candidateUrl) {
       const jugementMatch = title.match(/^(\d{4})(qc[a-z]{2,10})(\d+)/i);
       
       if (jugementMatch) {
-        const [, annee, tribunal, numero] = jugementMatch;
-        const tribunalLower = tribunal.toLowerCase();
-        // Build CanLII URL: https://www.canlii.org/fr/qc/{tribunal}/{annee}/{annee}{tribunal}{numero}.html
-        candidateUrl = `https://www.canlii.org/fr/qc/${tribunalLower}/${annee}/${annee}${tribunalLower}${numero}.html`;
-        urlSource = 'Jugement';
+        // Judgment detected but no link returned (CanLII not allowed)
+        debugLog('FORMAT', `[URL_TRANSFORM] Jugement detected but link disabled: ${title}`);
+        return null;
       }
     }
     
-    // If we found a candidate URL, validate it
+    // If we found a candidate URL (legisquebec.gouv.qc.ca only), return it
     if (candidateUrl) {
-      debugLog('FORMAT', `[URL_TRANSFORM] ${urlSource}: ${title} -> ${candidateUrl} (validating...)`);
-      
-      const isValid = await validateUrl(candidateUrl);
-      
-      if (isValid) {
-        debugLog('FORMAT', `[URL_TRANSFORM] ✓ URL validated: ${candidateUrl}`);
-        return candidateUrl;
-      } else {
-        debugLog('FORMAT', `[URL_TRANSFORM] ✗ URL validation failed: ${candidateUrl}, trying LLM...`);
-        
-        // Try LLM to find correct URL
-        const llmUrl = await findUrlWithLLM(title, candidateUrl);
-        
-        if (llmUrl) {
-          debugLog('FORMAT', `[URL_TRANSFORM] ✓ LLM found valid URL: ${llmUrl}`);
-          return llmUrl;
-        }
-      }
+      debugLog('FORMAT', `[URL_TRANSFORM] ${urlSource}: ${title} -> ${candidateUrl}`);
+      return candidateUrl;
     }
     
     // No valid URL found - return null to hide link
@@ -363,9 +354,43 @@ const instructions = loadInstructions();
  * @param {Array} citations - Array of citation objects from Azure AI Search
  * @returns {Promise<string>} Formatted response with citations and notice légale at the end
  */
-async function formatBotResponse(content, citations = []) {
-  let formatted = content;
+/**
+ * Normalize Markdown heading hierarchy for Teams/Copilot display
+ * Microsoft best practices:
+ * - ## for main sections (H2)
+ * - ### for subsections (H3)  
+ * - **bold** for emphasis within text
+ * - Avoid H1 (#) in message content
+ */
+function normalizeMarkdownHierarchy(content) {
+  let normalized = content;
+  
+  // Fix common patterns where bold text should be headings
+  // Pattern: "Titre de section :" followed by content
+  // Examples: "Principes généraux :", "Exemples concrets :", etc.
+  normalized = normalized.replace(/\n\*\*([^*]+)\s*:\*\*\n/g, (match, title) => {
+    // Check if it's a main section indicator (appears at start of line after newline)
+    // These should be H3 (###)
+    return `\n### ${title}\n\n`;
+  });
+  
+  // Ensure numbered sections are H2 (##)
+  // Pattern: "1. Titre", "2. Titre", "3. Titre"
+  normalized = normalized.replace(/\n(\d+\.\s+[A-Z][^\n]+)\n/g, (match, title) => {
+    // Only apply if not already a heading
+    if (!title.startsWith('#')) {
+      return `\n## ${title}\n\n`;
+    }
+    return match;
+  });
+  
+  return normalized;
+}
 
+async function formatBotResponse(content, citations = []) {
+  // v1.1.9 approach: Trust LLM to generate proper Teams format from instructions.txt
+  // No post-processing needed - LLM knows Teams Markdown format
+  
   // Deduplicate citations by title (keep highest score)
   const uniqueCitations = [];
   const seenTitles = new Set();
@@ -380,44 +405,138 @@ async function formatBotResponse(content, citations = []) {
   
   debugLog('FORMAT', `[CITATIONS] Deduplicated: ${citations.length} -> ${uniqueCitations.length} unique citations`);
 
-  // Add citations section if available (Microsoft best practice: max 20 citations)
-  if (uniqueCitations && uniqueCitations.length > 0) {
-    const citationLimit = Math.min(uniqueCitations.length, 20);
-    formatted += '\n\n---\n\n';
-    formatted += '**📚 Sources Consultées**\n\n';
-    
-    for (let i = 0; i < citationLimit; i++) {
-      const citation = uniqueCitations[i];
-      const citationNum = i + 1;
-      
-      // Extract readable title from document content (if title is a filename)
-      let displayTitle = citation.title || 'Document';
-      if (displayTitle.endsWith('.pdf') && citation.content) {
-        displayTitle = await extractReadableTitle(citation.title, citation.content);
-      }
-      
-      formatted += `${citationNum}. **${displayTitle}**`;
-      
-      // Always try to generate public URL from title (never use blob storage URLs)
-      // This will attempt to transform to legisquebec.gouv.qc.ca or canlii.org
-      const legisUrl = await transformToLegisQuebecUrl(null, citation.title);
-      
-      // Only add link if URL transformation succeeded
-      if (legisUrl) {
-        formatted += ` ([Voir le document](${legisUrl}))`;
-      }
-      
-      formatted += '\n';
-    }
-  }
+  // Validate response structure (follow-up questions required by instructions.txt)
+  validateFollowUpQuestions(content);
+  
+  // Clean up extra whitespace only
+  const formatted = content.replace(/\n{3,}/g, '\n\n');
 
-  // Add notice légale at the VERY END (Microsoft Teams best practice)
-  formatted += '\n\n---\n\n';
-  formatted += '**NOTE :** Les sources documentaires consultées apparaissent ci-dessus.\n\n';
-  formatted += '**NOTICE LÉGALE :** Cette réponse est générée par l\'IA, elle est à titre informatif seulement et ne constitue pas un avis juridique. Pour toute situation particulière ou pour plus d\'information, consultez un avocat.';
-
+  // NOTE: According to instructions.txt (v1.1.9 style):
+  // - LLM generates content with proper Teams Markdown format
+  // - Citations section will be displayed AUTOMATICALLY by Teams UI
+  // - Legal notice is generated by LLM according to instructions
+  // - NO post-processing of heading hierarchy needed
+  
+  debugLog('FORMAT', 'Response ready for Teams (LLM-generated format)');
   return formatted;
 }
+
+/*
+ * DEPRECATED - v1.1.9 approach: LLM generates proper format from instructions.txt
+ * 
+ * This function attempted to normalize heading hierarchy but caused issues:
+ * - Converted follow-up questions to H2 headings (wrong formatting)
+ * - Added complexity not present in v1.1.9
+ * - LLM already knows Teams Markdown format from instructions
+ * 
+ * v1.1.9 sent LLM content directly with ZERO post-processing.
+ * Instructions.txt specifies Teams format, LLM generates correctly.
+ 
+function normalizeMarkdownHeadings(content) {
+  // CRITICAL: Protect follow-up questions from being converted to headings
+  // Step 0: Mark follow-up questions with temporary placeholders BEFORE any transformation
+  const followUpPattern = /(\*\*)?pour approfondir (votre recherche|vos connaissances)(\*\*)?\s*:?/i;
+  const followUpMatch = followUpPattern.exec(content);
+  
+  if (followUpMatch) {
+    const followUpIndex = followUpMatch.index;
+    const beforeQuestions = content.substring(0, followUpIndex);
+    const questionsSection = content.substring(followUpIndex);
+    
+    // Protect numbered items in questions section by adding temporary marker
+    const protectedQuestions = questionsSection.replace(/^(\d+)\.\s+/gm, '___QUESTION_MARKER___$1. ');
+    
+    debugLog('FORMAT', 'Protected follow-up questions from heading conversion');
+    content = beforeQuestions + protectedQuestions;
+  }
+  
+  // Step 1: Convert numbered sections (1. Section, 2. Section) to H2 (main sections)
+  // Process line by line to respect markers
+  const lines = content.split('\n');
+  const processedLines = lines.map(line => {
+    // Skip lines with protection marker
+    if (line.includes('___QUESTION_MARKER___')) {
+      return line;
+    }
+    
+    // Check if line matches numbered section pattern
+    const match = line.match(/^(\d+)\.\s+([^\n]+)$/);
+    if (match) {
+      const num = match[1];
+      let text = match[2];
+      // Remove any existing markdown or bold from text
+      debugLog('FORMAT', `Converting section "${num}. ${text.substring(0, 30)}..." to H2`);
+      return `## ${num}. ${text}`;
+    }
+    
+    return line;
+  });
+  
+  content = processedLines.join('\n');
+  
+  // Step 2: Convert **Bold text:** (with colon) at start of line to H3
+  // These are usually subsection headers like "Principes généraux :", "Théorie :", etc.
+  content = content.replace(/^\*\*([^*\n]+):\*\*\s*$/gm, '### $1');
+  
+  // Step 3: Convert standalone **Bold text** (no colon) at start of line to H4
+  // These are sub-subsections or emphasis headers
+  content = content.replace(/^\*\*([^*:\n]+)\*\*\s*$/gm, '#### $1');
+  
+  // Step 4: Clean up any double spaces or formatting artifacts
+  content = content.replace(/^###\s+###\s+/gm, '### ');
+  content = content.replace(/^##\s+##\s+/gm, '## ');
+  
+  // Step 5: Remove temporary question markers
+  content = content.replace(/___QUESTION_MARKER___/g, '');
+  
+  debugLog('FORMAT', 'Normalized Markdown heading hierarchy (H2 > H3 > H4)');
+  return content;
+}
+*/
+
+/**
+ * Validate that response contains mandatory follow-up questions.
+ */
+function validateFollowUpQuestions(content) {
+  const hasFollowUp = /pour approfondir (votre recherche|vos connaissances)\s*:/i.test(content);
+  if (!hasFollowUp) {
+    debugLog('VALIDATION', '⚠️ Response missing follow-up questions (required by instructions.txt)');
+  }
+  return hasFollowUp;
+}
+
+/**
+ * DEPRECATED - v1.1.9 approach: LLM generates notice according to instructions.txt
+ * 
+ * Previously these functions removed LLM notices and added code-generated ones.
+ * Now following v1.1.9-documentation-certification: instructions.txt tells LLM 
+ * to include the notice, no post-processing needed.
+ */
+
+// Kept as reference for future debugging if double notices reappear
+
+// function removeLLMGeneratedNotices(content) {
+//   const patterns = [
+//     /⚖️\s*[Pp]our toute situation[^]*?(?:avocat|jurisprudence)[^.]*\./gi,
+//     /\*?\*?NOTICE LÉGALE\s*:?\*?\*?\s*[^]*?(?:avocat|information)[^.]*\./gi,
+//     /[Pp]our toute situation particulière[^]*?(?:avocat|spécialisé|textes officiels)[^.]*\./gi,
+//     /[Ii]l est recommandé de consulter[^.]*?avocat[^.]*\./gi,
+//     /\n\n[⚖️\s]*(?:[Pp]our toute|[Ii]l est recommandé)[^]*?(?:avocat|jurisprudence récente)\./gi,
+//     /\n\n[^]*?(?:consultez un avocat|consulter un avocat spécialisé)[^.]*\./gi,
+//   ];
+//   let cleanedContent = content;
+//   patterns.forEach(pattern => {
+//     cleanedContent = cleanedContent.replace(pattern, '');
+//   });
+//   return cleanedContent.trim();
+// }
+
+// function addLegalNotices(content) {
+//   content = removeLLMGeneratedNotices(content);
+//   const legalNotice = '\n\n⚖️ Pour toute situation particulière...';
+//   const aiNotice = '\n\n**NOTICE LÉGALE :** Cette réponse...';
+//   return content + legalNotice + aiNotice;
+// }
 
 // Create the main AgentApplication instance
 const agentApp = new AgentApplication({
