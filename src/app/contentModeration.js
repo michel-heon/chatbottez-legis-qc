@@ -5,39 +5,69 @@
  */
 
 // Keywords and patterns for inappropriate content detection
+// NOTE: Patterns are designed to be PERMISSIVE for legal context
+// Block only clearly inappropriate requests, not legitimate legal questions
+// Supports both English and French
 const INAPPROPRIATE_PATTERNS = {
   weapons: [
-    /\b(ak[-\s]?47|gun|rifle|pistolet|arme|weapon|bomb|bombe|explosive)\b/i,
-    /\b(assault rifle|handgun|firearm|munitions?)\b/i
+    // Block: How to acquire/make weapons (EN + FR)
+    /\bhow\s+to\s+(buy|make|build|get|obtain)\s*(a\s+)?(gun|bomb|weapon|explosive)/i,
+    /\bcomment\s+(acheter|fabriquer|construire|obtenir)\s*(un\s+|une\s+)?(fusil|pistolet|arme|bombe|explosif)/i,
+    /\bwhere\s+to\s+(buy|find)\s*(an?\s+)?(ak[-\s]?47|rifle|firearm)/i,
+    /\bo[uù]\s+(acheter|trouver)\s*(un\s+|une\s+)?(ak[-\s]?47|fusil|arme)/i,
+    // Allow: "J'ai été menacé avec une arme" (legal question about being threatened)
   ],
   violence: [
-    /\b(kill|murder|attack|assault|threat|menace|tuer|attaquer)\b/i,
-    /\b(violence|violent|terroris[mt])\b/i
+    // Block: Instructions for violence (EN + FR)
+    /\bhow\s+to\s+(kill|murder|attack|hurt)/i,
+    /\bcomment\s+(tuer|assassiner|attaquer|blesser)/i,
+    /\bplan\s+(an attack|violence|terroris)/i,
+    /\bplanifier\s+(une attaque|violence|terroris)/i,
+    // Allow: "J'ai été victime d'agression" (victim seeking legal help)
   ],
   hateSpeech: [
-    /\b(religion.*best|meilleure religion|worst religion)\b/i,
-    /\b(race|racist|raciste|discrimination)\b/i
+    // Block: Comparative hate speech (EN + FR)
+    /\bwhich\s+(religion|race)\s*(is\s+)?(best|worst|better|superior)/i,
+    /\bquelle\s+(religion|race)\s*(est\s+)?(meilleure|pire|sup[ée]rieure)/i,
+    /\b(religions?|races?)\s+(best|worst|better|superior)/i,
+    /\b(religions?|races?)\s+(meilleure|pire|sup[ée]rieure)/i,
+    // Allow: "discrimination au travail" (legal question about discrimination)
   ],
   sexual: [
-    /\b(porn|porno|pornograph|sex[uy]|nude|naked)\b/i,
-    /\b(prostitut|escort service)\b/i
+    // Block: Pornography requests (EN + FR)
+    /\bporn|porno|pornograph|where.*nude/i,
+    /\bo[uù]\s+(trouver|voir)\s+(du\s+)?(porno|pornographie)/i,
+    /\bhow\s+to\s*.*(sex[uy]|nude|prostitut)/i,
+    /\bcomment\s+.*(sexe|nu|prostitut)/i,
+    // Allow: "harcèlement sexuel" (legal question about harassment)
   ],
   drugs: [
-    /\b(cocaine|heroin|meth|marijuana|cannabis|drogue|drug dealing)\b/i,
-    /\b(inject|snort|smoke.*drug)\b/i
+    // Block: How to obtain illegal drugs (EN + FR)
+    /\bhow\s+to\s+(buy|get|obtain|make)\s*.*(cocaine|heroin|meth)/i,
+    /\bcomment\s+(acheter|obtenir|fabriquer)\s*.*(coca[iï]ne|h[ée]ro[iï]ne|m[ée]th)/i,
+    /\bwhere\s+to\s+(buy|find)\s*.*(drug|cocaine|heroin)/i,
+    /\bo[uù]\s+(acheter|trouver)\s*.*(drogue|coca[iï]ne|h[ée]ro[iï]ne)/i,
+    // Allow: "accusation de trafic de drogue" (legal defense question)
   ],
   harmful: [
-    /\b(suicide|self[-\s]?harm|overdose)\b/i,
-    /\b(humiliate|reject.*candidate|discriminat)\b/i,
-    /\b(threat.*letter|lettre.*menace)\b/i
+    // Block: How to harm self or others (EN + FR)
+    /\bhow\s+to\s+(commit\s+suicide|self[-\s]?harm|overdose)/i,
+    /\bcomment\s+(se\s+suicider|s'auto[-\s]?mutiler|faire\s+une\s+overdose)/i,
+    /\bmethods?\s+(of|for)\s+(suicide|self[-\s]?harm)/i,
+    /\bm[ée]thodes?\s+(de|pour)\s+(suicide|auto[-\s]?mutilation)/i,
+    // Allow: "prévention du suicide" (legal/policy questions)
   ],
   political: [
-    /\b(war.*russia|ukraine.*war|political.*conflict)\b/i,
-    /\b(president.*threat|prime minister.*threat)\b/i
+    // Block: Calls for political violence (very limited, EN + FR)
+    /\b(overthrow|assassinate)\s*.*(government|president|ministre)/i,
+    /\b(renverser|assassiner)\s*.*(gouvernement|pr[ée]sident|premier\s+ministre)/i,
+    // Allow: Most political questions are legitimate
   ],
   alcohol: [
-    /\b(alcohol.*health|best.*alcohol|whiskey.*health)\b/i,
-    /\b(drinking.*benefits|alcool.*santé)\b/i
+    // Block: False health claims about alcohol (very limited, EN + FR)
+    /\balcohol\s+(cures|treats|heals)/i,
+    /\balcool\s+(gu[ée]rit|soigne|traite)/i,
+    // Allow: "vente d'alcool" (legal question about alcohol sales)
   ]
 };
 
