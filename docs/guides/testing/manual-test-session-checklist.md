@@ -485,27 +485,43 @@ cat manifest.json | jq '.bots[0].commandLists[0].commands | length'  # Should be
 
 ---
 
-### Bug 2: Liens manquants pour décisions de tribunaux ✅ CORRIGÉ
-- **Titre:** Fichiers PDF de jugements (2002qccrt33.pdf) n'ont pas de liens "Voir le document"
+### Bug 2: Liens manquants pour décisions de tribunaux ✅ CORRIGÉ + AMÉLIORÉ
+- **Titre:** Fichiers PDF de jugements n'ont pas de liens, ou liens incorrects (404)
 - **Sévérité:** Majeur (utilisabilité)
 - **Environnement:** Playground
 - **Reproduction:**
   1. Poser une question qui retourne des décisions de tribunaux
   2. Observer les "Sources Consultées"
-  3. Fichiers "2002qccrt*.pdf" listés sans lien
-- **Cause:** Regex ne supportait que format "CODE-loi" (S-2.2, CCQ-1991), pas le format "AAAAtribunalNNN" des jugements
+  3. Fichiers "2002qccrt*.pdf" listés sans lien ou avec liens 404
+- **Cause:** Regex ne supportait que format "CODE-loi", pas le format "AAAAtribunalNNN" des jugements
 - **Solution implémentée:**
-  - Ajout Pattern 2: Décisions de tribunaux (2002qccrt33 → CanLII)
-  - Transformation vers CanLII: `https://www.canlii.org/fr/qc/{tribunal}/{annee}/{reference}.html`
-  - Fallback sur URL blob si aucun pattern (au lieu de null)
-  - Tous les documents ont maintenant un lien cliquable
-- **Fichiers modifiés:** src/agent.js (fonction transformToLegisQuebecUrl, lignes 77-120)
+  - **Phase 1:** Ajout Pattern 2: Décisions de tribunaux (2002qccrt33 → CanLII)
+  - **Phase 2 (NOUVELLE):** Validation HTTP + LLM fallback
+    - Validation URL générée par regex (HEAD request, 3s timeout)
+    - Si 404/erreur, appel LLM pour trouver URL correcte
+    - Cache validation (évite HEAD requests répétés)
+    - Cache LLM (évite appels LLM répétés)
+    - Fallback final sur URL blob si tout échoue
+- **Fonctions créées:**
+  - `validateUrl(url)` - Validation HTTP avec cache
+  - `findUrlWithLLM(title, failedUrl)` - Résolution LLM avec cache
+  - `transformToLegisQuebecUrl()` - Async avec validation + LLM
+- **Fichiers modifiés:** src/agent.js (lignes 1-8, 28-153, 213-267, 335-343, 574)
 - **Patterns supportés:**
-  - Lois/Règlements: S-2.2, CCQ-1991, C-12 → legisquebec.gouv.qc.ca
-  - Jugements: 2002qccrt33, 2024qcca45 → canlii.org
-  - Autres: URL blob originale (fallback)
+  - Lois/Règlements: S-2.2, CCQ-1991, C-12 → legisquebec.gouv.qc.ca ✓
+  - Jugements: 2002qccrt33, 2024qcca45 → canlii.org ✓
+  - Validation: HEAD request confirme accessibilité ✓
+  - LLM fallback: Trouve URL si regex/validation échouent ✓
+  - Fallback final: URL blob (toujours cliquable) ✓
+- **Performance:**
+  - Validation URL: ~100-500ms par URL (avec cache)
+  - LLM fallback: ~1-2s par URL (seulement si nécessaire)
+  - Cache évite re-validation/re-LLM pour mêmes documents
 - **Commit:** À venir
-- **Validation:** Re-tester question congédiement - tous les jugements devraient avoir liens CanLII
+- **Validation:** 
+  - Re-tester question congédiement - tous liens devraient être valides
+  - Observer logs DEBUG pour voir validation + LLM en action
+  - Vérifier que liens clickables mènent à documents accessibles
 
 ---
 

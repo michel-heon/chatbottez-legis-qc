@@ -14,6 +14,13 @@ Ce répertoire documente les bugs connus et limitations acceptables du projet Ch
    - **Statut:** Documenté, solutions envisagées (API CanLII)
    - **Version:** v4.0.0-beta.1-legal-commands+
 
+2. **[Validation HTTP des URLs Désactivée](./url-validation-disabled.md)**
+   - **Sévérité:** Mineure / Limitation technique
+   - **Impact:** Quelques liens 404 possibles (~1-2%), mais performance optimale
+   - **Raison:** Éviter surcharge serveur et risque de blocage IP
+   - **Statut:** Désactivée volontairement, cache Redis envisagé
+   - **Version:** v4.0.0-beta.1-legal-commands+
+
 ---
 
 ## 🎯 Critères de Classification

@@ -22,3 +22,12 @@ lib/
 
 # Dev tool directories
 /devTools/
+
+# IDE files
+.project
+.settings/
+.vscode/settings.json
+
+# Test coverage
+coverage/
+.nyc_output/
