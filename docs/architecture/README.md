@@ -61,20 +61,11 @@ Architecture détaillée du système RAG (Retrieval-Augmented Generation) avec A
 Architecture de sécurité avec authentification, autorisation, secrets management et conformité.
 
 **Contenu**:
-- Modèle de sécurité Microsoft 365
-- Gestion des secrets (Azure Key Vault, GitHub Secrets)
-- Modération de contenu (Azure Content Safety)
-- Conformité et confidentialité
-
-### 6. [Intégrations](./integrations.md)
-
-Intégrations avec systèmes externes et APIs tierces.
-
-**Contenu**:
-- Microsoft Teams / M365 Copilot
-- Azure OpenAI API
-- Azure AI Search API
-- Application Insights (télémétrie)
+- Modèle de sécurité defense-in-depth (5 couches)
+- Content moderation (permissive legal context, 8 catégories)
+- Authentication & Authorization (OAuth 2.0, Azure AD)
+- Secrets management (App Service Config, future Key Vault)
+- Data protection & compliance (GDPR, Loi 25)
 
 ## Diagrammes
 
