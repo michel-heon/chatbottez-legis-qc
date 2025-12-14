@@ -34,12 +34,11 @@ Bienvenue dans la documentation du projet **ChatBotTez Légis Québec** - Agent 
 Documentation des décisions architecturales majeures du projet :
 
 - **[ADR 000 - Processus de création ADR](adr/000-processus-creation-adr.md)** - Template et processus
-- **[ADR 001 - Migration Azure OpenAI](adr/001-migration-azure-openai.md)** - Migration vers Azure OpenAI
-- **[ADR 002 - Architecture AI Search](adr/002-architecture-ai-search.md)** - Configuration Azure AI Search
-- **[ADR 003 - Service Principal manuel](adr/003-azure-ad-service-principal-creation-manuelle.md)** - Workaround bug TeamsFx
-- **[ADR 004 - Custom Engine Agent](adr/004-custom-engine-agent-template.md)** - Migration template engine
+- **[ADR 019 - Microsoft 365 Agents Toolkit Bonnes Pratiques](adr/019-microsoft-365-agents-toolkit-bonnes-pratiques.md)** - Adoption nouveau toolkit
+- **[ADR 021 - Nomenclature Resource Groups Azure](adr/021-nomenclature-resource-groups-azure.md)** - Naming conventions Azure
+- **[ADR 022 - Architecture Custom Engine Agent](adr/022-architecture-custom-engine-agent.md)** - ⭐ Migration complète Custom Engine Agent (v4.0.0)
 
-➡️ **[Voir tous les ADRs](adr/)**
+➡️ **[Voir tous les ADRs](adr/)** - 23 ADRs disponibles
 
 ### ⚙️ Configuration
 
