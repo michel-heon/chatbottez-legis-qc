@@ -61,6 +61,7 @@ Quelles autres options avons-nous évaluées et pourquoi les avons-nous rejetée
 | [020](./020-validation-guidelines-microsoft-365-copilot.md) | Guidelines de Validation Microsoft 365 Copilot | ✅ Accepté | 2025-12-12 |
 | [021](./021-nomenclature-resource-groups-azure.md) | Nomenclature Resource Groups Azure | ✅ Accepté | 2025-12-13 |
 | [022](./022-architecture-custom-engine-agent.md) | Architecture Custom Engine Agent Microsoft 365 Copilot | ✅ Accepté | 2025-12-14 |
+| [023](./023-cicd-github-actions.md) | CI/CD avec GitHub Actions | 🔄 Proposé | 2025-12-14 |
 
 ## Résumé des décisions clés
 
