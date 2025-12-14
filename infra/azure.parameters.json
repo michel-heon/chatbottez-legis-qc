@@ -6,7 +6,7 @@
       "value": "bot${{RESOURCE_SUFFIX}}"
     },
     "azureOpenAIKey": {
-      "value": "${{SECRET_AZURE_OPENAI_API_KEY}}"
+      "value": "${{AZURE_OPENAI_API_KEY}}"
     },
     "azureOpenAIEndpoint": {
       "value": "${{AZURE_OPENAI_ENDPOINT}}"
