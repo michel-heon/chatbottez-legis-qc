@@ -1,4 +1,4 @@
-# ADR 021: Nomenclature des Versions et Tags Git
+# ADR 008: Nomenclature des Versions et Tags Git
 
 ## Statut
 

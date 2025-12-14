@@ -1,4 +1,4 @@
-# ADR-007 : Sécurité des Secrets dans l'Historique Git
+# ADR 010: Sécurité des Secrets dans l'Historique Git
 
 ## Statut
 

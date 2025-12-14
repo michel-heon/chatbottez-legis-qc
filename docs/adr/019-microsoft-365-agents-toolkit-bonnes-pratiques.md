@@ -1,4 +1,4 @@
-# ADR-019 : Microsoft 365 Agents Toolkit - Bonnes Pratiques et Gestion des Variables
+# ADR 019: Microsoft 365 Agents Toolkit - Bonnes Pratiques et Gestion des Variables
 
 ## Statut
 

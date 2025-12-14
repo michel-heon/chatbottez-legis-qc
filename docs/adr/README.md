@@ -59,6 +59,8 @@ Quelles autres options avons-nous évaluées et pourquoi les avons-nous rejetée
 | [018](./018-git-bash-vscode-premier-caractere-tronque.md) | Git Bash VSCode Premier Caractère Tronqué | ✅ Accepté | 2025-11-27 |
 | [019](./019-microsoft-365-agents-toolkit-bonnes-pratiques.md) | Microsoft 365 Agents Toolkit Bonnes Pratiques | ✅ Accepté | 2025-12-10 |
 | [020](./020-validation-guidelines-microsoft-365-copilot.md) | Guidelines de Validation Microsoft 365 Copilot | ✅ Accepté | 2025-12-12 |
+| [021](./021-nomenclature-resource-groups-azure.md) | Nomenclature Resource Groups Azure | ✅ Accepté | 2025-12-13 |
+| [022](./022-architecture-custom-engine-agent.md) | Architecture Custom Engine Agent Microsoft 365 Copilot | ✅ Accepté | 2025-12-14 |
 
 ## Résumé des décisions clés
 
@@ -166,4 +168,4 @@ Pour questions sur les ADR ou propositions de nouvelles décisions architectural
 
 ---
 
-*Dernière mise à jour : 2025-12-12*
+*Dernière mise à jour : 2025-12-14*

@@ -1,4 +1,4 @@
-# ADR 019: Déploiement avec Microsoft 365 Agents Toolkit CLI
+# ADR 007: Déploiement avec Microsoft 365 Agents Toolkit CLI
 
 ## Statut
 

@@ -1,4 +1,4 @@
-# ADR 003: Création Manuelle du Service Principal Azure AD pour Teams Agent
+# ADR 002: Création Manuelle du Service Principal Azure AD pour Teams Agent
 
 ## Statut
 

@@ -1,4 +1,4 @@
-# ADR 018: Bonnes Pratiques pour Instructions d'Agent Microsoft 365
+# ADR 006: Bonnes Pratiques pour Instructions d'Agent Microsoft 365
 
 ## Statut
 

@@ -1,4 +1,4 @@
-# ADR 017: Message de Bienvenue avec Adaptive Card et Disclaimer IA
+# ADR 014: Message de Bienvenue avec Adaptive Card et Disclaimer IA
 
 ## Statut
 

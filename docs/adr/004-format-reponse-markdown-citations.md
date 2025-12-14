@@ -1,4 +1,4 @@
-# ADR 003: Format de Réponse Markdown avec Citations Inline
+# ADR 004: Format de Réponse Markdown avec Citations Inline
 
 ## Statut
 

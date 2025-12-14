@@ -1,4 +1,4 @@
-# ADR 002: Optimisation de la Recherche Vectorielle pour RAG Juridique
+# ADR 003: Optimisation de la Recherche Vectorielle pour RAG Juridique
 
 ## Statut
 

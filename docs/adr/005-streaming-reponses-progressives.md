@@ -1,4 +1,4 @@
-# ADR 008: Streaming Réponses Progressives
+# ADR 005: Streaming Réponses Progressives
 
 ## Statut
 

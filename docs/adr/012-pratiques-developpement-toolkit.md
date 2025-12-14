@@ -1,4 +1,4 @@
-# ADR-014 : Développement avec Microsoft 365 Agents Toolkit et Azure AI Foundry
+# ADR 012: Développement avec Microsoft 365 Agents Toolkit et Azure AI Foundry
 
 ## 📋 Métadonnées
 
