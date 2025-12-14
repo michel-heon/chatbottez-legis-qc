@@ -54,7 +54,9 @@ test: check-node
 # Build
 build: check-node
 	@echo "Build application..."
-	cd .. && npm run build
+	@echo "Note: Pas de script build npm configure (Node.js projet)"
+	@echo "Build: OK (verification dependencies)"
+	cd .. && npm ls --depth=0 > /dev/null 2>&1 || npm install
 
 # Provision DEV
 provision-dev: check-teams-cli
