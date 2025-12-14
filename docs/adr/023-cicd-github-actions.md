@@ -40,86 +40,202 @@ Le projet **Légis Québec Custom Engine Agent** utilise actuellement un process
 
 ## Décision
 
-Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Québec avec l'architecture suivante :
+Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Québec avec une **architecture Makefile-oriented** :
 
-### Architecture CI/CD
+### Principe directeur : Make comme orchestrateur central
+
+**Philosophie** : Le `Makefile` devient l'interface unique pour toutes les opérations de déploiement, que ce soit en développement local ou dans GitHub Actions.
+
+**Avantages clés** :
+- 🔄 **Portabilité** : Les mêmes commandes fonctionnent localement et en CI/CD
+- 🧪 **Testabilité** : Les développeurs peuvent tester les déploiements avant de pousser
+- 📖 **Documentation vivante** : Le Makefile documente toutes les opérations disponibles
+- 🎯 **Simplicité** : GitHub Actions devient un wrapper minimal autour de Make
+- 🛠️ **Maintenabilité** : Logique centralisée dans Makefile, pas dispersée dans YAML
+- 🚀 **Minimaliste** : Pas de couleurs, pas de "flala", focus sur fonctionnalité
+
+### Architecture CI/CD (Makefile-oriented)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    GitHub Repository                              │
 │  michel-heon/chatbottez-legis-qc                                 │
+│                                                                   │
+│  ├── deployment/         (⭐ Structure CI/CD)                    │
+│  │   ├── Makefile       (Orchestrateur central)                 │
+│  │   └── README.md      (Documentation)                         │
+│  ├── .github/workflows/ (Wrappers Makefile)                     │
+│  │   ├── ci-tests.yml   → make test                            │
+│  │   ├── deploy-dev.yml → make deploy-dev                      │
+│  │   └── deploy-prod.yml→ make deploy-prod                     │
+│  ├── src/               (Code application)                      │
+│  ├── infra/             (Bicep templates)                       │
+│  └── env/               (Variables environnement)               │
 └───────────────┬─────────────────────────────────────────────────┘
                 │
                 │ Triggers (Push, PR, Tag)
                 │
                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    GitHub Actions Workflows                       │
+│                    GitHub Actions (Thin Wrappers)                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌──────────────────┐  ┌──────────────────┐  ┌───────────────┐ │
 │  │  ci-tests.yml    │  │ deploy-dev.yml   │  │deploy-prod.yml│ │
 │  │                  │  │                  │  │               │ │
 │  │ Trigger: PR      │  │ Trigger: Push    │  │ Trigger: Tag  │ │
-│  │ Jobs:            │  │         dev      │  │         v*    │ │
-│  │  - Lint          │  │ Jobs:            │  │ Jobs:         │ │
-│  │  - Build         │  │  - Deploy DEV    │  │  - Approval   │ │
-│  │  - Unit tests    │  │  - Smoke tests   │  │  - Deploy     │ │
-│  │  - Integration   │  │  - Notify        │  │  - Smoke      │ │
-│  │  - Coverage      │  │                  │  │  - Rollback?  │ │
+│  │ Steps:           │  │         dev      │  │         v*    │ │
+│  │  - Checkout      │  │ Steps:           │  │ Steps:        │ │
+│  │  - Setup Node    │  │  - Checkout      │  │  - Approval   │ │
+│  │  - Azure Login   │  │  - Setup Node    │  │  - Checkout   │ │
+│  │  - make test ⭐  │  │  - Azure Login   │  │  - Setup Node │ │
+│  │  - make build ⭐ │  │  - make deploy ⭐│  │  - Azure Login│ │
+│  │                  │  │  - make validate │  │  - make deploy│ │
 │  └──────────────────┘  └──────────────────┘  └───────────────┘ │
 │                                                                   │
 └───────────────┬───────────────────┬───────────────┬─────────────┘
                 │                   │               │
                 ▼                   ▼               ▼
 ┌────────────────────┐  ┌──────────────────┐  ┌─────────────────┐
-│   GitHub Secrets   │  │  GitHub          │  │   Azure         │
-│                    │  │  Environments    │  │   Resources     │
-│ - AZURE_CREDS      │  │                  │  │                 │
-│ - AZURE_SUB_ID     │  │  - dev (auto)    │  │ - DEV (rg-*-dev)│
-│ - OPENAI_KEY       │  │  - prod (manual) │  │ - PROD(rg-*-prd)│
+│   Makefile Targets │  │  GitHub          │  │   Azure         │
+│   (deployment/)    │  │  Environments    │  │   Resources     │
+│                    │  │                  │  │                 │
+│ - help             │  │  - dev (auto)    │  │ - DEV (rg-*-dev)│
+│ - test             │  │  - prod (manual) │  │ - PROD(rg-*-prd)│
+│ - build            │  │                  │  │                 │
+│ - provision-dev    │  │  GitHub Secrets  │  │                 │
+│ - deploy-dev       │  │  - AZURE_CREDS   │  │                 │
+│ - provision-prod   │  │  - AZURE_SUB_ID  │  │                 │
+│ - deploy-prod      │  │  - OPENAI_KEY    │  │                 │
+│ - validate         │  │  - SEARCH_KEY    │  │                 │
 │ - SEARCH_KEY       │  │                  │  │                 │
 └────────────────────┘  └──────────────────┘  └─────────────────┘
 ```
 
-### Workflows définis
+### Structure deployment/
+
+```
+deployment/
+├── Makefile              # Orchestrateur principal (⭐ cœur du système)
+└── README.md             # Documentation targets + exemples usage
+```
+
+**Exemple Makefile** (minimaliste):
+```makefile
+.PHONY: help test build provision-dev deploy-dev provision-prod deploy-prod validate
+
+help:
+	@echo "Targets disponibles:"
+	@echo "  test           - Executer tests npm"
+	@echo "  build          - Build application"
+	@echo "  provision-dev  - Provisionner ressources Azure DEV"
+	@echo "  deploy-dev     - Deployer vers Azure DEV"
+	@echo "  provision-prod - Provisionner ressources Azure PROD"
+	@echo "  deploy-prod    - Deployer vers Azure PROD"
+	@echo "  validate       - Tests smoke post-deploiement"
+
+test:
+	npm test
+
+build:
+	npm run build
+
+provision-dev:
+	teamsapp provision --env dev
+
+deploy-dev: build
+	teamsapp deploy --env dev
+
+provision-prod:
+	teamsapp provision --env prod
+
+deploy-prod: build
+	teamsapp deploy --env prod
+
+validate:
+	@echo "Validation deploiement..."
+	# Tests smoke basiques ici
+```
+
+**Principes** :
+- ✅ Minimaliste : pas de couleurs, pas de "flala"
+- ✅ Target `help` par défaut
+- ✅ Variables d'environnement pour configuration
+- ✅ Messages clairs en cas d'erreur
+- ✅ Portabilité : même commandes local/CI
+
+### Workflows GitHub Actions (Makefile wrappers)
 
 #### 1. **ci-tests.yml** - Tests automatiques sur PR
 
 **Trigger** : Pull Request vers `dev` ou `main`
 
-**Jobs** :
-1. **lint** : ESLint + Prettier
-2. **build** : `npm run build` sans erreurs
-3. **unit-tests** : Tests unitaires avec Jest
-4. **integration-tests** : Tests d'intégration (RAG, commands, moderation)
-5. **coverage** : Rapport coverage (objectif > 70%)
-6. **comment-pr** : Commentaire automatique avec résultats
+**Workflow** :
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: make -C deployment test
+      - run: make -C deployment build
+```
 
-**Critères succès** : Tous les jobs passent ✅
+**Avantage** : Dev peut tester localement avec `make test` avant de pousser.
+
+**Durée estimée** : 3-5 minutes
 
 #### 2. **deploy-dev.yml** - Déploiement automatique DEV
 
 **Trigger** : Push sur branche `dev`
 
-**Jobs** :
-1. **deploy-azure-dev** : Teams Toolkit provision + deploy → Azure DEV
-2. **smoke-tests** : Tests basiques (bot répond, RAG fonctionne)
-3. **notify-success** : Notification succès (Slack/Teams)
-4. **notify-failure** : Notification échec avec logs
+**Workflow** :
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - run: npm ci
+      - run: make -C deployment deploy-dev
+      - run: make -C deployment validate
+```
+
+**Avantage** : Dev peut tester `make deploy-dev` localement avant CI/CD.
 
 **Environnement** : `rg-bot-legisqc-dev-cae-01` (Canada East)
 
 #### 3. **deploy-prod.yml** - Déploiement production avec approbation
 
-**Trigger** : Tag `v*` (ex: v4.0.0) OU Push sur `main`
+**Trigger** : Tag `v*` (ex: v4.0.0)
 
-**Jobs** :
-1. **manual-approval** : Approbation manuelle requise (reviewers GitHub)
-2. **deploy-azure-prod** : Teams Toolkit provision + deploy → Azure PROD
-3. **smoke-tests-prod** : 9 tests production (Issue #28)
-4. **rollback-on-failure** : Rollback automatique si tests échouent
-5. **notify-team** : Notification équipe (succès/échec)
+**Workflow** :
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod  # ← Requiert approbation manuelle
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - run: npm ci
+      - run: make -C deployment deploy-prod
+      - run: make -C deployment validate
+```
+
+**Avantage** : Même commande `make deploy-prod` local et CI/CD.
 
 **Environnement** : `rg-bot-legisqc-prd-cae-01` (Canada East)
 
@@ -158,7 +274,7 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
 - ✅ Require status checks pass (ci-tests.yml)
 - ❌ No PR required (pour rapidité développement)
 
-### Workflow développeur
+### Workflow développeur (Makefile-oriented)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -174,18 +290,26 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
     │  local          │
     └────────┬────────┘
              │
-             │ 2. Commit + Push
+             │ 2. Tester localement (⭐ Makefile)
+             │    make -C deployment test
+             │    make -C deployment build
+             │
+             ▼
+    ┌─────────────────┐
+    │  Tests passent  │  ✅ Validation locale avant PR
+    │  localement     │
+    └────────┬────────┘
+             │
+             │ 3. Commit + Push
              │    git push origin michel-heon/feature-xyz
              │
              ▼
     ┌─────────────────┐
     │  Créer PR       │  ◄── Trigger: ci-tests.yml
-    │  vers dev       │      ├── Lint ✅
-    └────────┬────────┘      ├── Build ✅
-             │                ├── Tests ✅
-             │                └── Coverage ✅
+    │  vers dev       │      └── make test ✅
+    └────────┬────────┘      └── make build ✅
              │
-             │ 3. Review + Approve (si tests ✅)
+             │ 4. Review + Approve (si tests ✅)
              │
              ▼
     ┌─────────────────┐
@@ -193,15 +317,17 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
     │  vers dev       │
     └────────┬────────┘
              │
-             │ 4. Auto-trigger: deploy-dev.yml
+             │ 5. Auto-trigger: deploy-dev.yml
+             │    └── make deploy-dev ⭐
              │
              ▼
     ┌─────────────────┐
     │  Azure DEV      │  ◄── Déploiement automatique
-    │  (rg-*-dev)     │      └── Tests smoke ✅
+    │  (rg-*-dev)     │      └── make validate ✅
     └────────┬────────┘
              │
-             │ 5. Tests manuels DEV OK
+             │ 6. Tests manuels DEV OK
+             │    (Option: tester make deploy-dev localement)
              │
              ▼
     ┌─────────────────┐
@@ -209,15 +335,14 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
     │  vers main      │  ◄── Require approval + ci-tests ✅
     └────────┬────────┘
              │
-             │ 6. Créer tag v4.0.0
+             │ 7. Créer tag v4.0.0
              │
              ▼
     ┌─────────────────┐
     │  Tag trigger    │  ◄── Trigger: deploy-prod.yml
     │  deploy-prod    │      ├── Manual approval required ⏸️
-    └────────┬────────┘      ├── Deploy PROD ✅
-             │                ├── Tests smoke ✅
-             │                └── Notify team 📧
+    └────────┬────────┘      ├── make deploy-prod ⭐
+             │                └── make validate ✅
              │
              ▼
     ┌─────────────────┐
@@ -225,6 +350,12 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
     │  (rg-*-prd)     │  ◄── Production ready 🚀
     └─────────────────┘
 ```
+
+**Note** : Avec approche Makefile, développeur peut:
+- Tester `make test` avant de créer PR
+- Tester `make deploy-dev` localement avant de pousser
+- Déboguer problèmes déploiement sans CI/CD
+- Même commandes local et CI/CD = portabilité maximale
 
 ## Alternatives considérées
 
@@ -369,34 +500,55 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
 
 ## Implémentation
 
-### Phase 1 : Documentation et setup (0.5 jour)
+### Phase 1 : Structure Makefile-oriented (✅ Complété)
 
 1. **Créer ADR-023** : Ce document ✅
-2. **Créer guide** : `docs/guides/deployment/ci-cd-setup.md`
-3. **Service Principal Azure** : Créer SP avec permissions déploiement
-4. **GitHub Secrets** : Configurer 7 secrets requis
-5. **GitHub Environments** : Créer `dev` et `prod`
+2. **Créer deployment/** : Répertoire orchestration ✅
+3. **Créer Makefile** : Orchestrateur central ✅
+4. **deployment/README.md** : Documentation targets ✅
+5. **Test make help** : Validation locale ✅
 
-### Phase 2 : Workflows CI/CD (1 jour)
+**Durée** : 2 heures
 
-1. **ci-tests.yml** : Tests automatiques PR (2 heures)
-2. **deploy-dev.yml** : Déploiement auto DEV (2 heures)
-3. **deploy-prod.yml** : Déploiement manuel PROD (3 heures)
-4. **Branch protections** : Configurer rules (30 min)
+### Phase 2 : Workflows GitHub Actions (✅ Complété)
 
-### Phase 3 : Tests et validation (0.5 jour)
+1. **ci-tests.yml** : Wrapper `make test` + `make build` ✅
+2. **deploy-dev.yml** : Wrapper `make deploy-dev` ✅
+3. **deploy-prod.yml** : Wrapper `make deploy-prod` ✅
 
-1. **Test ci-tests** : Créer PR test, vérifier exécution
-2. **Test deploy-dev** : Push dev, vérifier déploiement Azure
-3. **Test deploy-prod** : Tag release, vérifier approbation + déploiement
-4. **Documentation** : README badges, troubleshooting
+**Durée** : 1 heure
 
-### Phase 4 : Déploiement et monitoring (continu)
+### Phase 3 : Configuration GitHub (À faire)
 
-1. **Activer workflows** : Enable pour toute l'équipe
-2. **Formation équipe** : Session onboarding workflows
-3. **Monitoring** : Dashboard usage, alertes échecs
-4. **Optimisation** : Amélioration continue workflows
+1. **Service Principal Azure** : Créer SP avec permissions déploiement
+2. **GitHub Secrets** : Configurer secrets requis
+   - `AZURE_CREDENTIALS`
+   - `AZURE_SUBSCRIPTION_ID`
+   - `AZURE_OPENAI_API_KEY`
+   - `AZURE_OPENAI_ENDPOINT`
+   - `AZURE_SEARCH_KEY`
+   - `AZURE_SEARCH_ENDPOINT`
+3. **GitHub Environments** : Créer `dev` (auto) et `prod` (manual approval)
+4. **Branch protections** : Configurer rules sur `dev` et `main`
+
+**Durée** : 30 minutes
+
+### Phase 4 : Tests et validation (À faire)
+
+1. **Test local** : `make test` sur machine dev
+2. **Test ci-tests** : Créer PR test, vérifier workflow
+3. **Test deploy-dev** : Push dev, vérifier déploiement Azure
+4. **Test deploy-prod** : Tag release, vérifier approbation + déploiement
+
+**Durée** : 1 heure
+
+### Phase 5 : Documentation et formation (À faire)
+
+1. **README badges** : Ajouter badges build status
+2. **Formation équipe** : Session onboarding Makefile + workflows
+3. **Monitoring** : Dashboard GitHub Actions usage
+
+**Durée** : 30 minutes
 
 ## Métriques de succès
 

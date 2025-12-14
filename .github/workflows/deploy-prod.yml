@@ -1,0 +1,38 @@
+name: Deploy PROD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod  # Require manual approval
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Install Teams Toolkit CLI
+      run: npm install -g @microsoft/teamsfx-cli
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Deploy to PROD
+      run: make -C deployment deploy-prod
+    
+    - name: Validate deployment
+      run: make -C deployment validate

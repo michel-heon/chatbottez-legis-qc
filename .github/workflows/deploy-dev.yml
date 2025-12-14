@@ -1,0 +1,37 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Install Teams Toolkit CLI
+      run: npm install -g @microsoft/teamsfx-cli
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Deploy to DEV
+      run: make -C deployment deploy-dev
+    
+    - name: Validate deployment
+      run: make -C deployment validate
