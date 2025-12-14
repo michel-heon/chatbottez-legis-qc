@@ -112,12 +112,12 @@ Ce document présente l'architecture globale du système **Légis Québec**, un 
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │ │
 │  │  │   Agent     │  │   Activity  │  │    Commands         │ │ │
 │  │  │   Core      │◄─┤   Handler   │◄─┤    Processor        │ │ │
-│  │  │             │  │             │  │  • codes            │ │ │
-│  │  │  - Turn     │  │  - onMessage│  │  • lois             │ │ │
-│  │  │  - State    │  │  - onCreate │  │  • règlements       │ │ │
-│  │  │  - Prompt   │  │  - onUpdate │  │  • jugements        │ │ │
-│  │  └─────────────┘  └─────────────┘  │  • ressources       │ │ │
-│  │                                     │  • stats            │ │ │
+│  │  │  │             │  │             │  │  • droitsTravail    │ │ │
+│  │  │  │  - Turn     │  │  - onMessage│  │  • protecConso      │ │ │
+│  │  │  │  - State    │  │  - onCreate │  │  • donneesPerso     │ │ │
+│  │  │  │  - Prompt   │  │  - onUpdate │  │  • miseEnDemeure    │ │ │
+│  │  └─────────────┘  └─────────────┘  │  • contesterDec     │ │ │
+│  │                                     │  • deposerPlainte   │ │ │
 │  │                                     └─────────────────────┘ │ │
 │  └──────────────────────────────────────────────────────────────┘ │
 │                                                                    │
@@ -352,42 +352,59 @@ Ce document présente l'architecture globale du système **Légis Québec**, un 
 ### Flux 3 : Commande Spécialisée
 
 ```
-┌──────┐  1. Commande        ┌──────────┐
-│      │───"codes ccq"───────►│  Teams / │
-│ User │◄──6. Liste──────────│  Copilot │
-└──────┘   codes civils      └────┬─────┘
-                                   │
-                              2. Activity
-                                   │
-                                   ▼
-                          ┌────────────────┐
-                          │  Custom Engine │
-                          │  Agent         │
-                          └────────┬───────┘
-                                   │
-                          3. Detect command
-                                   │
-                                   ▼
-                          ┌────────────────┐
-                          │  Legal         │
-                          │  Commands      │
-                          │  Processor     │
-                          └────────┬───────┘
-                                   │
-                  ┌────────────────┼────────────────┐
-                  │                │                │
-             4. RAG          4. RAG           4. RAG
-              "codes"        "civil"         "Québec"
-                  │                │                │
-                  └────────────────┼────────────────┘
-                                   │
-                          5. Aggregate & Format
-                                   │
-                                   ▼
-                          ┌────────────────┐
-                          │  Azure OpenAI  │
-                          │  (synthesis)   │
-                          └────────────────┘
+┌──────┐  1. Commande                       ┌──────────┐
+│      │───"Mes droits au travail"──────────►│  Teams / │
+│ User │◄──7. Réponse contextualisée────────│  Copilot │
+└──────┘   avec welcome message             └────┬─────┘
+                                                  │
+                                            2. Activity
+                                                  │
+                                                  ▼
+                                         ┌────────────────┐
+                                         │  Custom Engine │
+                                         │  Agent         │
+                                         └────────┬───────┘
+                                                  │
+                                         3. Detect command
+                                            (pattern match)
+                                                  │
+                                                  ▼
+                                         ┌────────────────┐
+                                         │  legalCommands │
+                                         │  .js           │
+                                         │                │
+                                         │ detectLegal    │
+                                         │ Command()      │
+                                         └────────┬───────┘
+                                                  │
+                                         4. Match pattern
+                                            "droits travail"
+                                                  │
+                                                  ▼
+                                         ┌────────────────┐
+                                         │  handleDroits  │
+                                         │  Travail()     │
+                                         └────────┬───────┘
+                                                  │
+                                         5. Enhanced
+                                            instructions +
+                                            welcome message
+                                                  │
+                                                  ▼
+                                         ┌────────────────┐
+                                         │  Agent with    │
+                                         │  specialized   │
+                                         │  context       │
+                                         └────────┬───────┘
+                                                  │
+                                         6. Generate with
+                                            legal context
+                                                  │
+                                                  ▼
+                                         ┌────────────────┐
+                                         │  Azure OpenAI  │
+                                         │  + RAG         │
+                                         └────────────────┘
 ```
 
 ## Caractéristiques Système
