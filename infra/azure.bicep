@@ -12,6 +12,24 @@ param azureOpenAIEndpoint string
 @secure()
 param azureOpenAIDeploymentName string
 
+@secure()
+param azureOpenAIEmbeddingDeploymentName string
+
+@secure()
+param azureSearchKey string
+
+@secure()
+param azureSearchEndpoint string
+
+@secure()
+param azureSearchIndexName string
+
+param azureSearchStrictness string = '1'
+
+param azureSearchRetrievedDocuments string = '20'
+
+param azureSearchLimitToDataContent string = 'true'
+
 param webAppSKU string
 
 @maxLength(42)
@@ -79,6 +97,34 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: 'AZURE_OPENAI_DEPLOYMENT_NAME'
           value: azureOpenAIDeploymentName
+        }
+        {
+          name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME'
+          value: azureOpenAIEmbeddingDeploymentName
+        }
+        {
+          name: 'AZURE_SEARCH_KEY'
+          value: azureSearchKey
+        }
+        {
+          name: 'AZURE_SEARCH_ENDPOINT'
+          value: azureSearchEndpoint
+        }
+        {
+          name: 'AZURE_SEARCH_INDEX_NAME'
+          value: azureSearchIndexName
+        }
+        {
+          name: 'AZURE_SEARCH_STRICTNESS'
+          value: azureSearchStrictness
+        }
+        {
+          name: 'AZURE_SEARCH_RETRIEVED_DOCUMENTS'
+          value: azureSearchRetrievedDocuments
+        }
+        {
+          name: 'AZURE_SEARCH_LIMIT_TO_DATA_CONTENT'
+          value: azureSearchLimitToDataContent
         }
       ]
       ftpsState: 'FtpsOnly'

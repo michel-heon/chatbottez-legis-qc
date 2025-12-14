@@ -14,6 +14,27 @@
     "azureOpenAIDeploymentName": {
       "value": "${{AZURE_OPENAI_DEPLOYMENT_NAME}}"
     },
+    "azureOpenAIEmbeddingDeploymentName": {
+      "value": "${{AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}}"
+    },
+    "azureSearchKey": {
+      "value": "${{AZURE_SEARCH_KEY}}"
+    },
+    "azureSearchEndpoint": {
+      "value": "${{AZURE_SEARCH_ENDPOINT}}"
+    },
+    "azureSearchIndexName": {
+      "value": "${{AZURE_SEARCH_INDEX_NAME}}"
+    },
+    "azureSearchStrictness": {
+      "value": "${{AZURE_SEARCH_STRICTNESS}}"
+    },
+    "azureSearchRetrievedDocuments": {
+      "value": "${{AZURE_SEARCH_RETRIEVED_DOCUMENTS}}"
+    },
+    "azureSearchLimitToDataContent": {
+      "value": "${{AZURE_SEARCH_LIMIT_TO_DATA_CONTENT}}"
+    },
     "webAppSKU": {
       "value": "B1"
     },
