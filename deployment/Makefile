@@ -84,12 +84,13 @@ build: check-node
 deploy-dev:
 	@echo "Deploiement code vers Azure DEV..."
 	@echo "Chargement configuration DEV..."
-	@set -a && . ../env/.env.dev && set +a && \
-	echo "Deploiement vers $$AZURE_WEB_APP_NAME..." && \
+	@set -a; . ../env/.env.dev; set +a; \
+	WEB_APP_NAME=$$(echo $$BOT_DOMAIN | cut -d'.' -f1); \
+	echo "Deploiement vers $$WEB_APP_NAME..."; \
 	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
 	az webapp deployment source config-zip \
 		--resource-group $$AZURE_RESOURCE_GROUP_NAME \
-		--name $$AZURE_WEB_APP_NAME \
+		--name $$WEB_APP_NAME \
 		--src deploy.zip && \
 	rm deploy.zip
 	@echo "Deploiement DEV termine"
@@ -98,12 +99,13 @@ deploy-dev:
 deploy-prod:
 	@echo "Deploiement code vers Azure PROD..."
 	@echo "Chargement configuration PROD..."
-	@set -a && . ../env/.env.prod && set +a && \
-	echo "Deploiement vers $$AZURE_WEB_APP_NAME..." && \
+	@set -a; . ../env/.env.prod; set +a; \
+	WEB_APP_NAME=$$(echo $$BOT_DOMAIN | cut -d'.' -f1); \
+	echo "Deploiement vers $$WEB_APP_NAME..."; \
 	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
 	az webapp deployment source config-zip \
 		--resource-group $$AZURE_RESOURCE_GROUP_NAME \
-		--name $$AZURE_WEB_APP_NAME \
+		--name $$WEB_APP_NAME \
 		--src deploy.zip && \
 	rm deploy.zip
 	@echo "Deploiement PROD termine"
