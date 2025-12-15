@@ -77,13 +77,17 @@ if [[ "$TYPE" == "rc" ]]; then
                 # Ajouter le fichier au commit
                 git add "$ENV_FILE"
                 
-                # Commiter la modification
-                git commit -m "chore: Synchroniser TEAMS_APP_RC_VERSION avec $TAG_NAME"
-                echo "✅ Changement committé"
-                
-                # Push le commit
-                git push origin "$CURRENT_BRANCH"
-                echo "✅ Changement poussé vers GitHub"
+                # Commiter la modification seulement si il y a des changements
+                if git diff --cached --quiet; then
+                    echo "ℹ️  Aucun changement à committer (déjà à jour)"
+                else
+                    git commit -m "chore: Synchroniser TEAMS_APP_RC_VERSION avec $TAG_NAME"
+                    echo "✅ Changement committé"
+                    
+                    # Push le commit
+                    git push origin "$CURRENT_BRANCH"
+                    echo "✅ Changement poussé vers GitHub"
+                fi
             else
                 echo "⚠️  Échec de la mise à jour de TEAMS_APP_RC_VERSION"
             fi
