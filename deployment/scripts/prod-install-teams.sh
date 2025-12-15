@@ -20,18 +20,18 @@ echo ""
 # Etape 2: Creation package Teams
 echo "📦 Etape 2: Creation package Teams..."
 powershell.exe -Command "\
-    Remove-Item -Path 'appPackage.prod.zip' -ErrorAction SilentlyContinue; \
+    Remove-Item -Path 'appPackage/build/appPackage.prod.zip' -ErrorAction SilentlyContinue; \
     Copy-Item 'appPackage/build/manifest.prod.json' 'appPackage/manifest.json' -Force; \
     Compress-Archive -Path 'appPackage/manifest.json','appPackage/color.png','appPackage/outline.png' \
-        -DestinationPath 'appPackage.prod.zip' -Force; \
-    Write-Host '✅ Package créé: appPackage.prod.zip'"
+        -DestinationPath 'appPackage/build/appPackage.prod.zip' -Force; \
+    Write-Host '✅ Package créé: appPackage/build/appPackage.prod.zip'"
 echo ""
 
 # Etape 3: Upload vers Teams
 echo "📤 Etape 3: Upload vers Teams (avec teamsapp CLI)..."
 if command -v teamsapp >/dev/null 2>&1 || command -v atk >/dev/null 2>&1; then
     echo "   Installation/mise à jour de l'app Teams..."
-    teamsapp install --file-path appPackage.prod.zip || atk install --file-path appPackage.prod.zip
+    teamsapp install --file-path appPackage/build/appPackage.prod.zip || atk install --file-path appPackage/build/appPackage.prod.zip
 else
     echo "   ⚠️  Teams Toolkit CLI (teamsapp/atk) non installé"
     echo "   📋 Installez: npm install -g @microsoft/m365agentstoolkit-cli"
