@@ -231,17 +231,15 @@ prod-install-teams:
 			-DestinationPath '../appPackage.prod.zip' -Force; \
 		Write-Host '✅ Package cree: appPackage.prod.zip'"
 	@echo ""
-	@echo "📤 Etape 3: Upload vers Teams (avec M365 CLI)..."
+	@echo "📤 Etape 3: Upload vers Teams (avec teamsapp CLI)..."
 	@cd .. && \
-		TEAMS_APP_ID=$$(grep '^TEAMS_APP_ID=' env/.env.prod | cut -d'=' -f2) && \
-		if command -v m365 >/dev/null 2>&1; then \
-			echo "   Utilisation m365 CLI pour mettre a jour l'app..."; \
-			m365 teams app update --id $$TEAMS_APP_ID --filePath appPackage.prod.zip; \
+		if command -v teamsapp >/dev/null 2>&1 || command -v atk >/dev/null 2>&1; then \
+			echo "   Installation/mise a jour de l'app Teams..."; \
+			teamsapp install --file-path appPackage.prod.zip || atk install --file-path appPackage.prod.zip; \
 		else \
-			echo "   ⚠️  m365 CLI non installe"; \
-			echo "   📋 Installez: npm install -g @pnp/cli-microsoft365"; \
-			echo "   OU uploadez manuellement appPackage.prod.zip vers:"; \
-			echo "   https://admin.teams.microsoft.com/policies/manage-apps"; \
+			echo "   ⚠️  Teams Toolkit CLI (teamsapp/atk) non installe"; \
+			echo "   📋 Installez: npm install -g @microsoft/m365agentstoolkit-cli"; \
+			echo "   OU uploadez manuellement appPackage.prod.zip vers Teams"; \
 		fi
 	@echo ""
 	@echo "Teams App ID: $(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)"
