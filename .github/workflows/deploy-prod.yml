@@ -49,6 +49,14 @@ jobs:
         AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     
+    - name: Update Teams App manifest
+      run: |
+        cd appPackage
+        teamsapp update --env prod --manifest-path build/manifest.prod.json
+      env:
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    
     - name: Deployment summary
       run: |
         echo "✅ Code déployé vers Azure PROD"
