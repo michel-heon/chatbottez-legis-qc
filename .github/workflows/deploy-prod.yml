@@ -40,8 +40,20 @@ jobs:
         AZURE_SEARCH_KEY=${{ secrets.AZURE_SEARCH_KEY }}
         EOF
     
-    - name: Provision Teams App (rebuild manifest)
-      run: teamsapp provision --env prod
+    - name: Rebuild Teams App manifest
+      run: |
+        # Rebuild manifest with updated env variables
+        if command -v atk >/dev/null 2>&1; then
+          atk provision --env prod --action executeDriver --driver manifest/create
+        else
+          # Fallback: manually substitute variables in manifest
+          cd appPackage
+          mkdir -p build
+          envsubst < manifest.json > build/manifest.prod.json
+        fi
+      env:
+        TEAMS_APP_VERSION: 4.0.6
+        APP_NAME_SUFFIX: ""
     
     - name: Deploy code to PROD
       run: make -C deployment deploy-prod
