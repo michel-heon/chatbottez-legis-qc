@@ -11,9 +11,11 @@ Ce répertoire contient les scripts bash appelés par le Makefile pour orchestre
 
 ## Scripts disponibles
 
-### configure-github.sh
+### github-configure.sh
 
 Configure automatiquement GitHub CI/CD (secrets, environments, branch protections).
+
+**Nomenclature** : ADR-017 (`{object}-{action}.sh`)
 
 **Usage** :
 ```bash
@@ -21,7 +23,7 @@ Configure automatiquement GitHub CI/CD (secrets, environments, branch protection
 make github-configure-auto
 
 # Direct
-./scripts/configure-github.sh [repo]
+./scripts/github-configure.sh [repo]
 ```
 
 **Prérequis** :
@@ -51,11 +53,14 @@ Pour ajouter un nouveau script :
 
 ## Structure recommandée d'un script
 
+Respecter ADR-017 : Format `{object}-{action}.sh`
+
 ```bash
 #!/usr/bin/env bash
-# Script: mon-script.sh
+# Script: object-action.sh
 # Description: Ce que fait le script
-# Usage: ./mon-script.sh <args>
+# Usage: ./object-action.sh <args>
+# Nomenclature: ADR-017 (object-action.sh)
 
 set -e  # Arrêter sur erreur
 

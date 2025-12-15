@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Script: configure-github.sh
+# Script: github-configure.sh
 # Description: Configure GitHub CI/CD (secrets, environments, branch protections)
-# Usage: ./configure-github.sh <repo>
+# Usage: ./github-configure.sh <repo>
+# Nomenclature: ADR-017 (object-action.sh)
 
 set -e
 

@@ -138,7 +138,7 @@ github-setup: check-az-cli
 
 # Configuration GitHub automatique (via GitHub CLI)
 github-configure-auto: check-gh-cli check-az-cli
-	@bash scripts/configure-github.sh $(REPO)
+	@bash scripts/github-configure.sh $(REPO)
 
 # Verifier secrets GitHub configures (via API GitHub)
 github-check-secrets: check-gh-cli
