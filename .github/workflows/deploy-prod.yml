@@ -26,6 +26,11 @@ jobs:
     - name: Install Teams Toolkit CLI
       run: npm install -g @microsoft/teamsfx-cli
     
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
     - name: Create .env.prod.user with secrets
       run: |
         cat > env/.env.prod.user << EOF
