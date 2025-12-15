@@ -2,75 +2,34 @@
 
 Guide de configuration des GitHub Secrets, Environments et Branch Protections pour le CI/CD du projet Légis Québec.
 
+**Objectif** : Automatiser le déploiement du CODE uniquement depuis GitHub Actions. Les ressources Azure sont déjà provisionnées via M365 Agents Toolkit.
+
+**Workflow cible** :
+- Push vers `dev` → GitHub Actions → `teamsapp deploy --env dev`
+- Tag `v*` → GitHub Actions → Approbation manuelle → `teamsapp deploy --env prod`
+
 ## Prérequis
 
 - Accès administrateur au repository GitHub
-- Azure CLI installé et authentifié
-- Accès Azure avec permissions de création Service Principal
+- Environnements Azure DEV et PROD déjà provisionnés via M365 Agents Toolkit
+- Subscription ID et Tenant ID Azure
 
-## Phase 1 : Service Principal Azure
+## Phase 1 : Récupérer informations Azure
 
-### 1.1 Créer le Service Principal
+### 1.1 Subscription ID et Tenant ID
 
 ```bash
 # Se connecter à Azure
 az login
 
-# Créer Service Principal avec role Contributor
-az ad sp create-for-rbac \
-  --name "sp-legisqc-github-cicd" \
-  --role Contributor \
-  --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-bot-legisqc-dev-cae-01 \
-           /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-bot-legisqc-prd-cae-01 \
-  --sdk-auth
-```
-
-**Output attendu** (à copier pour GitHub Secrets):
-```json
-{
-  "clientId": "<guid>",
-  "clientSecret": "<secret>",
-  "subscriptionId": "<guid>",
-  "tenantId": "<guid>",
-  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-  "resourceManagerEndpointUrl": "https://management.azure.com/",
-  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-  "galleryEndpointUrl": "https://gallery.azure.com/",
-  "managementEndpointUrl": "https://management.core.windows.net/"
-}
-```
-
-⚠️ **IMPORTANT** : Sauvegarder ce JSON dans un endroit sécurisé.
-
-### 1.2 Récupérer les informations Azure existantes
-
-```bash
-# Subscription ID
+# Récupérer Subscription ID
 az account show --query id -o tsv
 
-# Azure OpenAI info
-az cognitiveservices account show \
-  --name openai-cotechnoe \
-  --resource-group rg-openai-cotechnoe \
-  --query "{endpoint:properties.endpoint}" -o json
-
-az cognitiveservices account keys list \
-  --name openai-cotechnoe \
-  --resource-group rg-openai-cotechnoe \
-  --query "key1" -o tsv
-
-# Azure AI Search info
-az search service show \
-  --name search-cotechnoe-ai \
-  --resource-group rg-search-cotechnoe \
-  --query "{endpoint:properties.endpoint}" -o json
-
-az search admin-key show \
-  --service-name search-cotechnoe-ai \
-  --resource-group rg-search-cotechnoe \
-  --query "primaryKey" -o tsv
+# Récupérer Tenant ID
+az account show --query tenantId -o tsv
 ```
+
+⚠️ **Note** : Ces 2 valeurs suffisent pour `teamsapp deploy`. Les ressources Azure sont déjà provisionnées via M365 Agents Toolkit.
 
 ## Phase 2 : GitHub Secrets
 
@@ -84,23 +43,17 @@ az search admin-key show \
 
 | Secret Name | Source | Description |
 |-------------|--------|-------------|
-| `AZURE_CREDENTIALS` | Output Service Principal (JSON complet) | Authentification Azure pour GitHub Actions |
 | `AZURE_SUBSCRIPTION_ID` | `az account show --query id` | ID Subscription Azure |
-| `AZURE_OPENAI_API_KEY` | `az cognitiveservices account keys list` | Clé API Azure OpenAI |
-| `AZURE_OPENAI_ENDPOINT` | Endpoint OpenAI | `https://openai-cotechnoe.openai.azure.com/` |
-| `AZURE_SEARCH_KEY` | `az search admin-key show` | Clé Azure AI Search |
-| `AZURE_SEARCH_ENDPOINT` | Endpoint Search | `https://search-cotechnoe-ai.search.windows.net` |
+| `AZURE_TENANT_ID` | `az account show --query tenantId` | ID Tenant Azure |
 
 **Pour chaque secret** :
 1. Cliquer **New repository secret**
-2. Name: `AZURE_CREDENTIALS` (par exemple)
-3. Value: Coller la valeur (JSON ou string)
+2. Name: `AZURE_SUBSCRIPTION_ID`
+3. Value: Coller le GUID
 4. Cliquer **Add secret**
+5. Répéter pour `AZURE_TENANT_ID`
 
-⚠️ **Sécurité** :
-- Ne jamais commiter ces valeurs dans Git
-- Rotation régulière des secrets (tous les 90 jours)
-- Permissions minimales sur Service Principal
+⚠️ **Simplifié** : Seulement 2 secrets requis car `teamsapp deploy` utilise les fichiers `.env` déjà configurés localement via M365 Agents Toolkit.
 
 ## Phase 3 : GitHub Environments
 
@@ -163,22 +116,15 @@ az search admin-key show \
 
 ## Phase 5 : Validation
 
-### 5.1 Vérifier configuration GitHub Secrets
+### 5.1 Vérifier configuration locale
 
 ```bash
-# Tester localement avec Azure Login
-az login
-
-# Vérifier que Service Principal fonctionne
-az login --service-principal \
-  -u <clientId> \
-  -p <clientSecret> \
-  --tenant <tenantId>
-
-az account show
+# Vérifier que teamsapp deploy fonctionne localement
+cd /path/to/chatbottez-legis-qc
+make -C deployment deploy-dev
 ```
 
-✅ Si succès → Service Principal correctement configuré
+✅ Si succès → Configuration locale OK, GitHub Actions devrait fonctionner
 
 ### 5.2 Tester workflow ci-tests.yml
 
@@ -227,14 +173,15 @@ git push origin v4.0.0-test-cicd
 
 ## Troubleshooting
 
-### Erreur: "Azure login failed"
+### Erreur: "teamsapp deploy failed"
 
-**Symptôme** : Workflow échoue à l'étape Azure Login
+**Symptôme** : Workflow échoue à l'étape deploy
 
-**Solution** :
-1. Vérifier que `AZURE_CREDENTIALS` contient JSON complet Service Principal
-2. Vérifier que Service Principal a permissions sur resource groups
-3. Tester login local avec Service Principal (voir Phase 5.1)
+**Solutions** :
+1. Vérifier que `AZURE_SUBSCRIPTION_ID` et `AZURE_TENANT_ID` sont corrects
+2. Vérifier que fichiers `.env.dev` ou `.env.prod` sont commitées dans le repo
+3. Tester `make deploy-dev` localement pour identifier le problème
+4. Vérifier logs GitHub Actions pour message d'erreur exact
 
 ### Erreur: "Environment secrets not found"
 
@@ -242,8 +189,8 @@ git push origin v4.0.0-test-cicd
 
 **Solution** :
 1. Vérifier que secrets sont créés au niveau **repository** (pas environment)
-2. Vérifier noms exacts des secrets (case-sensitive)
-3. Vérifier syntaxe dans workflow: `${{ secrets.AZURE_CREDENTIALS }}`
+2. Vérifier noms exacts: `AZURE_SUBSCRIPTION_ID` et `AZURE_TENANT_ID` (case-sensitive)
+3. Vérifier syntaxe dans workflow: `${{ secrets.AZURE_SUBSCRIPTION_ID }}`
 
 ### Erreur: "Required reviewers not set"
 
@@ -268,10 +215,11 @@ git push origin v4.0.0-test-cicd
 
 Avant de considérer configuration complète, vérifier :
 
-- [ ] Service Principal Azure créé et testé
-- [ ] 6 GitHub Secrets configurés
+- [ ] Subscription ID et Tenant ID récupérés
+- [ ] 2 GitHub Secrets configurés (`AZURE_SUBSCRIPTION_ID`, `AZURE_TENANT_ID`)
+- [ ] Fichiers `.env.dev` et `.env.prod` présents dans le repo
 - [ ] Environment `dev` créé (sans protection)
-- [ ] Environment `prod` créé (avec approbation)
+- [ ] Environment `prod` créé (avec approbation manuelle)
 - [ ] Branch protection `main` configurée
 - [ ] Branch protection `dev` configurée
 - [ ] Workflow ci-tests.yml testé avec PR ✅

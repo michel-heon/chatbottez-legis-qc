@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build provision-dev deploy-dev provision-prod deploy-prod validate clean
+.PHONY: help test build deploy-dev deploy-prod validate clean
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -14,20 +14,20 @@ TEAMS_CLI := $(shell which teamsapp 2>/dev/null)
 help:
 	@echo "Targets disponibles:"
 	@echo ""
-	@echo "  help           - Afficher cette aide"
-	@echo "  test           - Executer tests npm"
-	@echo "  build          - Build application"
-	@echo "  provision-dev  - Provisionner ressources Azure DEV"
-	@echo "  deploy-dev     - Deployer vers Azure DEV"
-	@echo "  provision-prod - Provisionner ressources Azure PROD"
-	@echo "  deploy-prod    - Deployer vers Azure PROD"
-	@echo "  validate       - Tests smoke post-deploiement"
-	@echo "  clean          - Nettoyer build artifacts"
+	@echo "  help        - Afficher cette aide"
+	@echo "  test        - Executer tests npm"
+	@echo "  build       - Verifier dependencies"
+	@echo "  deploy-dev  - Deployer code vers Azure DEV"
+	@echo "  deploy-prod - Deployer code vers Azure PROD"
+	@echo "  validate    - Tests smoke post-deploiement"
+	@echo "  clean       - Nettoyer build artifacts"
+	@echo ""
+	@echo "Note: Provisionnement Azure deja fait via M365 Agents Toolkit"
 	@echo ""
 	@echo "Exemples:"
 	@echo "  make test                # Lancer tests localement"
-	@echo "  make deploy-dev          # Deployer vers DEV"
-	@echo "  make deploy-prod         # Deployer vers PROD"
+	@echo "  make deploy-dev          # Deployer code vers DEV"
+	@echo "  make deploy-prod         # Deployer code vers PROD"
 
 # Verifier Node.js installe
 check-node:
@@ -53,41 +53,31 @@ test: check-node
 
 # Build
 build: check-node
-	@echo "Build application..."
-	@echo "Note: Pas de script build npm configure (Node.js projet)"
-	@echo "Build: OK (verification dependencies)"
+	@echo "Verification dependencies..."
 	cd .. && npm ls --depth=0 > /dev/null 2>&1 || npm install
-
-# Provision DEV
-provision-dev: check-teams-cli
-	@echo "Provisionnement ressources Azure DEV..."
-	cd .. && teamsapp provision --env dev
+	@echo "Dependencies: OK"
 
 # Deploy DEV
-deploy-dev: check-teams-cli build
-	@echo "Deploiement vers Azure DEV..."
+deploy-dev: check-teams-cli
+	@echo "Deploiement code vers Azure DEV..."
 	cd .. && teamsapp deploy --env dev
 	@echo "Deploiement DEV termine"
 
-# Provision PROD
-provision-prod: check-teams-cli
-	@echo "Provisionnement ressources Azure PROD..."
-	cd .. && teamsapp provision --env prod
-
 # Deploy PROD
-deploy-prod: check-teams-cli build
-	@echo "Deploiement vers Azure PROD..."
+deploy-prod: check-teams-cli
+	@echo "Deploiement code vers Azure PROD..."
 	cd .. && teamsapp deploy --env prod
 	@echo "Deploiement PROD termine"
 
 # Validation post-deploiement
 validate:
 	@echo "Validation deploiement..."
-	@echo "Tests smoke basiques:"
-	@echo "  - Bot accessible: OK (verification manuelle requise)"
-	@echo "  - RAG fonctionne: OK (verification manuelle requise)"
+	@echo "Verification bot accessible (requiert test manuel):"
+	@echo "  - Ouvrir Teams"
+	@echo "  - Tester commande: 'Bonjour'"
+	@echo "  - Tester commande: '/droitsTravail'"
 	@echo ""
-	@echo "Pour tests complets, voir: docs/guides/deployment/production-deployment.md"
+	@echo "Pour tests complets: docs/guides/deployment/production-deployment.md"
 
 # Nettoyage
 clean:

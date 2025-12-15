@@ -19,19 +19,20 @@ jobs:
         node-version: '18'
         cache: 'npm'
     
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Install dependencies
+      run: npm ci
     
     - name: Install Teams Toolkit CLI
       run: npm install -g @microsoft/teamsfx-cli
     
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Deploy to DEV
+    - name: Deploy code to DEV
       run: make -C deployment deploy-dev
+      env:
+        # Variables d'environnement pour teamsapp deploy
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     
-    - name: Validate deployment
-      run: make -C deployment validate
+    - name: Deployment summary
+      run: |
+        echo "✅ Code déployé vers Azure DEV"
+        echo "🔗 Tester dans Teams (environnement DEV)"

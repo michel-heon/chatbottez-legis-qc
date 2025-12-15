@@ -51,33 +51,31 @@ Exécute les tests npm. Utilisez cette commande avant de créer une PR pour vér
 make build
 ```
 
-Build l'application. Vérifie que le code compile sans erreurs.
+Vérifie les dépendances npm.
 
 ### Déploiement DEV
 
 ```bash
-# 1. Provisionner ressources Azure DEV (première fois)
-make provision-dev
-
-# 2. Déployer vers DEV
+# Déployer code vers DEV
 make deploy-dev
 
-# 3. Valider déploiement
+# Valider déploiement
 make validate
 ```
+
+**Note** : Les ressources Azure DEV sont déjà provisionnées via M365 Agents Toolkit. Cette commande déploie uniquement le code.
 
 ### Déploiement PROD
 
 ```bash
-# 1. Provisionner ressources Azure PROD (première fois)
-make provision-prod
-
-# 2. Déployer vers PROD
+# Déployer code vers PROD
 make deploy-prod
 
-# 3. Valider déploiement
+# Valider déploiement
 make validate
 ```
+
+**Note** : Les ressources Azure PROD sont déjà provisionnées via M365 Agents Toolkit. Cette commande déploie uniquement le code.
 
 ## Usage local (développeur)
 
