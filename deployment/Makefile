@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg
+.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg prod-install-teams
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -31,8 +31,9 @@ help:
 	@echo "  github-check-secrets  - Verifier secrets GitHub configures"
 	@echo ""
 	@echo "Production:"
-	@echo "  prod-create-rg   - Creer resource group PROD dans Azure"
-	@echo "  prod-provision   - Provisionner environnement PROD (Issue #28)"
+	@echo "  prod-create-rg      - Creer resource group PROD dans Azure"
+	@echo "  prod-provision      - Provisionner environnement PROD (Issue #28)"
+	@echo "  prod-install-teams  - Ouvrir lien installation bot Teams PROD"
 	@echo ""
 	@echo "Note: Playground/Local/Dev deja provisionnes via M365 Agents Toolkit"
 	@echo ""
@@ -160,6 +161,23 @@ prod-create-rg: check-az-cli
 # Provisionner environnement PROD
 prod-provision: check-teams-cli prod-create-rg
 	@bash scripts/prod-provision.sh
+
+# Ouvrir lien installation Teams PROD
+prod-install-teams:
+	@echo "=========================================="
+	@echo "Installation Bot Teams PROD"
+	@echo "=========================================="
+	@echo ""
+	@echo "Teams App ID: $(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)"
+	@echo "Bot Domain: $(shell grep '^BOT_DOMAIN=' ../env/.env.prod | cut -d'=' -f2)"
+	@echo ""
+	@echo "Lien d'installation:"
+	@echo "https://teams.microsoft.com/l/app/$(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)?installAppPackage=true"
+	@echo ""
+	@echo "Ouverture du navigateur..."
+	@powershell.exe -Command "Start-Process 'https://teams.microsoft.com/l/app/$(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)?installAppPackage=true'"
+	@echo ""
+	@echo "Si le navigateur ne s'ouvre pas, copiez le lien ci-dessus"
 
 # Verifier GitHub CLI installe
 check-gh-cli:

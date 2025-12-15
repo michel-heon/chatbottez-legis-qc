@@ -189,6 +189,43 @@ Tapez `help` pour voir toutes les commandes disponibles.
 
 Voir [Guide de déploiement](docs/guides/deployment/production-deployment.md) pour PROD.
 
+### Déployer en PROD - Séquence Complète
+
+Pour une mise en production complète, exécuter les commandes suivantes depuis le répertoire `deployment/`:
+
+```bash
+# 1. Configuration GitHub CI/CD (une seule fois)
+make github-configure-auto    # Configure secrets, environments, branch protections
+
+# 2. Créer Resource Group PROD dans Azure
+make prod-create-rg          # Crée rg-bot-legisqc-prd-cae-01
+
+# 3. Provisionner environnement PROD (Bot Service, App Service, Teams App)
+make prod-provision          # ~5-10 minutes
+
+# 4. Déployer le code vers Azure PROD
+make deploy-prod             # Upload zip package
+
+# 5. Installer le bot dans Teams
+make prod-install-teams      # Ouvre le lien d'installation
+
+# 6. Vérifier le déploiement
+make validate                # Tests manuels recommandés
+```
+
+**Prérequis avant déploiement PROD:**
+- Azure CLI connecté: `az login`
+- GitHub CLI connecté: `gh auth login`
+- Teams Toolkit CLI installé: `npm install -g @microsoft/teamsfx-cli`
+- Fichiers `.env.prod` et `.env.prod.user` configurés
+
+**Résultat:**
+- Resource Group: `rg-bot-legisqc-prd-cae-01`
+- Bot Service: bot[suffix].azurewebsites.net
+- Teams App installable via lien direct
+
+Voir [ADR-023](docs/adr/023-cicd-github-actions.md) pour détails complets CI/CD.
+
 ## Tests
 
 Le projet inclut des tests exhaustifs:
