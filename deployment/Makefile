@@ -84,7 +84,7 @@ build: check-node
 deploy-dev:
 	@echo "Deploiement code vers Azure DEV..."
 	@echo "Chargement configuration DEV..."
-	@set -a && source ../env/.env.dev && set +a && \
+	@set -a && . ../env/.env.dev && set +a && \
 	echo "Deploiement vers $$AZURE_WEB_APP_NAME..." && \
 	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
 	az webapp deployment source config-zip \
@@ -98,7 +98,7 @@ deploy-dev:
 deploy-prod:
 	@echo "Deploiement code vers Azure PROD..."
 	@echo "Chargement configuration PROD..."
-	@set -a && source ../env/.env.prod && set +a && \
+	@set -a && . ../env/.env.prod && set +a && \
 	echo "Deploiement vers $$AZURE_WEB_APP_NAME..." && \
 	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
 	az webapp deployment source config-zip \
