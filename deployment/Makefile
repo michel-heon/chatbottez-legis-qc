@@ -214,44 +214,9 @@ prod-create-rg: check-az-cli
 prod-provision: check-teams-cli prod-create-rg
 	@bash scripts/prod-provision.sh
 
-# Ouvrir lien installation Teams PROD
+# Rebuild, package et upload manifest Teams PROD
 prod-install-teams:
-	@echo "=========================================="
-	@echo "Installation Bot Teams PROD"
-	@echo "=========================================="
-	@echo ""
-	@echo "🔄 Etape 1: Rebuild manifest avec valeurs PROD..."
-	@cd .. && bash scripts/rebuild-manifest.sh
-	@echo ""
-	@echo "📦 Etape 2: Creation package Teams..."
-	@powershell.exe -Command "\
-		Remove-Item -Path '../appPackage.prod.zip' -ErrorAction SilentlyContinue; \
-		Copy-Item '../appPackage/build/manifest.prod.json' '../appPackage/manifest.json' -Force; \
-		Compress-Archive -Path '../appPackage/manifest.json','../appPackage/color.png','../appPackage/outline.png' \
-			-DestinationPath '../appPackage.prod.zip' -Force; \
-		Write-Host '✅ Package cree: appPackage.prod.zip'"
-	@echo ""
-	@echo "📤 Etape 3: Upload vers Teams (avec teamsapp CLI)..."
-	@cd .. && \
-		if command -v teamsapp >/dev/null 2>&1 || command -v atk >/dev/null 2>&1; then \
-			echo "   Installation/mise a jour de l'app Teams..."; \
-			teamsapp install --file-path appPackage.prod.zip || atk install --file-path appPackage.prod.zip; \
-		else \
-			echo "   ⚠️  Teams Toolkit CLI (teamsapp/atk) non installe"; \
-			echo "   📋 Installez: npm install -g @microsoft/m365agentstoolkit-cli"; \
-			echo "   OU uploadez manuellement appPackage.prod.zip vers Teams"; \
-		fi
-	@echo ""
-	@echo "Teams App ID: $(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)"
-	@echo "Bot Domain: $(shell grep '^BOT_DOMAIN=' ../env/.env.prod | cut -d'=' -f2)"
-	@echo ""
-	@echo "🔗 Lien d'installation:"
-	@echo "https://teams.microsoft.com/l/app/$(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)?installAppPackage=true"
-	@echo ""
-	@echo "Ouverture du navigateur..."
-	@powershell.exe -Command "Start-Process 'https://teams.microsoft.com/l/app/$(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)?installAppPackage=true'"
-	@echo ""
-	@echo "Si le navigateur ne s'ouvre pas, copiez le lien ci-dessus"
+	@bash scripts/prod-install-teams.sh
 
 # Verifier GitHub CLI installe
 check-gh-cli:
