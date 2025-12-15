@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg prod-install-teams workflow-test-pr workflow-merge-pr workflow-release-rc workflow-release workflow-status workflow-logs workflow-view
+.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto github-secrets-setup prod-provision prod-create-rg prod-install-teams workflow-test-pr workflow-merge-pr workflow-release-rc workflow-release workflow-status workflow-logs workflow-view
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -26,9 +26,10 @@ help:
 	@echo "  clean            - Nettoyer build artifacts"
 	@echo ""
 	@echo "GitHub CI/CD:"
-	@echo "  github-setup     - Afficher commandes configuration GitHub"
+	@echo "  github-setup          - Afficher commandes configuration GitHub"
 	@echo "  github-configure-auto - Configurer GitHub automatiquement (gh CLI)"
 	@echo "  github-check-secrets  - Verifier secrets GitHub configures"
+	@echo "  github-secrets-setup  - Configurer secrets depuis .env.prod.user"
 	@echo ""
 	@echo "Production:"
 	@echo "  prod-create-rg      - Creer resource group PROD dans Azure"
@@ -182,6 +183,26 @@ github-configure-auto: check-gh-cli check-az-cli
 github-check-secrets: check-gh-cli
 	@echo "Verification secrets GitHub..."
 	@gh secret list -R $(REPO)
+
+# Configurer secrets GitHub depuis .env.prod.user
+github-secrets-setup: check-gh-cli
+	@echo "🔐 Configuration secrets GitHub depuis env/.env.prod.user"
+	@echo ""
+	@if [ ! -f ../env/.env.prod.user ]; then \
+		echo "❌ Erreur: Fichier ../env/.env.prod.user introuvable"; \
+		echo "   Ce fichier doit contenir les secrets a configurer"; \
+		exit 1; \
+	fi
+	@echo "📤 Envoi des secrets vers GitHub..."
+	@grep -v '^#' ../env/.env.prod.user | grep -v '^$$' | grep -v 'TEAMS_APP_UPDATE_TIME' | while IFS='=' read -r key value; do \
+		if [ -n "$$key" ] && [ -n "$$value" ]; then \
+			echo "   ⏳ $$key..."; \
+			echo "$$value" | gh secret set --repo $(REPO) "$$key" 2>/dev/null && echo "   ✅ $$key configure" || echo "   ❌ Erreur avec $$key"; \
+		fi; \
+	done
+	@echo ""
+	@echo "✅ Secrets configures!"
+	@echo "🔍 Verification: make github-check-secrets"
 
 # Creer resource group PROD dans Azure
 prod-create-rg: check-az-cli
