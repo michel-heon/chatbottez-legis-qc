@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg prod-install-teams workflow-test-pr workflow-merge-pr workflow-release-rc workflow-release workflow-status
+.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg prod-install-teams workflow-test-pr workflow-merge-pr workflow-release-rc workflow-release workflow-status workflow-logs workflow-view
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -41,6 +41,8 @@ help:
 	@echo "  workflow-release-rc - Creer tag RC (v4.0.0-rc1, declenche deploy-prod.yml)"
 	@echo "  workflow-release    - Creer tag final (v4.0.0, declenche deploy-prod.yml)"
 	@echo "  workflow-status     - Verifier statut workflows GitHub Actions"
+	@echo "  workflow-view       - Voir details d'un workflow (demande run-id)"
+	@echo "  workflow-logs       - Voir logs d'un workflow (demande run-id)"
 	@echo ""
 	@echo "Note: Playground/Local/Dev deja provisionnes via M365 Agents Toolkit"
 	@echo ""
@@ -81,13 +83,21 @@ build: check-node
 # Deploy DEV
 deploy-dev: check-teams-cli
 	@echo "Deploiement code vers Azure DEV..."
-	cd .. && atk deploy --env dev
+	@if command -v atk >/dev/null 2>&1; then \
+		cd .. && atk deploy --env dev; \
+	else \
+		cd .. && teamsapp deploy --env dev; \
+	fi
 	@echo "Deploiement DEV termine"
 
 # Deploy PROD
 deploy-prod: check-teams-cli
 	@echo "Deploiement code vers Azure PROD..."
-	cd .. && atk deploy --env prod
+	@if command -v atk >/dev/null 2>&1; then \
+		cd .. && atk deploy --env prod; \
+	else \
+		cd .. && teamsapp deploy --env prod; \
+	fi
 	@echo "Deploiement PROD termine"
 
 # Validation post-deploiement
@@ -255,5 +265,24 @@ workflow-status: check-gh-cli
 	@echo ""
 	@gh run list --repo $(REPO) --limit 10
 	@echo ""
-	@echo "Details d'un workflow: gh run view <run-id> --repo $(REPO)"
-	@echo "Logs d'un workflow: gh run view <run-id> --log --repo $(REPO)"
+	@echo "Diagnostique:"
+	@echo "  make workflow-view    - Voir details workflow"
+	@echo "  make workflow-logs    - Voir logs complets"
+
+# Voir details d'un workflow specifique
+workflow-view: check-gh-cli
+	@echo "=========================================="
+	@echo "Details workflow"
+	@echo "=========================================="
+	@echo ""
+	@read -p "Run ID (depuis workflow-status): " RUN_ID && \
+	gh run view $$RUN_ID --repo $(REPO)
+
+# Voir logs complets d'un workflow
+workflow-logs: check-gh-cli
+	@echo "=========================================="
+	@echo "Logs workflow"
+	@echo "=========================================="
+	@echo ""
+	@read -p "Run ID (depuis workflow-status): " RUN_ID && \
+	gh run view $$RUN_ID --log --repo $(REPO)
