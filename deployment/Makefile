@@ -84,7 +84,9 @@ build: check-node
 deploy-dev:
 	@echo "Deploiement code vers Azure DEV..."
 	@echo "Chargement configuration DEV..."
-	@set -a; . ../env/.env.dev; set +a; \
+	@set -a; . ../env/.env.dev; \
+	if [ -f ../env/.env.dev.user ]; then . ../env/.env.dev.user; fi; \
+	set +a; \
 	WEB_APP_NAME=$$(echo $$BOT_DOMAIN | cut -d'.' -f1); \
 	echo "Deploiement vers $$WEB_APP_NAME..."; \
 	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
@@ -99,7 +101,9 @@ deploy-dev:
 deploy-prod:
 	@echo "Deploiement code vers Azure PROD..."
 	@echo "Chargement configuration PROD..."
-	@set -a; . ../env/.env.prod; set +a; \
+	@set -a; . ../env/.env.prod; \
+	if [ -f ../env/.env.prod.user ]; then . ../env/.env.prod.user; fi; \
+	set +a; \
 	WEB_APP_NAME=$$(echo $$BOT_DOMAIN | cut -d'.' -f1); \
 	echo "Deploiement vers $$WEB_APP_NAME..."; \
 	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \

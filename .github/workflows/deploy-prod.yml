@@ -26,10 +26,18 @@ jobs:
     - name: Install Teams Toolkit CLI
       run: npm install -g @microsoft/teamsfx-cli
     
+    - name: Create .env.prod.user with secrets
+      run: |
+        cat > env/.env.prod.user << EOF
+        AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
+        AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        AZURE_OPENAI_DEPLOYMENT_NAME=${{ secrets.AZURE_OPENAI_DEPLOYMENT_NAME }}
+        AZURE_SEARCH_KEY=${{ secrets.AZURE_SEARCH_KEY }}
+        EOF
+    
     - name: Deploy code to PROD
       run: make -C deployment deploy-prod
       env:
-        # Variables d'environnement pour teamsapp deploy
         AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     
