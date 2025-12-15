@@ -45,6 +45,10 @@ help:
 	@echo "  workflow-view       - Voir details d'un workflow (demande run-id)"
 	@echo "  workflow-logs       - Voir logs d'un workflow (demande run-id)"
 	@echo ""
+	@echo "Validation:"
+	@echo "  validate-prod-package        - Valider package local appPackage.prod.zip"
+	@echo "  validate-workflow-package    - Valider package depuis dernier workflow"
+	@echo ""
 	@echo "Note: Playground/Local/Dev deja provisionnes via M365 Agents Toolkit"
 	@echo ""
 	@echo "Exemples:"
@@ -270,6 +274,27 @@ workflow-release-rc: check-gh-cli
 	@echo "=========================================="
 	@echo ""
 	@bash scripts/workflow-create-tag.sh $(REPO) rc
+	@echo ""
+	@echo "=========================================="
+	@echo "Attente fin workflow..."
+	@echo "=========================================="
+	@echo ""
+	@RUN_ID=$$(gh run list --repo $(REPO) --workflow=deploy-prod.yml --limit 1 --json databaseId --jq '.[0].databaseId'); \
+	echo "📊 Run ID: $$RUN_ID"; \
+	echo "⏳ Attente completion workflow..."; \
+	gh run watch $$RUN_ID --repo $(REPO); \
+	echo ""; \
+	echo "=========================================="; \
+	echo "Validation package workflow..."; \
+	echo "=========================================="; \
+	echo ""; \
+	bash scripts/validate-prod-package.sh workflow; \
+	echo ""; \
+	echo "=========================================="; \
+	echo "Installation package local..."; \
+	echo "=========================================="; \
+	echo ""; \
+	bash scripts/prod-install-teams.sh
 
 # Creer tag final stable (declenche workflow deploy-prod.yml avec approbation)
 workflow-release: check-gh-cli
@@ -308,3 +333,15 @@ workflow-logs: check-gh-cli
 	@echo ""
 	@read -p "Run ID (depuis workflow-status): " RUN_ID && \
 	gh run view $$RUN_ID --log --repo $(REPO)
+
+# ==========================================
+# Validation Packages
+# ==========================================
+
+# Valider package PROD local
+validate-prod-package:
+	@bash scripts/validate-prod-package.sh local
+
+# Valider package depuis dernier workflow GitHub
+validate-workflow-package: check-gh-cli
+	@bash scripts/validate-prod-package.sh workflow
