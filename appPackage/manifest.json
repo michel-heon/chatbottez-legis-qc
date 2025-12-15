@@ -1,8 +1,8 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.24/MicrosoftTeams.schema.json",
     "manifestVersion": "1.24",
-    "version": "${{TEAMS_APP_VERSION}}",
-    "id": "${{TEAMS_APP_ID}}",
+    "version": "4.0.6",
+    "id": "ef2df4e9-4f59-4ada-920d-ad07b21f2831",
     "developer": {
         "name": "Cotechnoe",
         "websiteUrl": "https://www.cotechnoe.net",
@@ -14,25 +14,25 @@
         "outline": "outline.png"
     },
     "name": {
-        "short": "Légis Québec${{APP_NAME_SUFFIX}}",
+        "short": "Légis Québec",
         "full": "Légis Québec - Assistant juridique pour les lois du Québec"
     },
     "description": {
-        "short": "Assistant juridique spécialisé dans les lois du Québec",
-        "full": "Légis Québec est un assistant juridique intelligent spécialisé dans les lois et règlements du Québec, utilisant Azure AI Search pour fournir des réponses précises basées sur la documentation officielle."
+        "short": "Agent Copilot pour les lois du Québec",
+        "full": "Légis Québec est un agent Copilot intelligent spécialisé dans les lois et règlements du Québec, utilisant Azure AI Search pour fournir des réponses précises basées sur la documentation officielle. Version: 4.0.6 (rc17)"
     },
     "accentColor": "#FFFFFF",
     "copilotAgents": {
         "customEngineAgents": [
             {
                 "type": "bot",
-                "id": "${{BOT_ID}}"
+                "id": "5b2b6b25-6231-4b5b-811e-ec9c5d353474"
             }
         ]
     },
     "bots": [
         {
-            "botId": "${{BOT_ID}}",
+            "botId": "5b2b6b25-6231-4b5b-811e-ec9c5d353474",
             "scopes": [
                 "copilot",
                 "personal",

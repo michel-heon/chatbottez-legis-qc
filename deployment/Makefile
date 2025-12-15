@@ -220,10 +220,34 @@ prod-install-teams:
 	@echo "Installation Bot Teams PROD"
 	@echo "=========================================="
 	@echo ""
+	@echo "🔄 Etape 1: Rebuild manifest avec valeurs PROD..."
+	@cd .. && bash scripts/rebuild-manifest.sh
+	@echo ""
+	@echo "📦 Etape 2: Creation package Teams..."
+	@powershell.exe -Command "\
+		Remove-Item -Path '../appPackage.prod.zip' -ErrorAction SilentlyContinue; \
+		Copy-Item '../appPackage/build/manifest.prod.json' '../appPackage/manifest.json' -Force; \
+		Compress-Archive -Path '../appPackage/manifest.json','../appPackage/color.png','../appPackage/outline.png' \
+			-DestinationPath '../appPackage.prod.zip' -Force; \
+		Write-Host '✅ Package cree: appPackage.prod.zip'"
+	@echo ""
+	@echo "📤 Etape 3: Upload vers Teams (avec M365 CLI)..."
+	@cd .. && \
+		TEAMS_APP_ID=$$(grep '^TEAMS_APP_ID=' env/.env.prod | cut -d'=' -f2) && \
+		if command -v m365 >/dev/null 2>&1; then \
+			echo "   Utilisation m365 CLI pour mettre a jour l'app..."; \
+			m365 teams app update --id $$TEAMS_APP_ID --filePath appPackage.prod.zip; \
+		else \
+			echo "   ⚠️  m365 CLI non installe"; \
+			echo "   📋 Installez: npm install -g @pnp/cli-microsoft365"; \
+			echo "   OU uploadez manuellement appPackage.prod.zip vers:"; \
+			echo "   https://admin.teams.microsoft.com/policies/manage-apps"; \
+		fi
+	@echo ""
 	@echo "Teams App ID: $(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)"
 	@echo "Bot Domain: $(shell grep '^BOT_DOMAIN=' ../env/.env.prod | cut -d'=' -f2)"
 	@echo ""
-	@echo "Lien d'installation:"
+	@echo "🔗 Lien d'installation:"
 	@echo "https://teams.microsoft.com/l/app/$(shell grep '^TEAMS_APP_ID=' ../env/.env.prod | cut -d'=' -f2)?installAppPackage=true"
 	@echo ""
 	@echo "Ouverture du navigateur..."
