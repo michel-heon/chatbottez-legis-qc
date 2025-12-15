@@ -55,6 +55,44 @@ if [[ "$TYPE" == "rc" ]]; then
         echo "❌ Version requise"
         exit 1
     fi
+    
+    # Extraire le numéro RC du tag (ex: v4.0.6-rc19 → rc19)
+    RC_VERSION=$(echo "$TAG_NAME" | grep -oP 'rc\d+')
+    if [[ -n "$RC_VERSION" ]]; then
+        echo ""
+        echo "🔄 Synchronisation TEAMS_APP_RC_VERSION avec $RC_VERSION..."
+        
+        # Chemin vers .env.prod (relatif au script)
+        ENV_FILE="../env/.env.prod"
+        
+        # Vérifier si le fichier existe
+        if [[ -f "$ENV_FILE" ]]; then
+            # Mettre à jour TEAMS_APP_RC_VERSION dans .env.prod
+            sed -i "s/^TEAMS_APP_RC_VERSION=.*/TEAMS_APP_RC_VERSION=$RC_VERSION/" "$ENV_FILE"
+            
+            # Vérifier si la modification a réussi
+            if grep -q "^TEAMS_APP_RC_VERSION=$RC_VERSION" "$ENV_FILE"; then
+                echo "✅ TEAMS_APP_RC_VERSION mis à jour: $RC_VERSION"
+                
+                # Ajouter le fichier au commit
+                git add "$ENV_FILE"
+                
+                # Commiter la modification
+                git commit -m "chore: Synchroniser TEAMS_APP_RC_VERSION avec $TAG_NAME"
+                echo "✅ Changement committé"
+                
+                # Push le commit
+                git push origin "$CURRENT_BRANCH"
+                echo "✅ Changement poussé vers GitHub"
+            else
+                echo "⚠️  Échec de la mise à jour de TEAMS_APP_RC_VERSION"
+            fi
+        else
+            echo "⚠️  Fichier $ENV_FILE introuvable"
+        fi
+        echo ""
+    fi
+    
     TAG_MESSAGE="Release Candidate $TAG_NAME
 
 Cette RC teste le déploiement automatique vers PROD via GitHub Actions.
