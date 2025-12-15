@@ -30,4 +30,4 @@ lib/
 
 # Test coverage
 coverage/
-.nyc_output/
+.nyc_output/appPackage.prod.zip
