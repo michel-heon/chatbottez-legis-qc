@@ -132,8 +132,21 @@ echo "Branche: $CURRENT_BRANCH"
 echo ""
 echo "🚀 Workflow deploy-prod.yml déclenché!"
 echo ""
-echo "🔍 Vérifier workflow:"
-echo "   https://github.com/$REPO/actions"
+
+# Attendre un peu pour que le workflow démarre
+sleep 2
+
+# Récupérer l'ID du workflow run le plus récent
+RUN_ID=$(gh run list --workflow=deploy-prod.yml --limit 1 --json databaseId --jq '.[0].databaseId')
+
+if [[ -n "$RUN_ID" ]]; then
+    echo "🔍 Vérifier workflow:"
+    echo "   https://github.com/$REPO/actions/runs/$RUN_ID"
+else
+    echo "🔍 Vérifier workflow:"
+    echo "   https://github.com/$REPO/actions"
+fi
+
 echo ""
 echo "⚠️  IMPORTANT: Approbation manuelle requise"
 echo "   1. Aller sur Actions → Deploy PROD"
