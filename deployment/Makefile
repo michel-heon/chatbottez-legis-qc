@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto
+.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -24,11 +24,16 @@ help:
 	@echo "  deploy-prod      - Deployer code vers Azure PROD"
 	@echo "  validate         - Tests smoke post-deploiement"
 	@echo "  clean            - Nettoyer build artifacts"
+	@echo ""
+	@echo "GitHub CI/CD:"
 	@echo "  github-setup     - Afficher commandes configuration GitHub"
 	@echo "  github-configure-auto - Configurer GitHub automatiquement (gh CLI)"
 	@echo "  github-check-secrets  - Verifier secrets GitHub configures"
 	@echo ""
-	@echo "Note: Provisionnement Azure deja fait via M365 Agents Toolkit"
+	@echo "Production:"
+	@echo "  prod-provision   - Provisionner environnement PROD (Issue #28)"
+	@echo ""
+	@echo "Note: Playground/Local/Dev deja provisionnes via M365 Agents Toolkit"
 	@echo ""
 	@echo "Exemples:"
 	@echo "  make test                # Lancer tests localement"
@@ -144,6 +149,10 @@ github-configure-auto: check-gh-cli check-az-cli
 github-check-secrets: check-gh-cli
 	@echo "Verification secrets GitHub..."
 	@gh secret list -R $(REPO)
+
+# Provisionner environnement PROD
+prod-provision: check-teams-cli
+	@bash scripts/prod-provision.sh
 
 # Verifier GitHub CLI installe
 check-gh-cli:

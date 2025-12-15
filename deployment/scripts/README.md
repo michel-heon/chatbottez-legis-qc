@@ -41,6 +41,37 @@ make github-configure-auto
 - Affiche progression avec ✓ ou ✗ pour chaque étape
 - Liste finale des secrets et environments configurés
 
+### prod-provision.sh
+
+Provisionne l'environnement PROD via Teams Toolkit CLI.
+
+**Nomenclature** : ADR-017 (`{object}-{action}.sh`)
+
+**Usage** :
+```bash
+# Via Makefile (recommandé)
+make prod-provision
+
+# Direct
+./scripts/prod-provision.sh
+```
+
+**Prérequis** :
+- Teams Toolkit CLI (`teamsapp`) installé
+- Azure CLI authentifié (`az login`)
+
+**Actions** :
+1. Vérifie présence de `teamsapp` CLI
+2. Demande confirmation utilisateur
+3. Exécute `teamsapp provision --env prod`
+4. Génère valeurs dans `env/.env.prod`
+
+**Sortie** :
+- Affiche progression du provisionnement
+- Indique les prochaines étapes (commit, test)
+
+**Note** : Prend 5-10 minutes pour créer les ressources Azure.
+
 ## Ajout de nouveaux scripts
 
 Pour ajouter un nouveau script :
