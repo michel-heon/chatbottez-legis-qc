@@ -42,18 +42,23 @@ jobs:
     
     - name: Rebuild Teams App manifest
       run: |
+        # Load environment variables from .env.prod
+        set -a
+        source env/.env.prod
+        set +a
+        
         # Rebuild manifest with updated env variables
-        if command -v atk >/dev/null 2>&1; then
-          atk provision --env prod --action executeDriver --driver manifest/create
-        else
-          # Fallback: manually substitute variables in manifest
-          cd appPackage
-          mkdir -p build
-          envsubst < manifest.json > build/manifest.prod.json
-        fi
-      env:
-        TEAMS_APP_VERSION: 4.0.6
-        APP_NAME_SUFFIX: ""
+        cd appPackage
+        mkdir -p build
+        
+        # Substitute ${{VAR}} with values using sed
+        sed -e "s/\${{TEAMS_APP_VERSION}}/${TEAMS_APP_VERSION}/g" \
+            -e "s/\${{APP_NAME_SUFFIX}}/${APP_NAME_SUFFIX}/g" \
+            -e "s/\${{TEAMS_APP_ID}}/${TEAMS_APP_ID}/g" \
+            -e "s/\${{BOT_ID}}/${BOT_ID}/g" \
+            manifest.json > build/manifest.prod.json
+        
+        echo "✅ Manifest rebuilt with version ${TEAMS_APP_VERSION}"
     
     - name: Deploy code to PROD
       run: make -C deployment deploy-prod
