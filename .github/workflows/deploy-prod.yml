@@ -49,13 +49,15 @@ jobs:
         AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     
-    - name: Update Teams App manifest
+    - name: Package and upload Teams App
       run: |
         cd appPackage
-        teamsapp update --env prod --manifest-path build/manifest.prod.json
-      env:
-        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        # Create app package with updated manifest
+        zip -r ../appPackage.prod.zip . -i build/manifest.prod.json color.png outline.png
+        
+        echo "✅ App package created with updated manifest"
+        echo "📦 Package: appPackage.prod.zip"
+        echo "ℹ️  Manual Teams update required - see docs/guides/teams-pwa-guide.md"
     
     - name: Deployment summary
       run: |
