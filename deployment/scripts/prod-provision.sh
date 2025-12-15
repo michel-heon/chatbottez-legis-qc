@@ -52,7 +52,7 @@ echo "Cela peut prendre 5-10 minutes..."
 echo "Répertoire: $PROJECT_ROOT"
 echo ""
 
-teamsapp provision --env prod
+atk provision --env prod
 
 echo ""
 echo "=========================================="

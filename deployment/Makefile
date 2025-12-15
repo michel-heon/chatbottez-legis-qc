@@ -73,13 +73,13 @@ build: check-node
 # Deploy DEV
 deploy-dev: check-teams-cli
 	@echo "Deploiement code vers Azure DEV..."
-	cd .. && teamsapp deploy --env dev
+	cd .. && atk deploy --env dev
 	@echo "Deploiement DEV termine"
 
 # Deploy PROD
 deploy-prod: check-teams-cli
 	@echo "Deploiement code vers Azure PROD..."
-	cd .. && teamsapp deploy --env prod
+	cd .. && atk deploy --env prod
 	@echo "Deploiement PROD termine"
 
 # Validation post-deploiement
