@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg prod-install-teams
+.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg prod-install-teams workflow-test-pr workflow-merge-pr workflow-release-rc workflow-release workflow-status
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -34,6 +34,13 @@ help:
 	@echo "  prod-create-rg      - Creer resource group PROD dans Azure"
 	@echo "  prod-provision      - Provisionner environnement PROD (Issue #28)"
 	@echo "  prod-install-teams  - Ouvrir lien installation bot Teams PROD"
+	@echo ""
+	@echo "Workflow CI/CD:"
+	@echo "  workflow-test-pr    - Creer PR de test vers dev (declenche ci-tests.yml)"
+	@echo "  workflow-merge-pr   - Merger PR (declenche deploy-dev.yml)"
+	@echo "  workflow-release-rc - Creer tag RC (v4.0.0-rc1, declenche deploy-prod.yml)"
+	@echo "  workflow-release    - Creer tag final (v4.0.0, declenche deploy-prod.yml)"
+	@echo "  workflow-status     - Verifier statut workflows GitHub Actions"
 	@echo ""
 	@echo "Note: Playground/Local/Dev deja provisionnes via M365 Agents Toolkit"
 	@echo ""
@@ -196,3 +203,57 @@ ifndef AZ_CLI
 	@exit 1
 endif
 	@echo "Azure CLI: OK"
+
+# ==========================================
+# Workflow CI/CD - Orchestration Git/GitHub
+# ==========================================
+
+# Creer PR de test vers dev (declenche workflow ci-tests.yml)
+workflow-test-pr: check-gh-cli
+	@echo "=========================================="
+	@echo "Creation PR de test vers dev"
+	@echo "=========================================="
+	@echo ""
+	@bash scripts/workflow-create-pr.sh $(REPO)
+
+# Merger PR (declenche workflow deploy-dev.yml)
+workflow-merge-pr: check-gh-cli
+	@echo "=========================================="
+	@echo "Merge PR vers dev"
+	@echo "=========================================="
+	@echo ""
+	@read -p "Numero de PR a merger: " PR_NUMBER && \
+	gh pr merge $$PR_NUMBER --repo $(REPO) --merge --delete-branch && \
+	echo "" && \
+	echo "✓ PR #$$PR_NUMBER mergee" && \
+	echo "✓ Branche supprimee" && \
+	echo "✓ Workflow deploy-dev.yml declenche automatiquement" && \
+	echo "" && \
+	echo "Verifier: make workflow-status"
+
+# Creer tag Release Candidate (declenche workflow deploy-prod.yml avec approbation)
+workflow-release-rc: check-gh-cli
+	@echo "=========================================="
+	@echo "Creation tag Release Candidate"
+	@echo "=========================================="
+	@echo ""
+	@bash scripts/workflow-create-tag.sh $(REPO) rc
+
+# Creer tag final stable (declenche workflow deploy-prod.yml avec approbation)
+workflow-release: check-gh-cli
+	@echo "=========================================="
+	@echo "Creation tag release final"
+	@echo "=========================================="
+	@echo ""
+	@bash scripts/workflow-create-tag.sh $(REPO) final
+
+# Verifier statut des workflows GitHub Actions
+workflow-status: check-gh-cli
+	@echo "=========================================="
+	@echo "Statut workflows GitHub Actions"
+	@echo "=========================================="
+	@echo ""
+	@gh run list --repo $(REPO) --limit 10
+	@echo ""
+	@echo "Details d'un workflow: gh run view <run-id> --repo $(REPO)"
+	@echo "Logs d'un workflow: gh run view <run-id> --log --repo $(REPO)"
