@@ -9,13 +9,17 @@ set -euo pipefail
 MODE="${1:-local}"
 REPO="michel-heon/chatbottez-legis-qc"
 
+# Déterminer le répertoire racine du projet
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$PROJECT_ROOT"
+
 echo "=========================================="
 echo "Validation Package Teams PROD"
 echo "=========================================="
 echo ""
 
 # Charger les versions attendues depuis .env.prod
-cd ..
 EXPECTED_VERSION=$(grep '^TEAMS_APP_VERSION=' env/.env.prod | cut -d'=' -f2)
 EXPECTED_RC=$(grep '^TEAMS_APP_RC_VERSION=' env/.env.prod | cut -d'=' -f2)
 EXPECTED_FULL_VERSION="${EXPECTED_VERSION} (${EXPECTED_RC})"

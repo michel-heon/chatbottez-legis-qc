@@ -25,7 +25,9 @@ else
 fi
 
 # Substitute ${{VAR}} with actual values using sed
-sed -e "s/\${{TEAMS_APP_VERSION}}/${FULL_VERSION}/g" \
+# IMPORTANT: Version JSON doit être SIMPLE (4.0.7), description peut avoir RC (4.0.7 (rc2))
+sed -e "s/\${{TEAMS_APP_VERSION}}/${TEAMS_APP_VERSION}/g" \
+    -e "s/\${{FULL_VERSION}}/${FULL_VERSION}/g" \
     -e "s/\${{APP_NAME_SUFFIX}}/${APP_NAME_SUFFIX}/g" \
     -e "s/\${{TEAMS_APP_ID}}/${TEAMS_APP_ID}/g" \
     -e "s/\${{BOT_ID}}/${BOT_ID}/g" \
