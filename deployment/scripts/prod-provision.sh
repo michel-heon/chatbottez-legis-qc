@@ -21,10 +21,16 @@ fi
 echo "✓ Teams Toolkit CLI: OK"
 echo ""
 
+# Naviguer vers la racine du projet
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+cd "$PROJECT_ROOT"
+
 # Vérifier que nous sommes dans le bon répertoire
-if [ ! -f "../m365agents.yml" ]; then
+if [ ! -f "m365agents.yml" ]; then
     echo "❌ ERREUR: m365agents.yml non trouvé"
-    echo "Exécutez ce script depuis deployment/scripts/"
+    echo "Impossible de trouver la racine du projet"
     exit 1
 fi
 
@@ -43,9 +49,9 @@ fi
 echo ""
 echo "Démarrage provisionnement PROD..."
 echo "Cela peut prendre 5-10 minutes..."
+echo "Répertoire: $PROJECT_ROOT"
 echo ""
 
-cd ../..
 teamsapp provision --env prod
 
 echo ""

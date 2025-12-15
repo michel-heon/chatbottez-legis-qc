@@ -2,7 +2,7 @@
 # Usage: make <target>
 # Principes: minimaliste, portable, testable
 
-.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision
+.PHONY: help test build deploy-dev deploy-prod validate clean github-setup github-check-secrets github-configure-auto prod-provision prod-create-rg
 
 # Target par defaut
 .DEFAULT_GOAL := help
@@ -31,6 +31,7 @@ help:
 	@echo "  github-check-secrets  - Verifier secrets GitHub configures"
 	@echo ""
 	@echo "Production:"
+	@echo "  prod-create-rg   - Creer resource group PROD dans Azure"
 	@echo "  prod-provision   - Provisionner environnement PROD (Issue #28)"
 	@echo ""
 	@echo "Note: Playground/Local/Dev deja provisionnes via M365 Agents Toolkit"
@@ -150,8 +151,14 @@ github-check-secrets: check-gh-cli
 	@echo "Verification secrets GitHub..."
 	@gh secret list -R $(REPO)
 
+# Creer resource group PROD dans Azure
+prod-create-rg: check-az-cli
+	@echo "Creation resource group PROD..."
+	@az group create --name rg-bot-legisqc-prd-cae-01 --location canadaeast --output table
+	@echo "✓ Resource group cree"
+
 # Provisionner environnement PROD
-prod-provision: check-teams-cli
+prod-provision: check-teams-cli prod-create-rg
 	@bash scripts/prod-provision.sh
 
 # Verifier GitHub CLI installe
