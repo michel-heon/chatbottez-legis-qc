@@ -43,6 +43,19 @@ jobs:
     - name: Rebuild Teams App manifest
       run: bash scripts/rebuild-manifest.sh
     
+    - name: Verify manifest content
+      run: |
+        echo "=========================================="
+        echo "📋 MANIFEST PROD CONTENT (for debugging)"
+        echo "=========================================="
+        cat appPackage/build/manifest.prod.json | head -30
+        echo ""
+        echo "=========================================="
+        echo "🔍 Key values:"
+        grep '"version"' appPackage/build/manifest.prod.json
+        grep '"short"' appPackage/build/manifest.prod.json
+        echo "=========================================="
+    
     - name: Deploy code to PROD
       run: make -C deployment deploy-prod
       env:
