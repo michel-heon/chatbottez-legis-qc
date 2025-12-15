@@ -51,11 +51,12 @@ jobs:
         cd appPackage
         mkdir -p build
         
-        # Substitute ${{VAR}} with values using sed (escape braces for GitHub Actions)
-        sed -e 's/\${{TEAMS_APP_VERSION}}/'"${TEAMS_APP_VERSION}"'/g' \
-            -e 's/\${{APP_NAME_SUFFIX}}/'"${APP_NAME_SUFFIX}"'/g' \
-            -e 's/\${{TEAMS_APP_ID}}/'"${TEAMS_APP_ID}"'/g' \
-            -e 's/\${{BOT_ID}}/'"${BOT_ID}"'/g' \
+        # Use bash variable to avoid GitHub Actions interpreting ${{
+        DOLLAR='$'
+        sed -e "s/${DOLLAR}{{TEAMS_APP_VERSION}}/${TEAMS_APP_VERSION}/g" \
+            -e "s/${DOLLAR}{{APP_NAME_SUFFIX}}/${APP_NAME_SUFFIX}/g" \
+            -e "s/${DOLLAR}{{TEAMS_APP_ID}}/${TEAMS_APP_ID}/g" \
+            -e "s/${DOLLAR}{{BOT_ID}}/${BOT_ID}/g" \
             manifest.json > build/manifest.prod.json
         
         echo "✅ Manifest rebuilt with version ${TEAMS_APP_VERSION}"
