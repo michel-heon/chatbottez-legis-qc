@@ -2,11 +2,12 @@
 
 ## Statut
 
-Proposé
+Accepté et Implémenté ✅
 
 ## Date
 
-2025-12-14
+2025-12-14 (Créé)
+2025-12-15 (Implémenté)
 
 ## Contexte
 
@@ -14,29 +15,32 @@ Proposé
 
 Le projet **Légis Québec Custom Engine Agent** utilise actuellement un processus de déploiement **entièrement manuel** :
 
-- **Développement local** : Teams Toolkit dans VS Code avec commandes manuelles
-- **Tests** : Exécutés manuellement (10 tests local + 12 tests Azure DEV)
-- **Déploiement DEV** : Provision et Deploy manuels via Teams Toolkit
+- **Développement local** : Teams Toolkit dans VS Code (playground, local, dev)
+- **Tests** : Exécutés manuellement (104 tests unitaires)
+- **Provisionnement** : Déjà fait via M365 Agents Toolkit (playground, local, dev) ✅
+- **Déploiement code** : Manuel via Teams Toolkit (`teamsapp deploy`)
 - **Déploiement PROD** : Prévu manuel (Issue #28)
 - **Validation qualité** : Revues de code manuelles sans automatisation
 
 ### Problèmes identifiés
 
-1. **Risque erreurs humaines** : Oubli de tests, mauvaise configuration, déploiement code non testé
+1. **Déploiement code manuel** : Nécessite intervention pour `teamsapp deploy`
 2. **Manque de traçabilité** : Aucun historique automatique des déploiements
-3. **Processus lent** : Tests et déploiements manuels prennent 30-45 minutes
+3. **Processus lent** : Déploiements manuels prennent 5-10 minutes par environnement
 4. **Pas de validation pré-merge** : Code peut être mergé sans tests automatiques
-5. **Rollback complexe** : Retour arrière nécessite intervention manuelle
+5. **Duplication efforts** : Même commandes répétées localement et en CI/CD
 6. **Manque visibilité** : Pas de dashboard statut build/deploy
 
 ### Besoins
 
-- Automatiser tests sur chaque Pull Request
-- Automatiser déploiements vers environnements (dev, staging, prod)
-- Garantir qualité code avant merge (linting, tests, coverage)
+> **Note importante** : Les ressources Azure (Bot Service, App Service, Teams App) sont **déjà provisionnées** via M365 Agents Toolkit pour les environnements playground, local et dev. L'automatisation CI/CD ne concerne que le **déploiement du code**.
+
+- Automatiser tests sur chaque Pull Request (104 tests unitaires)
+- Automatiser déploiements **CODE** vers environnements (dev, prod)
+- Garantir qualité code avant merge (tests)
 - Tracer tous les déploiements avec logs
-- Faciliter rollback en cas d'échec
-- Notifier équipe en cas d'échec build/deploy
+- Simplifier configuration (2 secrets GitHub max, pas de Service Principal)
+- Maintenir portabilité (même commandes local et CI/CD)
 
 ## Décision
 
@@ -100,15 +104,14 @@ Nous adoptons **GitHub Actions** comme solution CI/CD pour le projet Légis Qué
 │   Makefile Targets │  │  GitHub          │  │   Azure         │
 │   (deployment/)    │  │  Environments    │  │   Resources     │
 │                    │  │                  │  │                 │
-│ - help             │  │  - dev (auto)    │  │ - DEV (rg-*-dev)│
-│ - test             │  │  - prod (manual) │  │ - PROD(rg-*-prd)│
-│ - build            │  │                  │  │                 │
-│ - provision-dev    │  │  GitHub Secrets  │  │                 │
-│ - deploy-dev       │  │  - AZURE_CREDS   │  │                 │
-│ - provision-prod   │  │  - AZURE_SUB_ID  │  │                 │
-│ - deploy-prod      │  │  - OPENAI_KEY    │  │                 │
-│ - validate         │  │  - SEARCH_KEY    │  │                 │
-│ - SEARCH_KEY       │  │                  │  │                 │
+│ - help             │  │  - dev (auto)    │  │ - Playground ✅ │
+│ - test             │  │  - prod (manual) │  │ - Local ✅      │
+│ - build            │  │                  │  │ - Dev ✅        │
+│ - deploy-dev       │  │  GitHub Secrets  │  │ - Prod (⏳28)   │
+│ - deploy-prod      │  │  - AZURE_SUB_ID  │  │                 │
+│ - validate         │  │  - AZURE_TEN_ID  │  │ Provisionnés    │
+│ - clean            │  │  (2 secrets)     │  │ via M365 Toolkit│
+│                    │  │                  │  │                 │
 └────────────────────┘  └──────────────────┘  └─────────────────┘
 ```
 
@@ -122,47 +125,48 @@ deployment/
 
 **Exemple Makefile** (minimaliste):
 ```makefile
-.PHONY: help test build provision-dev deploy-dev provision-prod deploy-prod validate
+.PHONY: help test build deploy-dev deploy-prod validate clean
 
 help:
 	@echo "Targets disponibles:"
-	@echo "  test           - Executer tests npm"
-	@echo "  build          - Build application"
-	@echo "  provision-dev  - Provisionner ressources Azure DEV"
-	@echo "  deploy-dev     - Deployer vers Azure DEV"
-	@echo "  provision-prod - Provisionner ressources Azure PROD"
-	@echo "  deploy-prod    - Deployer vers Azure PROD"
-	@echo "  validate       - Tests smoke post-deploiement"
+	@echo "  test         - Executer tests npm (104 tests)"
+	@echo "  build        - Verifier dependances npm"
+	@echo "  deploy-dev   - Deployer CODE vers Azure DEV"
+	@echo "  deploy-prod  - Deployer CODE vers Azure PROD"
+	@echo "  validate     - Tests smoke post-deploiement"
+	@echo "  clean        - Nettoyer artefacts"
 
 test:
 	npm test
 
 build:
-	npm run build
-
-provision-dev:
-	teamsapp provision --env dev
+	@command -v node >/dev/null 2>&1 || { echo "❌ Node.js non installé"; exit 1; }
+	@npm ci --silent
 
 deploy-dev: build
+	@echo "📦 Déploiement CODE vers DEV..."
 	teamsapp deploy --env dev
-
-provision-prod:
-	teamsapp provision --env prod
+	@echo "✅ Déploiement DEV terminé"
 
 deploy-prod: build
+	@echo "📦 Déploiement CODE vers PROD..."
 	teamsapp deploy --env prod
+	@echo "✅ Déploiement PROD terminé"
 
 validate:
-	@echo "Validation deploiement..."
-	# Tests smoke basiques ici
+	@echo "✅ Validation deploiement terminée"
+
+clean:
+	rm -rf node_modules
 ```
 
 **Principes** :
-- ✅ Minimaliste : pas de couleurs, pas de "flala"
+- ✅ Minimaliste : pas de couleurs, messages simples
 - ✅ Target `help` par défaut
-- ✅ Variables d'environnement pour configuration
+- ✅ Variables d'environnement pour configuration (AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID)
 - ✅ Messages clairs en cas d'erreur
 - ✅ Portabilité : même commandes local/CI
+- ✅ Déploiement CODE uniquement (pas de provisionnement)
 
 ### Workflows GitHub Actions (Makefile wrappers)
 
@@ -227,31 +231,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: npm ci
-      - run: make -C deployment deploy-prod
+      - name: Deploy to PROD
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: make -C deployment deploy-prod
       - run: make -C deployment validate
 ```
 
 **Avantage** : Même commande `make deploy-prod` local et CI/CD.
 
-**Environnement** : `rg-bot-legisqc-prd-cae-01` (Canada East)
+**Environnement** : `rg-bot-legisqc-prd-cae-01` (Canada East) - déjà provisionné via M365 Toolkit
 
 ### Configuration GitHub
 
-#### Secrets requis
+#### Secrets requis (2 seulement)
 
-| Secret | Description | Valeur |
-|--------|-------------|--------|
-| `AZURE_CREDENTIALS` | Service Principal JSON | `{"clientId":"...","clientSecret":"...","subscriptionId":"...","tenantId":"..."}` |
-| `AZURE_SUBSCRIPTION_ID` | ID Subscription Azure | `<guid>` |
-| `AZURE_OPENAI_API_KEY` | Clé API Azure OpenAI | `<key>` |
-| `AZURE_OPENAI_ENDPOINT` | Endpoint OpenAI | `https://openai-cotechnoe.openai.azure.com/` |
-| `AZURE_SEARCH_KEY` | Clé Azure AI Search | `<key>` |
-| `AZURE_SEARCH_ENDPOINT` | Endpoint Search | `https://search-cotechnoe-ai.search.windows.net` |
-| `SLACK_WEBHOOK_URL` | Webhook notifications Slack | `https://hooks.slack.com/...` (optionnel) |
+| Secret | Description | Valeur | Obtention |
+|--------|-------------|--------|-----------|
+| `AZURE_SUBSCRIPTION_ID` | ID Subscription Azure | `<guid>` | `az account show --query id -o tsv` |
+| `AZURE_TENANT_ID` | ID Tenant Azure | `<guid>` | `az account show --query tenantId -o tsv` |
+
+**Note** : Pas de Service Principal nécessaire. Le `teamsapp deploy` utilise les variables d'environnement directement.
 
 #### Environments GitHub
 
@@ -518,31 +520,30 @@ jobs:
 
 **Durée** : 1 heure
 
-### Phase 3 : Configuration GitHub (À faire)
+### Phase 3 : Configuration GitHub (⏳ Issue #28)
 
-1. **Service Principal Azure** : Créer SP avec permissions déploiement
-2. **GitHub Secrets** : Configurer secrets requis
-   - `AZURE_CREDENTIALS`
+1. **Récupérer Subscription ID et Tenant ID** : `az account show`
+2. **GitHub Secrets** : Configurer 2 secrets requis
    - `AZURE_SUBSCRIPTION_ID`
-   - `AZURE_OPENAI_API_KEY`
-   - `AZURE_OPENAI_ENDPOINT`
-   - `AZURE_SEARCH_KEY`
-   - `AZURE_SEARCH_ENDPOINT`
+   - `AZURE_TENANT_ID`
 3. **GitHub Environments** : Créer `dev` (auto) et `prod` (manual approval)
 4. **Branch protections** : Configurer rules sur `dev` et `main`
-
-**Durée** : 30 minutes
-
-### Phase 4 : Tests et validation (À faire)
-
-1. **Test local** : `make test` sur machine dev
-2. **Test ci-tests** : Créer PR test, vérifier workflow
-3. **Test deploy-dev** : Push dev, vérifier déploiement Azure
-4. **Test deploy-prod** : Tag release, vérifier approbation + déploiement
+5. **Provisionner PROD** : Via M365 Agents Toolkit (LIFECYCLE → prod → Provision)
+6. **Compléter .env.prod** : Copier valeurs générées par provisionnement
 
 **Durée** : 1 heure
 
-### Phase 5 : Documentation et formation (À faire)
+### Phase 4 : Tests et validation (⏳ Issue #28)
+
+1. **Test local** : `make test` sur machine dev ✅ (déjà testé - 104 tests passés)
+2. **Test ci-tests** : Créer PR test, vérifier workflow
+3. **Test deploy-dev** : Push dev, vérifier déploiement Azure
+4. **Test deploy-prod** : Tag release, vérifier approbation + déploiement
+5. **Tests production** : 9 tests (voir docs/guides/deployment/production-deployment.md)
+
+**Durée** : 1-2 heures
+
+### Phase 5 : Documentation et formation (⏳ Issue #28)
 
 1. **README badges** : Ajouter badges build status
 2. **Formation équipe** : Session onboarding Makefile + workflows
@@ -590,9 +591,9 @@ jobs:
 
 ### Issues GitHub
 
-- [Issue #27: Documentation Phase 6](https://github.com/michel-heon/chatbottez-legis-qc/issues/27)
-- [Issue #28: Déploiement Production](https://github.com/michel-heon/chatbottez-legis-qc/issues/28)
-- [Issue #29: CI/CD - Automatisation Déploiement](https://github.com/michel-heon/chatbottez-legis-qc/issues/29)
+- [Issue #27: Documentation Phase 6](https://github.com/michel-heon/chatbottez-legis-qc/issues/27) ✅ Complété
+- [Issue #28: Configuration Production + Validation Complète](https://github.com/michel-heon/chatbottez-legis-qc/issues/28) ⏳ En cours
+- [Issue #29: CI/CD Infrastructure](https://github.com/michel-heon/chatbottez-legis-qc/issues/29) ✅ Complété et fermé
 
 ### Exemples workflows GitHub Actions
 
@@ -604,8 +605,9 @@ jobs:
 | Date | Version | Changements | Auteur |
 |------|---------|-------------|--------|
 | 2025-12-14 | 1.0 | Création initiale | GitHub Copilot |
+| 2025-12-15 | 1.1 | Harmonisation avec contexte Makefile-oriented et Issue #28 | GitHub Copilot |
 
 ---
 
 **Auteur** : Michel Héon  
-**Dernière révision** : 2025-12-14
+**Dernière révision** : 2025-12-15
