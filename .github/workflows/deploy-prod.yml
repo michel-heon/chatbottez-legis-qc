@@ -40,6 +40,9 @@ jobs:
         AZURE_SEARCH_KEY=${{ secrets.AZURE_SEARCH_KEY }}
         EOF
     
+    - name: Provision Teams App (rebuild manifest)
+      run: teamsapp provision --env prod
+    
     - name: Deploy code to PROD
       run: make -C deployment deploy-prod
       env:
