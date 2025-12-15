@@ -81,23 +81,31 @@ build: check-node
 	@echo "Dependencies: OK"
 
 # Deploy DEV
-deploy-dev: check-teams-cli
+deploy-dev:
 	@echo "Deploiement code vers Azure DEV..."
-	@if command -v atk >/dev/null 2>&1; then \
-		cd .. && atk deploy --env dev; \
-	else \
-		cd .. && teamsapp deploy --env dev; \
-	fi
+	@echo "Chargement configuration DEV..."
+	@set -a && source ../env/.env.dev && set +a && \
+	echo "Deploiement vers $$AZURE_WEB_APP_NAME..." && \
+	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
+	az webapp deployment source config-zip \
+		--resource-group $$AZURE_RESOURCE_GROUP_NAME \
+		--name $$AZURE_WEB_APP_NAME \
+		--src deploy.zip && \
+	rm deploy.zip
 	@echo "Deploiement DEV termine"
 
 # Deploy PROD
-deploy-prod: check-teams-cli
+deploy-prod:
 	@echo "Deploiement code vers Azure PROD..."
-	@if command -v atk >/dev/null 2>&1; then \
-		cd .. && atk deploy --env prod; \
-	else \
-		cd .. && teamsapp deploy --env prod; \
-	fi
+	@echo "Chargement configuration PROD..."
+	@set -a && source ../env/.env.prod && set +a && \
+	echo "Deploiement vers $$AZURE_WEB_APP_NAME..." && \
+	cd .. && zip -r deploy.zip . -x "*.git*" "node_modules/*" "deployment/*" && \
+	az webapp deployment source config-zip \
+		--resource-group $$AZURE_RESOURCE_GROUP_NAME \
+		--name $$AZURE_WEB_APP_NAME \
+		--src deploy.zip && \
+	rm deploy.zip
 	@echo "Deploiement PROD termine"
 
 # Validation post-deploiement
