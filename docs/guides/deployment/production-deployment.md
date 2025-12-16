@@ -804,6 +804,41 @@ Post-Deployment:
 
 ---
 
+## 📦 Migration v3.3.0 → v4.0.0
+
+Ce guide s'applique à la version **v4.0.0 Custom Engine Agent**. Si vous upgrader depuis v3.3.0:
+
+**⚠️ Attention**: Migration complète requise (pas de chemin automatique)
+
+1. **Backup v3.3.0**
+   - Exporter configuration existante
+   - Documenter customizations
+   - Sauvegarder logs et métriques
+
+2. **Infrastructure**
+   - Resource Group nouveau (ADR-021): `rg-bot-legisqc-prd-cae-01`
+   - Nouveau Bot Service (Custom Engine Agent compatible)
+   - Manifest v1.24 avec `copilotAgents`
+
+3. **Code**
+   - Application complètement réécrite (JavaScript, ~230 lignes)
+   - SDK: `@microsoft/agents-hosting` au lieu de `@microsoft/teams.ai`
+   - RAG: OpenAI SDK direct avec `azureExtensionOptions`
+
+4. **Testing**
+   - Tests complets requis (voir Phase 5, Issue #17)
+   - Validation Local 10/10
+   - Validation Azure DEV 12/12
+   - Tests utilisateurs pilote recommandés
+
+5. **Rollback**
+   - Si problème: réactiver v3.3.0 dans ancien resource group
+   - Pas de rollback automatique v4.0.0 → v3.3.0
+
+Voir [Issue #17](https://github.com/michel-heon/chatbottez-legis-qc/issues/17) pour détails complets de la migration.
+
+---
+
 **Auteur**: Michel Héon  
-**Version**: 1.0  
-**Dernière mise à jour**: 2025-12-14
+**Version**: 2.0 (Custom Engine Agent)  
+**Dernière mise à jour**: 2025-12-16

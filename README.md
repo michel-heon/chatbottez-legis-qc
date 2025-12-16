@@ -2,6 +2,8 @@
 
 **Légis Québec** est un assistant juridique intelligent spécialisé dans les lois et règlements du Québec, développé comme **Custom Engine Agent** pour Microsoft 365 Copilot et Microsoft Teams. Il utilise Azure AI Search et Azure OpenAI pour fournir des réponses précises basées sur la documentation officielle.
 
+> ⚠️ **Migration v3.3.0 → v4.0.0**: Ce projet a migré de Teams AI Library vers Custom Engine Agent (Microsoft 365 Agents SDK). Voir [issue #17](https://github.com/michel-heon/chatbottez-legis-qc/issues/17) pour détails de la migration.
+
 ## Caractéristiques
 
 - **RAG (Retrieval-Augmented Generation)**: Réponses basées sur 20+ documents juridiques indexés
@@ -276,12 +278,45 @@ azureExtensionOptions: {
 - **[ADR-021](docs/adr/021-nomenclature-resource-groups-azure.md)**: Nomenclature Resource Groups
 - **[Guide déploiement PROD](docs/guides/deployment/production-deployment.md)**: Déploiement production
 
-## Versioning
+## Versioning et Migration
 
-- **v3.3.0**: Dernière version Teams AI Library
-- **v4.0.0**: Custom Engine Agent (version actuelle)
-  - `v4.0.0-beta.1` à `v4.0.0-beta.6`: Versions beta
-  - `v4.0.0`: Production (à venir)
+### Timeline Versions
+
+| Version | Description | Status |
+|---------|-------------|--------|
+| **v3.3.0** | Dernière version Teams AI Library | ⚠️ Deprecated |
+| **v4.0.0-alpha.1** | Template officiel Custom Engine Agent | ✅ Initial |
+| **v4.0.0-beta.1 à beta.4** | Commandes juridiques + citations + streaming | ✅ Features |
+| **v4.0.0-beta.5** | Tests Local (10/10) | ✅ Local Tests |
+| **v4.0.0-beta.6** | Tests Azure DEV (12/12) | ✅ Azure Tests |
+| **v4.0.8-alpha.1** | Template engine + FULL_VERSION | ✅ Build System |
+| **v4.0.0** | **Production finale** | ⏳ À déployer |
+
+### Migration v3.3.0 → v4.0.0
+
+La migration vers Custom Engine Agent (Issue #17) a été réalisée en 6 phases:
+
+**✅ Phase 0**: Template officiel Microsoft importé  
+**✅ Phase 1**: Configuration Azure intégrée  
+**✅ Phase 2**: RAG Implementation (Azure AI Search)  
+**✅ Phase 3**: Content Moderation + Welcome/Help messages  
+**✅ Phase 4**: Features avancées (streaming, citations, commandes)  
+**✅ Phase 5**: Tests multi-environnements (Local 10/10, Azure DEV 12/12)  
+**⏳ Phase 6**: Documentation + déploiement PROD (EN COURS)
+
+#### Breaking Changes v3.3.0 → v4.0.0
+
+| Aspect | v3.3.0 (Avant) | v4.0.0 (Après) |
+|--------|----------------|----------------|
+| **SDK** | `@microsoft/teams.ai` | `@microsoft/agents-hosting` |
+| **Langage** | TypeScript | JavaScript |
+| **Compatibilité** | Teams uniquement | Teams + M365 Copilot |
+| **Code** | ~365 lignes | ~230 lignes (-37%) |
+| **RAG** | `OpenAIChatModel` | OpenAI SDK direct |
+| **État** | `LocalStorage` | `MemoryStorage` |
+| **Manifest** | v1.16 | v1.24 (copilotAgents) |
+
+**Impact**: Application complètement réécrite. Pas de chemin de migration automatique.
 
 Voir [ADR-008](docs/adr/008-nomenclature-versions-tags.md) pour détails versioning.
 
@@ -304,6 +339,19 @@ Copyright (c) 2025 Cotechnoe. Tous droits réservés.
 
 ---
 
+## 🎉 Migration Custom Engine Agent Complète
+
+Le projet a complété avec succès la migration de Teams AI Library vers Custom Engine Agent (issue #17):
+
+- ✅ 6 phases de migration complètes
+- ✅ Tests Local (10/10) et Azure DEV (12/12) validés
+- ✅ Architecture optimisée (-37% code)
+- ✅ Compatibilité Microsoft 365 Copilot
+- ✅ Documentation complète (ADR-003, ADR-022, ADR-019, ADR-021)
+- ⏳ Déploiement PROD en préparation
+
+---
+
 **Status**: ✅ Production-Ready (DEV), ⏳ PROD à déployer  
-**Version**: 4.0.5  
-**Dernière mise à jour**: 2025-12-14
+**Version**: 4.0.0 (Custom Engine Agent)  
+**Dernière mise à jour**: 2025-12-16
