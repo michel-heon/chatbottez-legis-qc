@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Bienvenue dans Microsoft 365</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Styles de base (Outlook ignore la plupart, mais utiles pour webmail) */
+    body { margin:0; padding:0; background-color:#f4f6fb; font-family:'Segoe UI', Arial, sans-serif; color:#1f2933; }
+    table { border-collapse:collapse; }
+    a { color:#0f3b82; text-decoration:none; }
+  </style>
+</head>
+<body style="margin:0; padding:24px; background-color:#f4f6fb;">
+  <center style="width:100%; background-color:#f4f6fb;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px; margin:0 auto;">
+      <tr>
+        <td style="padding:0 12px 24px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f3b82; border-radius:12px 12px 0 0;">
+            <tr>
+              <td style="padding:28px 32px;">
+                <p style="margin:0; font-size:14px; letter-spacing:0.6px; text-transform:uppercase; color:#9fc0ff;">Bienvenue</p>
+                <h1 style="margin:6px 0 0; font-size:26px; line-height:32px; font-weight:600; color:#ffffff;">Votre accès Microsoft&nbsp;365 est prêt</h1>
+              </td>
+            </tr>
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:0 0 12px 12px; box-shadow:0 10px 32px rgba(15,59,130,0.12);">
+            <tr>
+              <td style="padding:32px 32px 12px;">
+                <p style="margin:0 0 16px; font-size:16px; line-height:24px; color:#1f2933;">Bonjour <strong style="color:#0f3b82;">{{USER_FIRST_NAME}}</strong>,</p>
+                <p style="margin:0 0 24px; font-size:16px; line-height:24px;">Votre compte <strong>{{USER_FULL_NAME}}</strong> est maintenant configuré. Utilisez les informations ci-dessous pour accéder à Microsoft&nbsp;365 et à l'application <strong>Chatbottez Légis Québec</strong> dans Microsoft Teams.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 8px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+                  <tr>
+                    <td colspan="2" style="padding:18px 24px; background-color:#f0f6ff; font-weight:600; font-size:15px; color:#0f3b82;">Informations de connexion</td>
+                  </tr>
+                  <tr>
+                    <td style="width:38%; padding:14px 24px; background-color:#f9fbfd; font-size:14px; font-weight:600; color:#3d4a5d;">Courriel professionnel</td>
+                    <td style="padding:14px 24px; font-size:14px; color:#1f2933;"><a href="mailto:{{USER_EMAIL}}" style="color:#0f3b82;">{{USER_EMAIL}}</a></td>
+                  </tr>
+                  <tr>
+                    <td style="width:38%; padding:14px 24px; background-color:#f9fbfd; font-size:14px; font-weight:600; color:#3d4a5d;">Mot de passe temporaire</td>
+                    <td style="padding:14px 24px; font-size:14px; color:#1f2933;"><span style="display:inline-block; padding:7px 12px; background-color:#eef4ff; border-radius:6px; font-family:'Segoe UI', Menlo, monospace; letter-spacing:0.6px;">{{USER_TEMP_PASSWORD}}</span></td>
+                  </tr>
+                  <tr>
+                    <td style="width:38%; padding:14px 24px; background-color:#f9fbfd; font-size:14px; font-weight:600; color:#3d4a5d;">Première connexion</td>
+                    <td style="padding:14px 24px; font-size:14px; color:#1f2933;"><a href="https://login.microsoftonline.com/?username={{USER_EMAIL}}" style="color:#0f3b82;">https://login.microsoftonline.com</a></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px 8px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:0 0 18px;">
+                      <h2 style="margin:0 0 12px; font-size:18px; color:#0f3b82;">Étapes prioritaires</h2>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding:12px 0; font-size:14px; color:#1f2933; border-bottom:1px solid #edf2f7;">
+                            <strong>1. Activez votre compte</strong><br>
+                            Visitez <a href="https://login.microsoftonline.com/?username={{USER_EMAIL}}" style="color:#0f3b82;">login.microsoftonline.com</a> et créez votre mot de passe définitif.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 0; font-size:14px; color:#1f2933; border-bottom:1px solid #edf2f7;">
+                            <strong>2. Connectez-vous à Microsoft Teams</strong><br>
+                            Ouvrez <a href="https://teams.microsoft.com?username={{USER_EMAIL}}" style="color:#0f3b82;">teams.microsoft.com</a> ou l'application de bureau, puis connectez-vous avec vos nouvelles informations.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 0; font-size:14px; color:#1f2933;">
+                            <strong>3. Épinglez Légis Québec</strong><br>
+                            Dans Teams, sélectionnez <em>Applications</em> → recherchez <strong>Légis Québec</strong> → cliquez sur <em>Ajouter</em> pour l'ajouter à votre barre latérale. Selon votre configuration Teams, l'icône peut apparaître directement dans la barre latérale ou dans le coin supérieur gauche (icône en forme de balance de justice) : épinglez-la pour l'avoir sous la main.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 32px 8px;">
+                <h2 style="margin:0 0 12px; font-size:18px; color:#0f3b82;">🔗 Accès direct aux applications Microsoft 365</h2>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+                  <tr>
+                    <td style="padding:16px 24px; background-color:#f0f6ff;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="width:50%; padding:8px 8px 8px 0;">
+                            <a href="https://teams.microsoft.com?username={{USER_EMAIL}}" style="display:block; padding:12px; background-color:#6264a7; color:white; text-decoration:none; border-radius:6px; text-align:center; font-weight:600;">
+                              💬 Microsoft Teams
+                            </a>
+                          </td>
+                          <td style="width:50%; padding:8px 0 8px 8px;">
+                            <a href="https://outlook.office.com?username={{USER_EMAIL}}" style="display:block; padding:12px; background-color:#0078d4; color:white; text-decoration:none; border-radius:6px; text-align:center; font-weight:600;">
+                              📧 Outlook
+                            </a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="width:50%; padding:8px 8px 8px 0;">
+                            <a href="https://onedrive.live.com?username={{USER_EMAIL}}" style="display:block; padding:12px; background-color:#0078d4; color:white; text-decoration:none; border-radius:6px; text-align:center; font-weight:600;">
+                              💾 OneDrive
+                            </a>
+                          </td>
+                          <td style="width:50%; padding:8px 0 8px 8px;">
+                            <a href="https://www.onenote.com?username={{USER_EMAIL}}" style="display:block; padding:12px; background-color:#7719aa; color:white; text-decoration:none; border-radius:6px; text-align:center; font-weight:600;">
+                              📝 OneNote
+                            </a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="width:50%; padding:8px 8px 0 0;">
+                            <a href="https://myaccount.microsoft.com?username={{USER_EMAIL}}" style="display:block; padding:12px; background-color:#00bcf2; color:white; text-decoration:none; border-radius:6px; text-align:center; font-weight:600;">
+                              👤 Mon Compte
+                            </a>
+                          </td>
+                          <td style="width:50%; padding:8px 0 0 8px;">
+                            <a href="https://www.office.com/apps?username={{USER_EMAIL}}" style="display:block; padding:12px; background-color:#d83b01; color:white; text-decoration:none; border-radius:6px; text-align:center; font-weight:600;">
+                              📱 Télécharger Apps
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="margin:12px 0 0; font-size:12px; color:#6b7280; text-align:center;">Cliquez pour accéder directement avec votre nom d'utilisateur pré-rempli</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 32px 24px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fbfd; border-radius:10px;">
+                  <tr>
+                    <td style="padding:18px 22px;">
+                      <h3 style="margin:0 0 12px; font-size:16px; color:#0f3b82;">Ce que vous apporte l'assistant Chatbottez Légis Québec</h3>
+                      <ul style="margin:0; padding-left:18px;">
+                        <li style="margin:0 0 10px; font-size:14px; color:#1f2933;">Recherche accélérée dans les lois et règlements québécois récents.</li>
+                        <li style="margin:0 0 10px; font-size:14px; color:#1f2933;">Synthèses contextuelles et liens directs vers les sources officielles.</li>
+                        <li style="margin:0; font-size:14px; color:#1f2933;">Support d'experts Cotechnoe pour vos démarches administratives.</li>
+                      </ul>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" align="left">
+                  <tr>
+                    <td style="background-color:#0f3b82; border-radius:8px;">
+                      <a href="https://teams.microsoft.com?username={{USER_EMAIL}}" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:600; color:#ffffff;">Ouvrir Microsoft Teams</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 32px; font-size:14px; color:#1f2933;">
+                <p style="margin:0 0 12px;">Besoin d'assistance immédiate ? Répondez à ce courriel ou écrivez à <a href="mailto:{{ADMIN_EMAIL}}" style="color:#0f3b82; font-weight:600;">{{ADMIN_EMAIL}}</a>.</p>
+                <p style="margin:0; font-size:12px; color:#6b7280;">Courriel généré automatiquement le {{CURRENT_DATE}}.<br>{{ADMIN_NAME}} · {{ADMIN_EMAIL}}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </center>
+</body>
+</html>
