@@ -21,6 +21,15 @@ param azureSearchKey string
 @secure()
 param azureSearchEndpoint string
 
+@secure()
+param azureSearchIndexName string
+
+param azureSearchStrictness string = '1'
+
+param azureSearchRetrievedDocuments string = '20'
+
+param azureSearchLimitToDataContent string = 'true'
+
 param webAppSKU string
 
 @maxLength(42)
@@ -63,23 +72,19 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
         }
         {
           name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '~20' // Set NodeJS version to 20.x for your site
+          value: '~22' // Set NodeJS version to 22.x for your site
         }
         {
           name: 'RUNNING_ON_AZURE'
           value: '1'
         }
         {
-          name: 'CLIENT_ID'
+          name: 'clientId'
           value: identity.properties.clientId
         }
         {
-          name: 'TENANT_ID'
+          name: 'tenantId'
           value: identity.properties.tenantId
-        }
-        {
-          name: 'BOT_TYPE' 
-          value: 'UserAssignedMsi'
         }
         {
           name: 'AZURE_OPENAI_API_KEY'
@@ -104,6 +109,22 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: 'AZURE_SEARCH_ENDPOINT'
           value: azureSearchEndpoint
+        }
+        {
+          name: 'AZURE_SEARCH_INDEX_NAME'
+          value: azureSearchIndexName
+        }
+        {
+          name: 'AZURE_SEARCH_STRICTNESS'
+          value: azureSearchStrictness
+        }
+        {
+          name: 'AZURE_SEARCH_RETRIEVED_DOCUMENTS'
+          value: azureSearchRetrievedDocuments
+        }
+        {
+          name: 'AZURE_SEARCH_LIMIT_TO_DATA_CONTENT'
+          value: azureSearchLimitToDataContent
         }
       ]
       ftpsState: 'FtpsOnly'

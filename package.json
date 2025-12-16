@@ -1,49 +1,43 @@
 {
-    "name": "chatbottezlegisqcappgen",
+    "name": "engineagenttemplate",
     "version": "1.0.0",
     "msteams": {
         "teamsAppId": null
     },
-    "description": "Microsoft 365 Agents Toolkit RAG Bot Sample with Azure AI Search and Teams AI Library",
-    "engines": {
-        "node": "20 || 22"
-    },
+    "description": "Basic Custome Engine Agent with Microsoft 365 Agents SDK",
     "author": "Microsoft",
     "license": "MIT",
-    "main": "./lib/src/index.js",
+    "main": "./src/index.js",
     "scripts": {
-        "env:sync": "node ./scripts/sync-shared-env.js",
         "dev:teamsfx": "env-cmd --silent -f .localConfigs npm run dev",
-        "dev:teamsfx:testtool": "env-cmd --silent -f .localConfigs.playground npm run dev",
-        "dev:teamsfx:launch-testtool": "env-cmd --silent -f env/common.env -f env/.env.playground teamsapptester start",
-        "dev": "node ./scripts/free-port.js 9239 && nodemon --exec node --inspect=9239 --signal SIGINT -r ts-node/register ./src/index.ts",
-        "build": "tsc --build && shx cp -r ./src/app/instructions.txt ./lib/src/app",
-        "start": "node ./lib/src/index.js",
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "watch": "nodemon --exec \"npm run start\"",
-        "indexer:create": "npm run build && shx cp -r ./src/indexers/data ./lib/src/indexers && env-cmd --silent -f env/.env.playground.user node ./lib/src/indexers/setup.js",
-        "indexer:delete": "npm run build && env-cmd --silent -f env/.env.playground.user node ./lib/src/indexers/delete.js"
+        "dev:teamsfx:playground": "env-cmd --silent -f .localConfigs.playground npm run dev",
+        "dev:teamsfx:launch-playground": "env-cmd --silent -f env/.env.playground teamsapptester start",
+        "dev": "nodemon --inspect=9239 --signal SIGINT ./src/index.js",
+        "start": "node ./src/index.js",
+        "test": "jest --coverage",
+        "test:watch": "jest --watch",
+        "test:unit": "jest src-test/unit",
+        "watch": "nodemon --exec \"npm run start\""
     },
     "repository": {
         "type": "git",
         "url": "https://github.com"
     },
     "dependencies": {
-        "@azure/identity": "^4.11.1",
-        "@azure/search-documents": "^12.0.0",
-        "@microsoft/teams.ai": "^2.0.0",
-        "@microsoft/teams.apps": "^2.0.0",
-        "@microsoft/teams.common": "^2.0.0",
-        "@microsoft/teams.openai": "^2.0.0",
-        "pdf-parse": "^2.4.5",
-        "pdf2json": "^4.0.0"
+        "@azure/identity": "^4.8.0",
+        "@azure/openai": "^2.0.0",
+        "@azure/search-documents": "^12.2.0",
+        "@microsoft/agents-hosting-express": "^1.0.0",
+        "openai": "^4.94.0"
     },
     "devDependencies": {
-        "@types/node": "^20.0.0",
+        "@babel/core": "^7.28.5",
+        "@babel/preset-env": "^7.28.5",
+        "@types/jest": "^30.0.0",
+        "babel-jest": "^30.2.0",
         "env-cmd": "^10.1.0",
-        "nodemon": "^3.1.7",
-        "shx": "^0.3.3",
-        "ts-node": "^10.4.0",
-        "typescript": "~5.8.3"
+        "jest": "^30.2.0",
+        "nodemon": "^3.1.10",
+        "shx": "^0.3.3"
     }
 }

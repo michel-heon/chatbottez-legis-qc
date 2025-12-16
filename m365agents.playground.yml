@@ -4,12 +4,19 @@
 version: v1.9
 
 deploy:
+  # Generate FULL_VERSION from TEAMS_APP_VERSION (no RC for playground)
+  - uses: file/createOrUpdateEnvironmentFile
+    with:
+      target: ./env/.env.${{TEAMSFX_ENV}}
+      envs:
+        FULL_VERSION: ${{TEAMS_APP_VERSION}}
+
   # Install development tool(s)
   - uses: devTool/install
     with:
       testTool:
-        version: ~0.2.1
-        symlinkDir: ./devTools/teamsapptester
+        version: ~0.2.7
+        symlinkDir: ./devTools/playground
 
   # Run npm command
   - uses: cli/runNpmCommand
@@ -21,10 +28,14 @@ deploy:
     with:
       target: ./.localConfigs.playground
       envs:
-        AZURE_OPENAI_API_KEY: ${{SECRET_AZURE_OPENAI_API_KEY}}
+        AZURE_OPENAI_API_KEY: ${{AZURE_OPENAI_API_KEY}}
         AZURE_OPENAI_ENDPOINT: ${{AZURE_OPENAI_ENDPOINT}}
         AZURE_OPENAI_DEPLOYMENT_NAME: ${{AZURE_OPENAI_DEPLOYMENT_NAME}}
         AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: ${{AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}}
-        AZURE_SEARCH_KEY: ${{SECRET_AZURE_SEARCH_KEY}}
         AZURE_SEARCH_ENDPOINT: ${{AZURE_SEARCH_ENDPOINT}}
+        AZURE_SEARCH_KEY: ${{AZURE_SEARCH_KEY}}
+        AZURE_SEARCH_STRICTNESS: ${{AZURE_SEARCH_STRICTNESS}}
+        AZURE_SEARCH_RETRIEVED_DOCUMENTS: ${{AZURE_SEARCH_RETRIEVED_DOCUMENTS}}
+        AZURE_SEARCH_LIMIT_TO_DATA_CONTENT: ${{AZURE_SEARCH_LIMIT_TO_DATA_CONTENT}}
+        DEBUG: ${{DEBUG}}
         TEAMSFX_NOTIFICATION_STORE_FILENAME: ${{TEAMSFX_NOTIFICATION_STORE_FILENAME}}

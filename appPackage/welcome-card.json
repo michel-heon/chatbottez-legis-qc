@@ -1,0 +1,153 @@
+{
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "Container",
+            "items": [
+                {
+                    "type": "ColumnSet",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "width": "auto",
+                            "items": [
+                                {
+                                    "type": "Image",
+                                    "url": "https://chatbottez-legis-qc.cotechnoe.net/color.png",
+                                    "size": "Medium",
+                                    "style": "Person"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Column",
+                            "width": "stretch",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": "Légis Québec",
+                                    "weight": "Bolder",
+                                    "size": "ExtraLarge",
+                                    "color": "Accent"
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": "Conseiller juridique virtuel",
+                                    "size": "Medium",
+                                    "color": "Default",
+                                    "isSubtle": true,
+                                    "spacing": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Container",
+            "spacing": "Medium",
+            "separator": true,
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "text": "Bonjour! Je suis Légis Québec, votre conseiller juridique virtuel.",
+                    "wrap": true,
+                    "size": "Medium",
+                    "weight": "Bolder"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Je peux vous aider avec:",
+                    "wrap": true,
+                    "spacing": "Medium"
+                },
+                {
+                    "type": "FactSet",
+                    "facts": [
+                        {
+                            "title": "•",
+                            "value": "Questions sur les lois et règlements du Québec"
+                        },
+                        {
+                            "title": "•",
+                            "value": "Droits au travail"
+                        },
+                        {
+                            "title": "•",
+                            "value": "Protection du consommateur"
+                        },
+                        {
+                            "title": "•",
+                            "value": "Vie privée et données personnelles"
+                        },
+                        {
+                            "title": "•",
+                            "value": "Procédures juridiques"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Container",
+            "spacing": "Medium",
+            "style": "emphasis",
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "text": "Tapez \"Aide\" ou \"Help\" pour voir toutes mes commandes.",
+                    "wrap": true,
+                    "weight": "Bolder"
+                }
+            ]
+        },
+        {
+            "type": "Container",
+            "spacing": "Medium",
+            "style": "warning",
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "text": "AVERTISSEMENT",
+                    "wrap": true,
+                    "weight": "Bolder",
+                    "color": "Warning"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Mes réponses sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière, consultez un avocat.",
+                    "wrap": true,
+                    "spacing": "Small",
+                    "size": "Small"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Action.Submit",
+            "title": "Comment peux-tu m'aider?",
+            "data": {
+                "msteams": {
+                    "type": "messageBack",
+                    "displayText": "Comment peux-tu m'aider?",
+                    "text": "aide"
+                }
+            }
+        },
+        {
+            "type": "Action.Submit",
+            "title": "Voir les lois disponibles",
+            "data": {
+                "msteams": {
+                    "type": "messageBack",
+                    "displayText": "Quelles lois sont disponibles?",
+                    "text": "quelles lois sont disponibles?"
+                }
+            }
+        }
+    ]
+}

@@ -1,13 +1,10 @@
 # TeamsFx files
 env/.env.*.user
-env/*.env.user
 env/.env.local
-.smtp.env
-.smtp.env.*
-.env.user-account
-.env.user-account.*
+env/.env.sandbox
 .localConfigs
 .localConfigs.playground
+.localConfigs
 .notification.localstore.json
 .notification.playgroundstore.json
 appPackage/build
@@ -23,8 +20,14 @@ node_modules/
 # build
 lib/
 
-# devTools
-devTools/
-users/.smtp.env
-users/.env.user-account
-users/venv/
+# Dev tool directories
+/devTools/
+
+# IDE files
+.project
+.settings/
+.vscode/settings.json
+
+# Test coverage
+coverage/
+.nyc_output/appPackage.prod.zip

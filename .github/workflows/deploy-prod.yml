@@ -1,0 +1,79 @@
+name: Deploy PROD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod  # Require manual approval
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Teams Toolkit CLI
+      run: npm install -g @microsoft/teamsfx-cli
+    
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Create .env.prod.user with secrets
+      run: |
+        cat > env/.env.prod.user << EOF
+        AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
+        AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        AZURE_OPENAI_DEPLOYMENT_NAME=${{ secrets.AZURE_OPENAI_DEPLOYMENT_NAME }}
+        AZURE_SEARCH_KEY=${{ secrets.AZURE_SEARCH_KEY }}
+        EOF
+    
+    - name: Rebuild Teams App manifest
+      run: bash scripts/rebuild-manifest.sh
+    
+    - name: Verify manifest content
+      run: |
+        echo "=========================================="
+        echo "📋 MANIFEST PROD CONTENT (for debugging)"
+        echo "=========================================="
+        cat appPackage/build/manifest.prod.json | head -30
+        echo ""
+        echo "=========================================="
+        echo "🔍 Key values:"
+        grep '"version"' appPackage/build/manifest.prod.json
+        grep '"short"' appPackage/build/manifest.prod.json
+        echo "=========================================="
+    
+    - name: Deploy code to PROD
+      run: make -C deployment deploy-prod
+      env:
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    
+    - name: Package and upload Teams App
+      run: |
+        cd appPackage
+        # Create app package with updated manifest
+        zip -r ../appPackage.prod.zip . -i build/manifest.prod.json color.png outline.png
+        
+        echo "✅ App package created with updated manifest"
+        echo "📦 Package: appPackage.prod.zip"
+        echo "ℹ️  Manual Teams update required - see docs/guides/teams-pwa-guide.md"
+    
+    - name: Deployment summary
+      run: |
+        echo "✅ Code déployé vers Azure PROD"
+        echo "🔗 Tester dans Teams (environnement PROD)"
+        echo "📋 Tag déployé: ${{ github.ref_name }}"

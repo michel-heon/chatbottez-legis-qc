@@ -1,81 +1,83 @@
 {
-  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json",
-  "manifestVersion": "1.23",
-  "version": "${{TEAMS_APP_VERSION}}",
-  "id": "${{TEAMS_APP_ID}}",
-  "localizationInfo": {
-    "defaultLanguageTag": "fr-CA"
-  },
-  "developer": {
-    "name": "Cotechnoe inc.",
-    "websiteUrl": "https://cotechnoe.com",
-    "privacyUrl": "https://cotechnoe.com/legisqc/privacy",
-    "termsOfUseUrl": "https://cotechnoe.com/legisqc/terms"
-  },
-  "icons": {
-    "color": "color.png",
-    "outline": "outline.png"
-  },
-  "name": {
-    "short": "Légis Québec",
-    "full": "Légis Québec – Conseiller Juridique Virtuel pour le Québec"
-  },
-  "description": {
-    "short": "Conseiller juridique IA pour le droit québécois (French only)",
-    "full": "⚠️ This app is only available in French / Cette application est disponible uniquement en français.\n\nLégis Québec est une application spécialisée utilisant l'IA pour fournir des conseils juridiques précis basés exclusivement sur les lois et règlements officiels du Québec.\n\n🚀 Démarrage rapide: https://cotechnoe.com/legisqc/get-started\n📧 Support: support@cotechnoe.com\n📚 Aide: https://cotechnoe.com/legisqc/help\n🚨 Signaler du contenu inapproprié: support@cotechnoe.com\n\n⚖️ Avertissement: Les réponses de cette IA sont à titre informatif seulement et ne constituent pas un avis juridique. Pour toute situation particulière ou pour plus d'information, consultez un avocat."
-  },
-  "accentColor": "#0F3B82",
-  "bots": [
-    {
-      "botId": "${{BOT_ID}}",
-      "scopes": [
-        "team",
-        "groupChat",
-        "personal"
-      ],
-      "supportsFiles": false,
-      "isNotificationOnly": false,
-      "commandLists": [
-        {
-          "scopes": [
-            "personal"
-          ],
-          "commands": [
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.24/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.24",
+    "version": "${{TEAMS_APP_VERSION}}",
+    "id": "${{TEAMS_APP_ID}}",
+    "developer": {
+        "name": "Cotechnoe",
+        "websiteUrl": "https://www.cotechnoe.net",
+        "privacyUrl": "https://chatbottez-legis-qc.cotechnoe.net/privacy.html",
+        "termsOfUseUrl": "https://chatbottez-legis-qc.cotechnoe.net/terms.html"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "Légis Québec",
+        "full": "Légis Québec - Assistant juridique pour les lois du Québec"
+    },
+    "description": {
+        "short": "Agent Copilot pour les lois du Québec",
+        "full": "Légis Québec est un agent Copilot intelligent spécialisé dans les lois et règlements du Québec, utilisant Azure AI Search pour fournir des réponses précises basées sur la documentation officielle. Version: ${{FULL_VERSION}}"
+    },
+    "accentColor": "#FFFFFF",
+    "copilotAgents": {
+        "customEngineAgents": [
             {
-              "title": "Quelles lois sont disponibles?",
-              "description": "Voir les lois et règlements disponibles pour consultation."
-            },
-            {
-              "title": "Puis-je contester une décision?",
-              "description": "Obtenez les étapes à suivre pour contester une décision administrative ou judiciaire."
-            },
-            {
-              "title": "Quels sont mes droits au travail",
-              "description": "Renseignez-vous sur vos droits en tant que travailleur selon les normes du travail."
-            },
-            {
-              "title": "Protéger mes données persos",
-              "description": "Informations sur la protection des renseignements personnels au Québec."
-            },
-            {
-              "title": "Rédiger une mise en demeure",
-              "description": "Aide à la rédaction d'une mise en demeure conforme à la législation québécoise."
-            },
-            {
-              "title": "Mes droits comme consommateur?",
-              "description": "Connaître vos droits protégés par la Loi sur la protection du consommateur."
+                "type": "bot",
+                "id": "5b2b6b25-6231-4b5b-811e-ec9c5d353474"
             }
-          ]
+        ]
+    },
+    "bots": [
+        {
+            "botId": "5b2b6b25-6231-4b5b-811e-ec9c5d353474",
+            "scopes": [
+                "copilot",
+                "personal",
+                "team"
+            ],
+            "supportsFiles": false,
+            "isNotificationOnly": false,
+            "commandLists": [
+                {
+                    "scopes": [
+                        "copilot",
+                        "personal"
+                    ],
+                    "commands": [
+                        {
+                            "title": "Que peux-tu faire pour moi?",
+                            "description": "Découvrir les fonctionnalités de Légis Québec"
+                        },
+                        {
+                            "title": "Quelles lois sont disponibles?",
+                            "description": "Liste des lois du Québec disponibles dans la base"
+                        },
+                        {
+                            "title": "Explique-moi cette loi",
+                            "description": "Explication détaillée d'une loi spécifique"
+                        },
+                        {
+                            "title": "Mes droits au travail",
+                            "description": "Information sur les normes du travail au Québec"
+                        },
+                        {
+                            "title": "Protection du consommateur",
+                            "description": "Droits et recours des consommateurs"
+                        }
+                    ]
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "composeExtensions": [],
-  "configurableTabs": [],
-  "staticTabs": [],
-  "permissions": [
-    "identity",
-    "messageTeamMembers"
-  ],
-  "validDomains": []
+    ],
+    "composeExtensions": [],
+    "configurableTabs": [],
+    "staticTabs": [],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": []
 }

@@ -1,0 +1,38 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Teams Toolkit CLI
+      run: npm install -g @microsoft/teamsfx-cli
+    
+    - name: Deploy code to DEV
+      run: make -C deployment deploy-dev
+      env:
+        # Variables d'environnement pour teamsapp deploy
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    
+    - name: Deployment summary
+      run: |
+        echo "✅ Code déployé vers Azure DEV"
+        echo "🔗 Tester dans Teams (environnement DEV)"

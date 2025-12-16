@@ -5,20 +5,8 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Sync shared env secrets",
-            "type": "shell",
-            "command": "node scripts/sync-shared-env.js",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "presentation": {
-                "reveal": "silent"
-            }
-        },
-        {
-            "label": "Start Agent (Sandbox)",
+            "label": "Start App (Sandbox)",
             "dependsOn": [
-                "Sync shared env secrets",
                 "Validate prerequisites (Sandbox)",
                 "Start local tunnel (Sandbox)",
                 "Provision (Sandbox)",
@@ -29,9 +17,8 @@
             "dependsOrder": "sequence"
         },
         {
-            "label": "Start Agent in Microsoft 365 Agents Playground",
+            "label": "Start App in Microsoft 365 Agents Playground",
             "dependsOn": [
-                "Sync shared env secrets",
                 "Validate prerequisites (Microsoft 365 Agents Playground)",
                 "Deploy (Microsoft 365 Agents Playground)",
                 "Start application (Microsoft 365 Agents Playground)",
@@ -70,7 +57,7 @@
         {
             "label": "Start application (Microsoft 365 Agents Playground)",
             "type": "shell",
-            "command": "npm run dev:teamsfx:testtool",
+            "command": "npm run dev:teamsfx:playground",
             "isBackground": true,
             "options": {
                 "cwd": "${workspaceFolder}",
@@ -87,24 +74,25 @@
                 "background": {
                     "activeOnStart": true,
                     "beginsPattern": "[nodemon] starting",
-                    "endsPattern": "app listening to|Bot/ME service listening at|[nodemon] app crashed"
+                    "endsPattern": "Server listening to|[nodemon] app crashed"
                 }
             }
         },
         {
             "label": "Start Microsoft 365 Agents Playground",
             "type": "shell",
-            "command": "npm run dev:teamsfx:launch-testtool",
+            "command": "npm run dev:teamsfx:launch-playground",
             "isBackground": true,
             "options": {
                 "env": {
-                  "PATH": "${workspaceFolder}/devTools/teamsapptester/node_modules/.bin:${env:PATH}"
+                  "PATH": "${workspaceFolder}/devTools/playground/node_modules/.bin:${env:PATH}",
+                  "DEFAULT_CHANNEL_ID": "emulator"
                 }
             },
             "windows": {
                 "options": {
                     "env": {
-                        "PATH": "${workspaceFolder}/devTools/teamsapptester/node_modules/.bin;${env:PATH}"
+                        "PATH": "${workspaceFolder}/devTools/playground/node_modules/.bin;${env:PATH}"
                     }
                 }
             },
@@ -129,9 +117,8 @@
             }
         },
         {
-            "label": "Start Agent Locally",
+            "label": "Start App Locally",
             "dependsOn": [
-                "Sync shared env secrets",
                 "Validate prerequisites",
                 "Start local tunnel",
                 "Provision",
@@ -151,6 +138,24 @@
                     "nodejs", // Validate if Node.js is installed.
                     "m365Account", // Sign-in prompt for Microsoft 365 account, then validate if the account enables the sideloading permission.
                     "portOccupancy" // Validate available ports to ensure those debug ones are not occupied.
+                ],
+                "portOccupancy": [
+                    3978, // app service port
+                    9239 // app inspector port for Node.js debugger
+                ]
+            }
+        },
+        {
+            // Check all required prerequisites.
+            // See https://aka.ms/teamsfx-tasks/check-prerequisites to know the details and how to customize the args.
+            "label": "Validate prerequisites (Sandbox)",
+            "type": "teamsfx",
+            "command": "debug-check-prerequisites",
+            "args": {
+                "prerequisites": [
+                    "portOccupancy", // Validate available ports to ensure those debug ones are not occupied.
+                    "sandbox",
+                    "nodejs" // Validate if Node.js is installed.
                 ],
                 "portOccupancy": [
                     3978, // app service port
@@ -183,6 +188,30 @@
             "problemMatcher": "$teamsfx-local-tunnel-watch"
         },
         {
+            // Start the local tunnel service to forward public URL to local port and inspect traffic.
+            // See https://aka.ms/teamsfx-tasks/local-tunnel for the detailed args definitions.
+            "label": "Start local tunnel (Sandbox)",
+            "type": "teamsfx",
+            "command": "debug-start-local-tunnel",
+            "args": {
+                "type": "dev-tunnel",
+                "ports": [
+                    {
+                        "portNumber": 3978,
+                        "protocol": "http",
+                        "access": "public",
+                        "writeToEnvironmentFile": {
+                            "endpoint": "BOT_ENDPOINT", // output tunnel endpoint as BOT_ENDPOINT
+                            "domain": "BOT_DOMAIN" // output tunnel domain as BOT_DOMAIN
+                        }
+                    }
+                ],
+                "env": "sandbox"
+            },
+            "isBackground": true,
+            "problemMatcher": "$teamsfx-local-tunnel-watch"
+        },
+        {
             // Create the debug resources.
             // See https://aka.ms/teamsfx-tasks/provision to know the details and how to customize the args.
             "label": "Provision",
@@ -193,6 +222,14 @@
             }
         },
         {
+            "label": "Provision (Sandbox)",
+            "type": "teamsfx",
+            "command": "provision",
+            "args": {
+                "env": "sandbox",
+            }
+        },
+        {
             // Build project.
             // See https://aka.ms/teamsfx-tasks/deploy to know the details and how to customize the args.
             "label": "Deploy",
@@ -200,6 +237,16 @@
             "command": "deploy",
             "args": {
                 "env": "local"
+            }
+        },
+        {
+            // Build project.
+            // See https://aka.ms/teamsfx-tasks/deploy to know the details and how to customize the args.
+            "label": "Deploy (Sandbox)",
+            "type": "teamsfx",
+            "command": "deploy",
+            "args": {
+                "env": "sandbox"
             }
         },
         {
@@ -222,12 +269,12 @@
                 "background": {
                     "activeOnStart": true,
                     "beginsPattern": "[nodemon] starting",
-                    "endsPattern": "app listening to|Bot/ME service listening at|[nodemon] app crashed"
+                    "endsPattern": "Server listening to|[nodemon] app crashed"
                 }
             }
         },
         {
-            "label": "Start Agent in Desktop Client",
+            "label": "Start App in Desktop Client",
             "dependsOn": [
                 "Validate prerequisites",
                 "Start local tunnel",
@@ -247,66 +294,11 @@
             }
         },
         {
-            "label": "Start Agent in Desktop Client (Remote)",
+            "label": "Start App in Desktop Client (Remote)",
             "type": "teamsfx",
             "command": "launch-desktop-client",
             "args": {
-                "env": "dev",
                 "url": "teams.microsoft.com/l/app/${{TEAMS_APP_ID}}?installAppPackage=true"
-            }
-        },
-        {
-            "label": "Validate prerequisites (Sandbox)",
-            "type": "teamsfx",
-            "command": "debug-check-prerequisites",
-            "args": {
-                "prerequisites": [
-                    "portOccupancy",
-                    "m365Account",
-                    "nodejs"
-                ],
-                "portOccupancy": [
-                    3978,
-                    9239
-                ]
-            }
-        },
-        {
-            "label": "Start local tunnel (Sandbox)",
-            "type": "teamsfx",
-            "command": "debug-start-local-tunnel",
-            "args": {
-                "type": "dev-tunnel",
-                "ports": [
-                    {
-                        "portNumber": 3978,
-                        "protocol": "http",
-                        "access": "public",
-                        "writeToEnvironmentFile": {
-                            "endpoint": "BOT_ENDPOINT",
-                            "domain": "BOT_DOMAIN"
-                        }
-                    }
-                ],
-                "env": "sandbox"
-            },
-            "isBackground": true,
-            "problemMatcher": "$teamsfx-local-tunnel-watch"
-        },
-        {
-            "label": "Provision (Sandbox)",
-            "type": "teamsfx",
-            "command": "provision",
-            "args": {
-                "env": "sandbox"
-            }
-        },
-        {
-            "label": "Deploy (Sandbox)",
-            "type": "teamsfx",
-            "command": "deploy",
-            "args": {
-                "env": "sandbox"
             }
         },
         {
