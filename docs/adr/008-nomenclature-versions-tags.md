@@ -272,6 +272,36 @@ Major migration from Azure Storage to Cosmos DB.
 git push origin v2.0.0-cosmos-db-migration
 ```
 
+## Workflow de Mise à Jour des Versions
+
+### Environnement LOCAL (développement)
+
+Avant de lancer l'application en local avec **F5 - Début Teams (Edge)** :
+
+1. **Mettre à jour `.env.local`** :
+   ```bash
+   TEAMS_APP_VERSION=4.0.8
+   ```
+
+2. **Rebuilder le manifest local** :
+   ```bash
+   bash scripts/rebuild-manifest.sh local
+   ```
+
+3. **Vérifier que le manifest est à jour** :
+   ```bash
+   grep '"version"' appPackage/build/manifest.local.json
+   # Devrait afficher: "version": "4.0.8"
+   ```
+
+4. **Lancer l'application** : F5 dans VS Code
+
+⚠️ **Important** : Le script `rebuild-manifest.sh` accepte maintenant un paramètre d'environnement (`local`, `dev`, `prod`) pour générer le bon manifest avec les bonnes valeurs.
+
+### Environnement PROD (production)
+
+Pour les releases en production, suivre le workflow de création de tags ci-dessous.
+
 ## Workflow de Création de Tags
 
 1. **Compléter le travail** : S'assurer que tous les commits nécessaires sont faits
@@ -280,16 +310,23 @@ git push origin v2.0.0-cosmos-db-migration
    - MAJOR : Breaking changes
    - MINOR : Nouvelles fonctionnalités
    - PATCH : Bug fixes uniquement
-4. **Choisir le descripteur** : 2-4 mots décrivant le thème principal
-5. **Préparer le message** : Utiliser le template structuré
-6. **Créer le tag annoté** :
+4. **Mettre à jour `.env.prod`** :
+   ```bash
+   TEAMS_APP_VERSION=4.0.7
+   TEAMS_APP_RC_VERSION=rc2  # Pour les Release Candidates
+   ```
+5. **Choisir le descripteur** : 2-4 mots décrivant le thème principal
+6. **Préparer le message** : Utiliser le template structuré
+7. **Créer le tag annoté** :
    ```bash
    git tag -a v{VERSION}-{descripteur} -m "Message complet"
    # ou avec un fichier
    git tag -a v{VERSION}-{descripteur} -F message.txt
    ```
-7. **Vérifier le tag** : `git show v{VERSION}-{descripteur}`
-8. **Pousser le tag** : `git push origin v{VERSION}-{descripteur}`
+8. **Vérifier le tag** : `git show v{VERSION}-{descripteur}`
+9. **Pousser le tag** : `git push origin v{VERSION}-{descripteur}`
+
+💡 **Astuce Makefile** : Utiliser `make workflow-release-rc` qui automatise les étapes 4-9
 
 ## Commandes Utiles
 

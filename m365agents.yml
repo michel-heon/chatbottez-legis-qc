@@ -42,6 +42,19 @@ provision:
       # will use bicep CLI in PATH if you remove this config.
       bicepCliVersion: v0.9.1
 
+  # Generate FULL_VERSION from TEAMS_APP_VERSION and optional TEAMS_APP_RC_VERSION
+  # For prod: FULL_VERSION = "4.0.7 (rc2)" if RC exists, else "4.0.7"
+  # Note: If TEAMS_APP_RC_VERSION is empty/undefined, it will just be TEAMS_APP_VERSION
+  - uses: script/run
+    with:
+      shell: bash
+      run: |
+        if [ -n "$TEAMS_APP_RC_VERSION" ]; then
+          echo "FULL_VERSION=$TEAMS_APP_VERSION ($TEAMS_APP_RC_VERSION)" >> env/.env.$TEAMSFX_ENV
+        else
+          echo "FULL_VERSION=$TEAMS_APP_VERSION" >> env/.env.$TEAMSFX_ENV
+        fi
+
   # Validate using manifest schema
   - uses: teamsApp/validateManifest
     with:

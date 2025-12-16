@@ -4,6 +4,13 @@
 version: v1.9
 
 deploy:
+  # Generate FULL_VERSION from TEAMS_APP_VERSION (no RC for playground)
+  - uses: file/createOrUpdateEnvironmentFile
+    with:
+      target: ./env/.env.${{TEAMSFX_ENV}}
+      envs:
+        FULL_VERSION: ${{TEAMS_APP_VERSION}}
+
   # Install development tool(s)
   - uses: devTool/install
     with:

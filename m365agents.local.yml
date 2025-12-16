@@ -40,6 +40,13 @@ provision:
       channels:
         - name: msteams
 
+  # Generate FULL_VERSION from TEAMS_APP_VERSION (no RC for local)
+  - uses: file/createOrUpdateEnvironmentFile
+    with:
+      target: ./env/.env.${{TEAMSFX_ENV}}
+      envs:
+        FULL_VERSION: ${{TEAMS_APP_VERSION}}
+
   # Validate using manifest schema
   - uses: teamsApp/validateManifest
     with:

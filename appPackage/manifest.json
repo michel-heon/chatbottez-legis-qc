@@ -1,8 +1,8 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.24/MicrosoftTeams.schema.json",
     "manifestVersion": "1.24",
-    "version": "4.0.7",
-    "id": "ef2df4e9-4f59-4ada-920d-ad07b21f2831",
+    "version": "${{TEAMS_APP_VERSION}}",
+    "id": "${{TEAMS_APP_ID}}",
     "developer": {
         "name": "Cotechnoe",
         "websiteUrl": "https://www.cotechnoe.net",
@@ -19,7 +19,7 @@
     },
     "description": {
         "short": "Agent Copilot pour les lois du Québec",
-        "full": "Légis Québec est un agent Copilot intelligent spécialisé dans les lois et règlements du Québec, utilisant Azure AI Search pour fournir des réponses précises basées sur la documentation officielle. Version: 4.0.7 (rc2)"
+        "full": "Légis Québec est un agent Copilot intelligent spécialisé dans les lois et règlements du Québec, utilisant Azure AI Search pour fournir des réponses précises basées sur la documentation officielle. Version: ${{FULL_VERSION}}"
     },
     "accentColor": "#FFFFFF",
     "copilotAgents": {
@@ -48,7 +48,7 @@
                     ],
                     "commands": [
                         {
-                            "title": "Comment peux-tu m'aider?",
+                            "title": "Que peux-tu faire pour moi?",
                             "description": "Découvrir les fonctionnalités de Légis Québec"
                         },
                         {
