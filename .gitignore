@@ -31,3 +31,7 @@ lib/
 # Test coverage
 coverage/
 .nyc_output/appPackage.prod.zip
+
+# Local rclone mounts and copied knowledge-base content
+/KB/*
+!/KB/Makefile
